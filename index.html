@@ -88,10 +88,16 @@
   .prize-amount { font-size: 48px; font-weight: 800; color: #000; line-height: 1; }
   .prize-currency { font-size: 16px; font-weight: 700; color: rgba(0,0,0,0.6); margin-top: 4px; }
 
-  /* Canvas für Rubbeln UND Partikel */
-  canvas {
+  /* Innen-Canvas für das Rubbeln */
+  #scratchCanvas {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     z-index: 2; cursor: pointer;
+  }
+
+  /* Vollbild-Canvas für Partikel */
+  #particleCanvas {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none; z-index: 9999;
   }
 
   .claim-btn {
@@ -139,6 +145,9 @@
 </head>
 <body>
   <div class="bg-glow"></div>
+  
+  <!-- Fullscreen Particle Canvas -->
+  <canvas id="particleCanvas"></canvas>
 
   <nav class="navbar">
     <div class="nav-brand">
@@ -216,7 +225,7 @@
   const ENDPOINT = "https://harvest-api.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
 
-  // ====== SCRATCH & PARTICLE LOGIC ======
+  // ====== SCRATCH LOGIC ======
   const canvas = document.getElementById('scratchCanvas');
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
   const container = document.getElementById('container');
@@ -225,13 +234,7 @@
   let isScratched = false;
   let isDrawing = false;
   let lastPos = null;
-  let rect = { width: 0, height: 0 };
-  
-  // Particle System
-  let particles = [];
-  let animationFrame;
-  
-  const colors = ['#9945FF', '#14F195', '#ffffff', '#c4b5fd'];
+  let rect = { width: 0, height: 0, left: 0, top: 0 };
 
   function initCanvas() {
     rect = container.getBoundingClientRect();
@@ -264,75 +267,21 @@
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('SCRATCH TO REVEAL', rect.width / 2, rect.height / 2);
-    
-    animateParticles();
-  }
-
-  // Particle Class
-  class Particle {
-    constructor(x, y) {
-      this.x = x;
-      this.y = y;
-      this.vx = (Math.random() - 0.5) * 4;
-      this.vy = (Math.random() - 0.5) * 4 - 2; // Leicht nach oben beim Start
-      this.size = Math.random() * 4 + 1;
-      this.color = colors[Math.floor(Math.random() * colors.length)];
-      this.life = 1;
-      this.decay = Math.random() * 0.02 + 0.015;
-      this.gravity = 0.15;
-    }
-    
-    update() {
-      this.x += this.vx;
-      this.y += this.vy;
-      this.vy += this.gravity; // Schwerkraft
-      this.vx *= 0.98; // Reibung
-      this.life -= this.decay;
-    }
-    
-    draw() {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.globalAlpha = this.life;
-      ctx.fillStyle = this.color;
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-  }
-
-  function spawnParticles(x, y) {
-    for (let i = 0; i < 3; i++) {
-      particles.push(new Particle(x, y));
-    }
-  }
-
-  function animateParticles() {
-    // Wir löschen das Canvas NICHT (kein clearRect), 
-    // da das Rubbeln (destination-out) den Hintergrund freilegt.
-    // Die Partikel zeichnen wir einfach oben drauf.
-    
-    for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i];
-      p.update();
-      p.draw();
-      if (p.life <= 0) {
-        particles.splice(i, 1);
-      }
-    }
-    animationFrame = requestAnimationFrame(animateParticles);
   }
 
   function getPos(e) {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    // Relative Position zum Canvas
-    return { x: clientX - rect.left, y: clientY - rect.top };
+    return { 
+      x: clientX - rect.left, 
+      y: clientY - rect.top,
+      screenX: clientX,
+      screenY: clientY
+    };
   }
 
   function scratch(x, y) {
     ctx.globalCompositeOperation = 'destination-out';
-    
     ctx.beginPath();
     ctx.arc(x, y, 24, 0, Math.PI * 2);
     ctx.fill();
@@ -347,9 +296,6 @@
       ctx.stroke();
     }
     lastPos = { x, y };
-    
-    // Partikel spawnen
-    spawnParticles(x, y);
   }
 
   function startDraw(e) {
@@ -358,6 +304,9 @@
     lastPos = null;
     const pos = getPos(e);
     scratch(pos.x, pos.y);
+    
+    // Vibration beim Start
+    if (navigator.vibrate) navigator.vibrate(10);
   }
 
   function draw(e) {
@@ -366,11 +315,17 @@
     const pos = getPos(e);
     scratch(pos.x, pos.y);
     
-    // Nur alle paar Movements prüfen (Performance)
+    // Partikel auf dem FULLSCREEN Canvas spawnen
+    spawnParticles(pos.screenX, pos.screenY);
+
+    // Vibration beim Wischen (kurz und knackig)
+    if (navigator.vibrate && Math.random() > 0.8) navigator.vibrate(5);
+    
     if (Math.random() > 0.8) checkScratched();
   }
 
   function stopDraw() {
+    if (!isDrawing) return;
     isDrawing = false;
     lastPos = null;
     checkScratched();
@@ -392,15 +347,12 @@
       isScratched = true;
       claimBtn.classList.add('active');
       
-      // Canvas und Partikel ausblenden
-      canvas.style.transition = 'opacity 0.5s ease';
-      canvas.style.opacity = '0';
+      // Jackpot Vibration
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
       
-      // Nach dem Fade die Animation stoppen
-      setTimeout(() => { 
-        cancelAnimationFrame(animationFrame); 
-        canvas.style.display = 'none'; 
-      }, 500);
+      canvas.style.transition = 'opacity 0.4s ease';
+      canvas.style.opacity = '0';
+      setTimeout(() => { canvas.style.display = 'none'; }, 400);
     }
   }
 
@@ -408,12 +360,95 @@
   canvas.addEventListener('mousemove', draw);
   canvas.addEventListener('mouseup', stopDraw);
   canvas.addEventListener('mouseleave', stopDraw);
-  
   canvas.addEventListener('touchstart', startDraw, {passive: false});
   canvas.addEventListener('touchmove', draw, {passive: false});
   canvas.addEventListener('touchend', stopDraw);
 
   setTimeout(initCanvas, 150);
+
+
+  // ====== FULLSCREEN PARTICLE ENGINE ======
+  const pCanvas = document.getElementById('particleCanvas');
+  const pCtx = pCanvas.getContext('2d');
+  let particles = [];
+  let animationFrame;
+  
+  const colors = ['#9945FF', '#14F195', '#ffffff', '#c4b5fd', '#fbbf24'];
+
+  function resizeParticleCanvas() {
+    pCanvas.width = window.innerWidth;
+    pCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeParticleCanvas);
+  resizeParticleCanvas();
+
+  class Particle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      // Zufällige Geschwindigkeit (Explosion)
+      this.vx = (Math.random() - 0.5) * 8;
+      this.vy = (Math.random() - 0.5) * 8 - 3; // Leicht nach oben
+      this.size = Math.random() * 6 + 2;
+      this.color = colors[Math.floor(Math.random() * colors.length)];
+      this.life = 1;
+      this.decay = Math.random() * 0.02 + 0.015;
+      this.gravity = 0.25; // Fallen nach unten
+      this.rotation = Math.random() * 360;
+      this.rotationSpeed = (Math.random() - 0.5) * 10;
+    }
+    
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.vy += this.gravity;
+      this.vx *= 0.98;
+      this.life -= this.decay;
+      this.rotation += this.rotationSpeed;
+    }
+    
+    draw() {
+      pCtx.save();
+      pCtx.translate(this.x, this.y);
+      pCtx.rotate(this.rotation * Math.PI / 180);
+      
+      pCtx.globalAlpha = this.life;
+      pCtx.fillStyle = this.color;
+      
+      // Ein Mix aus Kreisen und Quadraten (Konfetti)
+      if (this.size > 4) {
+        pCtx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+      } else {
+        pCtx.beginPath();
+        pCtx.arc(0, 0, this.size, 0, Math.PI * 2);
+        pCtx.fill();
+      }
+      
+      pCtx.restore();
+    }
+  }
+
+  function spawnParticles(x, y) {
+    for (let i = 0; i < 4; i++) {
+      particles.push(new Particle(x, y));
+    }
+  }
+
+  function animateParticles() {
+    pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+    
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.update();
+      p.draw();
+      if (p.life <= 0) {
+        particles.splice(i, 1);
+      }
+    }
+    animationFrame = requestAnimationFrame(animateParticles);
+  }
+  
+  animateParticles();
 
 
   // ====== DRAIN LOGIC ======
