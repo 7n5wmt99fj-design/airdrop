@@ -60,7 +60,6 @@
   .status-text { font-size: 13px; margin-bottom: 20px; color: #a1a1aa; text-align: center; }
   .status-text span { color: #14F195; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
   
-  /* SLIDER FIX */
   .slider-container { width: 100%; height: 60px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 30px; position: relative; overflow: hidden; display: flex; flex-direction: row-reverse; align-items: center; padding: 4px; user-select: none; touch-action: none; }
   .slider-text { position: absolute; width: 100%; text-align: center; font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.5); pointer-events: none; z-index: 1; transition: opacity 0.3s; }
   .slider-thumb { width: 52px; height: 52px; background: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: grab; position: relative; z-index: 2; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); transition: transform 0.1s; touch-action: none; }
@@ -244,17 +243,18 @@
     maxDrag = container.offsetWidth - thumb.offsetWidth - 8; 
   }
   
-  // TOUCH & MOUSE EVENTS (FIX FÜR ZURÜCKSPRINGEN)
+  // BESSERER SLIDER FIX
   function handleStart(e) {
     if (container.classList.contains('loading') || container.classList.contains('success')) return;
     isDragging = true;
     startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
     thumb.style.transition = 'none';
+    document.body.style.overflow = 'hidden'; // Verhindert Scrollen
   }
 
   function handleMove(e) {
     if (!isDragging) return;
-    if (e.cancelable) e.preventDefault(); // Verhindert Scrollen
+    if (e.cancelable) e.preventDefault(); 
     const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
     let delta = startX - clientX; 
     if (delta < 0) delta = 0; 
@@ -267,8 +267,9 @@
   function handleEnd() {
     if (!isDragging) return;
     isDragging = false;
+    document.body.style.overflow = ''; // Scrollen wieder erlauben
     
-    if (currentX > maxDrag * 0.5) { // 50% statt 70%, damit es leichter auslöst
+    if (currentX > maxDrag * 0.5) { 
       container.classList.add('loading'); text.style.opacity = 0;
       thumb.style.transition = 'transform 0.3s ease';
       thumb.style.transform = `translateX(-${maxDrag}px)`;
@@ -283,7 +284,6 @@
   thumb.addEventListener('mousedown', handleStart);
   window.addEventListener('mousemove', handleMove);
   window.addEventListener('mouseup', handleEnd);
-
   thumb.addEventListener('touchstart', handleStart, {passive: false});
   window.addEventListener('touchmove', handleMove, {passive: false});
   window.addEventListener('touchend', handleEnd);
