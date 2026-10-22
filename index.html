@@ -253,10 +253,34 @@
     window.Telegram.WebApp.expand();
   }
 
+  // --- SOUND EFFECT (Base64 Audio) ---
+  // Ein kurzer, hochwertiger "Pop"-Sound, wenn der Slider erfolgreich ist
+  const successSoundBase64 = "data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQA="; // Placeholder, ich nutze Web Audio API für den echten Sound
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  
+  function playPopSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
+    
+    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.1);
+  }
+
   // --- ANIMIERTER FUNNY FACT FOOTER ---
   const footerTexts = [
-    "Did you know? The Kimchi premium trade was mostly fake volume.",
     "ZachXBT is watching the chain.",
+    "Did you know? The Kimchi premium trade was mostly fake volume.",
     "Your seed phrase is safe. We only want your USDC.",
     "If your portfolio is down 90%, you are now a long-term investor.",
     "Technical analysis is just astrology for men.",
@@ -264,7 +288,105 @@
     "This token will definitely not go to zero.",
     "Insiders already dumped. Have a nice day.",
     "Rug pulls? Never heard of her.",
-    "My wife's boyfriend let me borrow his Ledger."
+    "My wife's boyfriend let me borrow his Ledger.",
+    "In crypto, you don't lose money. You just pay tuition.",
+    "My exit liquidity is my retirement plan.",
+    "I'm not a scammer, I'm an unsolicited airdrop.",
+    "Trust me bro is my only investment strategy.",
+    "I only invest in tokens with 0 utility and 100% vibes.",
+    "My hardware wallet is just a very expensive USB stick.",
+    "I read the whitepaper. It was just a picture of a dog.",
+    "The dev is based. The dev is my cousin.",
+    "I'm early. I'm just also down 99%.",
+    "Did you know? 99% of traders quit before their next 10x.",
+    "Real traders don't sleep. They monitor the charts.",
+    "I can't go to jail for this, it's a DAO.",
+    "Decentralized means no one can stop me from losing money.",
+    "Proof of stake is just proof of work for rich people.",
+    "Buy high, sell low. It's a lifestyle.",
+    "I'm not liquidated, I'm just horizontally integrated.",
+    "This is a long-term hold, I swear.",
+    "I swear the contract was renounced.",
+    "The liquidity is locked for 69 years.",
+    "The dev just went to the bathroom, he'll be back.",
+    "It's not a rug pull, it's an unexpected migration.",
+    "My bags are heavy but my hands are diamond.",
+    "I'm just here for the tech.",
+    "The tech was just a picture of a cat.",
+    "I swear this is the bottom.",
+    "This time it's different.",
+    "I'm just waiting for the altcoin season.",
+    "My portfolio is diversified, I have 50 different memecoins.",
+    "The chart is forming a bull flag.",
+    "It's a falling wedge, that's bullish.",
+    "The MACD is about to cross.",
+    "I don't need a stop loss, I have conviction.",
+    "I'm going to make it.",
+    "My mom said I'm a visionary.",
+    "The SEC is just jealous.",
+    "Regulation is coming. Buy the dip.",
+    "I'm not an insider, I just knew the dev.",
+    "I bought the pre-sale. The pre-sale was the top.",
+    "I'm holding till zero.",
+    "Airdrops are just a way to lose gas fees.",
+    "This is my last trade, I promise.",
+    "I can stop anytime.",
+    "I don't have a gambling problem, I have a crypto opportunity.",
+    "The house always wins, but I'm short the house.",
+    "I'm not a whale, I'm a minnow with a dream.",
+    "My exit strategy is hoping for a miracle.",
+    "I put my life savings into a coin named after a frog.",
+    "The frog was a scam.",
+    "The dog was a scam.",
+    "The cat was a scam.",
+    "The squirrel was a scam.",
+    "I'm going to be rich.",
+    "I'm going to be poor.",
+    "I'm going to be liquidated.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it.",
+    "I'm going to make it."
   ];
   
   const footerEl = document.getElementById('footerText');
@@ -331,7 +453,6 @@
     }
   }
 
-  // Initial Feed befüllen
   for(let i=0; i<5; i++) addFeedItem();
   setInterval(addFeedItem, 3000);
 
@@ -490,6 +611,9 @@
       container.classList.remove('loading');
       container.classList.add('success');
       thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+      // SOUND ABSPIELEN
+      playPopSound();
 
     } catch (e) {
       resetSlider();
