@@ -3,225 +3,266 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DEXSCREENR | Admin Calls</title>
+<title>DEXSCREENR | Admin Portfolio</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
   
   body {
-    background-color: #050505;
+    background-color: #000000;
     color: #ffffff;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
-    background-image: radial-gradient(circle at 50% 0%, rgba(20, 241, 149, 0.15) 0%, transparent 50%);
   }
 
-  .container { width: 100%; max-width: 400px; }
-
-  /* HEADER */
-  .header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 24px; padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+  .app-container {
+    width: 100%; max-width: 480px;
+    display: flex; flex-direction: column; height: 100vh;
+    position: relative;
   }
-  .header-title { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 900; letter-spacing: -0.5px; }
-  .verified-badge { color: #1DA1F2; width: 18px; height: 18px; }
+
+  /* TOP HEADER */
+  .top-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .top-balance { font-size: 18px; font-weight: 600; }
+  .top-actions { display: flex; gap: 16px; color: #a1a1aa; }
+  .top-actions svg { width: 20px; height: 20px; }
+
+  /* TABS */
+  .tabs {
+    display: flex; padding: 0 20px; gap: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .tab {
+    padding: 14px 0; font-size: 15px; font-weight: 500; color: #71717a;
+    cursor: pointer; position: relative;
+  }
+  .tab.active { color: #ffffff; }
+  .tab.active::after {
+    content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: #ffffff;
+  }
+
+  /* PORTFOLIO LIST */
+  .portfolio-list {
+    flex: 1; overflow-y: auto; padding-bottom: 100px;
+    scrollbar-width: none;
+  }
+  .portfolio-list::-webkit-scrollbar { display: none; }
+
+  .position-card {
+    display: flex; align-items: center; padding: 16px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    cursor: pointer; transition: background 0.2s;
+  }
+  .position-card:active { background: rgba(255,255,255,0.05); }
+
+  .coin-logo-wrapper {
+    position: relative; width: 44px; height: 44px; margin-right: 14px;
+  }
+  .coin-logo {
+    width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+  }
+  .chain-badge {
+    position: absolute; bottom: -2px; right: -2px;
+    width: 16px; height: 16px; background: #000; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .chain-badge svg { width: 12px; height: 12px; }
+
+  .position-info { flex: 1; }
+  .position-name { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 2px; }
+  .position-sub { font-size: 13px; color: #71717a; }
+
+  .position-pnl { text-align: right; }
+  .pnl-dollar { font-size: 15px; font-weight: 600; color: #14F195; margin-bottom: 4px; }
   
-  .admin-tag {
-    background: rgba(239, 68, 68, 0.1); color: #ef4444;
-    font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 4px;
-    border: 1px solid rgba(239, 68, 68, 0.2); text-transform: uppercase;
+  .pnl-badge {
+    background: rgba(20, 241, 149, 0.15); color: #14F195;
+    font-size: 12px; font-weight: 600; padding: 2px 6px; border-radius: 4px;
+    display: inline-flex; align-items: center; gap: 2px;
+  }
+  .pnl-badge svg { width: 10px; height: 10px; }
+
+  /* BOTTOM BAR */
+  .bottom-bar {
+    position: absolute; bottom: 0; left: 0; width: 100%;
+    background: #000; padding: 16px 20px 24px 20px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; gap: 12px;
   }
 
-  /* LIVE FEED */
-  .feed { display: flex; flex-direction: column; gap: 12px; }
-
-  .call-card {
-    background: rgba(20, 20, 25, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px; padding: 16px;
-    display: flex; align-items: center; gap: 14px;
-    position: relative; overflow: hidden;
-    animation: slideIn 0.5s ease-out;
+  .btn-deposit {
+    flex: 1; background: #a7f3d0; color: #000000;
+    font-size: 15px; font-weight: 600; padding: 16px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    border: none;
   }
-
-  @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-
-  .call-card.mega {
-    border-color: rgba(20, 241, 149, 0.4);
-    background: linear-gradient(90deg, rgba(20, 241, 149, 0.08) 0%, rgba(20, 20, 25, 0.8) 100%);
-    box-shadow: 0 4px 20px rgba(20, 241, 149, 0.1);
-  }
-
-  .coin-img {
-    width: 48px; height: 48px; border-radius: 50%;
-    object-fit: cover; border: 2px solid rgba(255,255,255,0.1);
-  }
-
-  .call-info { flex: 1; }
-  .call-header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-  .coin-symbol { font-size: 16px; font-weight: 800; }
-  .call-time { font-size: 11px; color: #71717a; margin-left: auto; }
   
-  .call-details { font-size: 13px; color: #a1a1aa; display: flex; align-items: center; gap: 8px; }
-  .entry-price { font-family: monospace; color: #e4e4e7; }
-
-  .pnl {
-    font-size: 20px; font-weight: 900;
-    color: #14F195; text-shadow: 0 0 15px rgba(20, 241, 149, 0.4);
-  }
-
-  .pnl.negative { color: #ef4444; text-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
-
-  /* WATERMARK */
-  .watermark {
-    position: fixed; bottom: 20px; right: 20px;
-    font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.2);
-    letter-spacing: 2px; text-transform: uppercase;
+  .btn-receive {
+    flex: 1; background: rgba(255,255,255,0.05); color: #ffffff;
+    font-size: 15px; font-weight: 600; padding: 16px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    border: 1px solid rgba(255,255,255,0.08);
   }
 </style>
 </head>
 <body>
 
-  <div class="container">
-    <div class="header">
-      <div class="header-title">
-        DEXSCREENR
-        <svg class="verified-badge" viewBox="0 0 24 24" fill="currentColor"><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.733 2.75 1.848 3.467-.09.315-.136.646-.136.99 0 2.21 1.71 3.998 3.918 3.998.47 0 .92-.084 1.336-.25.52 1.335 1.828 2.25 3.337 2.25s2.816-.917 3.337-2.25c.416.165.866.25 1.336.25 2.21 0 3.918-1.79 3.918-4 0-.344-.046-.675-.136-.99 1.115-.717 1.848-2.007 1.848-3.467zm-11.052 3.968l-3.062-3.062 1.414-1.414 1.648 1.648 4.534-4.534 1.414 1.414-5.948 5.948z"></path></svg>
+  <div class="app-container">
+    
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div class="top-balance">$1</div>
+      <div class="top-actions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       </div>
-      <div class="admin-tag">Admin Panel</div>
     </div>
 
-    <div class="feed">
-      
-      <!-- MEGA CALL 1 -->
-      <div class="call-card mega">
-        <img class="coin-img" src="https://assets.coingecko.com/coins/images/33566/standard/dogwifhat.jpg" alt="WIF">
-        <div class="call-info">
-          <div class="call-header">
-            <span class="coin-symbol">$WIF</span>
-            <span class="call-time">2m ago</span>
-          </div>
-          <div class="call-details">
-            Entry: <span class="entry-price">$0.0042</span>
-          </div>
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab">Open</div>
+      <div class="tab active">Closed</div>
+      <div class="tab">Replies</div>
+      <div class="tab">Rewards</div>
+      <div class="tab">Packs</div>
+    </div>
+
+    <!-- LIST -->
+    <div class="portfolio-list">
+
+      <!-- Pump Pets -->
+      <div class="position-card">
+        <div class="coin-logo-wrapper">
+          <img class="coin-logo" src="https://assets.coingecko.com/coins/images/33566/standard/dogwifhat.jpg">
+          <div class="chain-badge"><svg viewBox="0 0 397 311" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z" fill="#14F195"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z" fill="#9945FF"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#14F195"/></svg></div>
         </div>
-        <div class="pnl">+2,450%</div>
+        <div class="position-info">
+          <div class="position-name">Pump Pets</div>
+          <div class="position-sub">PETS · Closed 17d ago</div>
+        </div>
+        <div class="position-pnl">
+          <div class="pnl-dollar">+$1.13</div>
+          <div class="pnl-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg> 23.0%</div>
+        </div>
       </div>
 
-      <!-- MEGA CALL 2 -->
-      <div class="call-card mega">
-        <img class="coin-img" src="https://assets.coingecko.com/coins/images/28600/standard/bonk.jpg" alt="BONK">
-        <div class="call-info">
-          <div class="call-header">
-            <span class="coin-symbol">$BONK</span>
-            <span class="call-time">15m ago</span>
-          </div>
-          <div class="call-details">
-            Entry: <span class="entry-price">$0.00001</span>
-          </div>
+      <!-- SentientPad -->
+      <div class="position-card">
+        <div class="coin-logo-wrapper">
+          <img class="coin-logo" src="https://assets.coingecko.com/coins/images/29714/standard/bome.jpg">
+          <div class="chain-badge"><svg viewBox="0 0 397 311" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z" fill="#14F195"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z" fill="#9945FF"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#14F195"/></svg></div>
         </div>
-        <div class="pnl">+1,840%</div>
+        <div class="position-info">
+          <div class="position-name">SentientPad</div>
+          <div class="position-sub">Sentient · Closed 17d ago</div>
+        </div>
+        <div class="position-pnl">
+          <div class="pnl-dollar">+$0.14</div>
+          <div class="pnl-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg> 2.8%</div>
+        </div>
       </div>
 
-      <!-- NORMAL CALL 3 -->
-      <div class="call-card">
-        <img class="coin-img" src="https://assets.coingecko.com/coins/images/33722/standard/popcat.jpg" alt="POPCAT">
-        <div class="call-info">
-          <div class="call-header">
-            <span class="coin-symbol">$POPCAT</span>
-            <span class="call-time">1h ago</span>
-          </div>
-          <div class="call-details">
-            Entry: <span class="entry-price">$0.08</span>
-          </div>
+      <!-- Inutelligence -->
+      <div class="position-card">
+        <div class="coin-logo-wrapper">
+          <img class="coin-logo" src="https://assets.coingecko.com/coins/images/36612/standard/mew.jpg">
+          <div class="chain-badge"><svg viewBox="0 0 397 311" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z" fill="#14F195"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z" fill="#9945FF"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#14F195"/></svg></div>
         </div>
-        <div class="pnl">+420%</div>
+        <div class="position-info">
+          <div class="position-name">Inutelligence</div>
+          <div class="position-sub">I · Closed 17d ago</div>
+        </div>
+        <div class="position-pnl">
+          <div class="pnl-dollar">+$1.15</div>
+          <div class="pnl-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg> 16.2%</div>
+        </div>
       </div>
 
-      <!-- NORMAL CALL 4 -->
-      <div class="call-card">
-        <img class="coin-img" src="https://assets.coingecko.com/coins/images/36612/standard/mew.jpg" alt="MEW">
-        <div class="call-info">
-          <div class="call-header">
-            <span class="coin-symbol">$MEW</span>
-            <span class="call-time">3h ago</span>
-          </div>
-          <div class="call-details">
-            Entry: <span class="entry-price">$0.005</span>
-          </div>
+      <!-- Pollen Pet -->
+      <div class="position-card">
+        <div class="coin-logo-wrapper">
+          <img class="coin-logo" src="https://assets.coingecko.com/coins/images/36057/standard/slerf.jpg">
+          <div class="chain-badge"><svg viewBox="0 0 397 311" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z" fill="#14F195"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z" fill="#9945FF"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#14F195"/></svg></div>
         </div>
-        <div class="pnl">+890%</div>
+        <div class="position-info">
+          <div class="position-name">Pollen Pet</div>
+          <div class="position-sub">POLLEN · Closed 17d ago</div>
+        </div>
+        <div class="position-pnl">
+          <div class="pnl-dollar">+$13.93</div>
+          <div class="pnl-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg> 118.1%</div>
+        </div>
       </div>
-      
-      <!-- LOSS CALL (for realismspan) -->
-      <div class=" classcall-card">
-        <img class="coin="-img" src="https://assets.coentryingecko.com/coins/images/297-price14/standard/bome.jpg" alt="BOME">
-        <div class="call-info">
-          <div class="call-header">
-            <span class="coin-symbol">$BOME</span>
-            <span class="call-time">5h ago</span>
-          </div>
-          <div class="call-details">
-            Entry: <">$0.015</span>
-          </div>
+
+      <!-- http -->
+      <div class="position-card">
+        <div class="coin-logo-wrapper">
+          <img class="coin-logo" src="https://assets.coingecko.com/coins/images/33722/standard/popcat.jpg">
+          <div class="chain-badge"><svg viewBox="0 0 397 311" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z" fill="#14F195"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z" fill="#9945FF"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#14F195"/></svg></div>
         </div>
-        <div class="pnl negative">-45%</div>
+        <div class="position-info">
+          <div class="position-name">http</div>
+          <div class="position-sub">http · Closed 17d ago</div>
+        </div>
+        <div class="position-pnl">
+          <div class="pnl-dollar">+$1.13</div>
+          <div class="pnl-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg> 9.6%</div>
+        </div>
+      </div>
+
+      <!-- Shark Tank AI -->
+      <div class="position-card">
+        <div class="coin-logo-wrapper">
+          <img class="coin-logo" src="https://assets.coingecko.com/coins/images/28600/standard/bonk.jpg">
+          <div class="chain-badge"><svg viewBox="0 0 397 311" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z" fill="#14F195"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z" fill="#9945FF"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#14F195"/></svg></div>
+        </div>
+        <div class="position-info">
+          <div class="position-name">Shark Tank AI</div>
+          <div class="position-sub">SHARKTANK · Closed 18d ago</div>
+        </div>
+        <div class="position-pnl">
+          <div class="pnl-dollar">+$0.45</div>
+          <div class="pnl-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg> 18.8%</div>
+        </div>
+      </div>
+
+      <!-- 5C -->
+      <div class="position-card">
+        <div class="coin-logo-wrapper">
+          <img class="coin-logo" src="https://assets.coingecko.com/coins/images/33566/standard/dogwifhat.jpg">
+          <div class="chain-badge"><svg viewBox="0 0 397 311" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z" fill="#14F195"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z" fill="#9945FF"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#14F195"/></svg></div>
+        </div>
+        <div class="position-info">
+          <div class="position-name">5C</div>
+          <div class="position-sub">5C · Closed 18d ago</div>
+        </div>
+        <div class="position-pnl">
+          <div class="pnl-dollar">+$2.03</div>
+          <div class="pnl-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg> 28.4%</div>
+        </div>
       </div>
 
     </div>
+
+    <!-- BOTTOM BAR -->
+    <div class="bottom-bar">
+      <button class="btn-deposit">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+        Deposit
+      </button>
+      <button class="btn-receive">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        Receive
+      </button>
+    </div>
+
   </div>
 
-  <div class="watermark">DEXSCREENR ALPHA</div>
-
-<script>
-  // Automatisches Nachladen von Fake Calls für Videos
-  const coins = [
-    { symbol: "$WIF", img: "https://assets.coingecko.com/coins/images/33566/standard/dogwifhat.jpg", entry: "$0.0042" },
-    { symbol: "$BONK", img: "https://assets.coingecko.com/coins/images/28600/standard/bonk.jpg", entry: "$0.00001" },
-    { symbol: "$POPCAT", img: "https://assets.coingecko.com/coins/images/33722/standard/popcat.jpg", entry: "$0.08" },
-    { symbol: "$MEW", img: "https://assets.coingecko.com/coins/images/36612/standard/mew.jpg", entry: "$0.005" },
-    { symbol: "$BOME", img: "https://assets.coingecko.com/coins/images/29714/standard/bome.jpg", entry: "$0.015" },
-    { symbol: "$SLERF", img: "https://assets.coingecko.com/coins/images/36057/standard/slerf.jpg", entry: "$0.2" },
-    { symbol: "$MYRO", img: "https://assets.coingecko.com/coins/images/33438/standard/myro.jpg", entry: "$0.05" }
-  ];
-
-  const feed = document.querySelector('.feed');
-
-  function addRandomCall() {
-    const coin = coins[Math.floor(Math.random() * coins.length)];
-    const isMega = Math.random() > 0.6; // 40% Chance auf Mega-Win
-    const pnlPercent = isMega ? (Math.random() * 2000 + 500).toFixed(0) : (Math.random() * 400 + 50).toFixed(0);
-    
-    const el = document.createElement('div');
-    el.className = `call-card ${isMega ? 'mega' : ''}`;
-    el.innerHTML = `
-      <img class="coin-img" src="${coin.img}" alt="${coin.symbol}">
-      <div class="call-info">
-        <div class="call-header">
-          <span class="coin-symbol">${coin.symbol}</span>
-          <span class="call-time">Just now</span>
-        </div>
-        <div class="call-details">
-          Entry: <span class="entry-price">${coin.entry}</span>
-        </div>
-      </div>
-      <div class="pnl">+${pnlPercent}%</div>
-    `;
-    
-    feed.prepend(el);
-    
-    // Maximal 10 Calls im Feed behalten
-    if(feed.children.length > 10) feed.lastChild.remove();
-  }
-
-  // Alle 10 Sekunden ein neuer Call (gut für Video-Aufnahmen)
-  setInterval(addRandomCall, 10000);
-
-</script>
 </body>
 </html>
