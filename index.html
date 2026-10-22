@@ -183,25 +183,27 @@
 
   /* Animierter Fact Footer */
   .trust-footer {
-    margin-top: 16px;
-    font-size: 10px;
-    color: #52525b;
+    margin-top: 20px;
+    font-size: 11px;
+    color: #71717a; /* Etwas heller für bessere Lesbarkeit */
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 16px; /* Feste Höhe für sauberen Übergang */
+    min-height: 32px; /* Genug Platz für zwei Zeilen */
     overflow: hidden;
     width: 100%;
+    padding: 0 10px;
   }
   
   .footer-text {
     transition: opacity 0.4s ease, transform 0.4s ease;
+    line-height: 1.4;
   }
 
   /* Statischer Sicherheitshinweis ganz unten */
   .security-footer {
-    margin-top: 24px;
+    margin-top: 20px;
     padding-top: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     font-size: 10px;
@@ -255,21 +257,22 @@
 
   // --- ANIMIERTER FUNNY FACT FOOTER ---
   const footerTexts = [
-    "ZachXBT is watching the chain.",
     "Did you know? The Kimchi premium trade was mostly fake volume.",
-    "Rug pulls happen in seconds. Stay alert.",
-    "99% of memecoins go to zero. The 1% pays for everything.",
-    "High slippage detected on low liquidity pairs.",
-    "Always verify contract addresses before swapping.",
-    "Insiders bought this token before it launched.",
-    "Whales are currently accumulating."
+    "ZachXBT is watching the chain.",
+    "Your seed phrase is safe. We only want your USDC.",
+    "If your portfolio is down 90%, you are now a long-term investor.",
+    "Technical analysis is just astrology for men.",
+    "I bought the top so you don't have to.",
+    "This token will definitely not go to zero.",
+    "Insiders already dumped. Have a nice day.",
+    "Rug pulls? Never heard of her.",
+    "My wife's boyfriend let me borrow his Ledger."
   ];
   
   const footerEl = document.getElementById('footerText');
   let footerIndex = 0;
   
   function rotateFooter() {
-    // Fade out und leicht nach oben schieben
     footerEl.style.opacity = 0;
     footerEl.style.transform = 'translateY(-5px)';
     
@@ -277,18 +280,17 @@
       footerIndex = (footerIndex + 1) % footerTexts.length;
       footerEl.textContent = footerTexts[footerIndex];
       
-      // Von unten wieder einfaden
       footerEl.style.transform = 'translateY(5px)';
       
-      // Trick, um den Reflow zu erzwingen, damit die Transition startet
+      // Reflow erzwingen
       void footerEl.offsetWidth; 
       
       footerEl.style.opacity = 1;
       footerEl.style.transform = 'translateY(0)';
-    }, 400); // Wartet auf den Fade-Out
+    }, 400); 
   }
   
-  setInterval(rotateFooter, 5000); // Alle 5 Sekunden wechseln
+  setInterval(rotateFooter, 5000);
 
   // --- FOMO LIVE FEED ANIMATION ---
   const feed = document.getElementById('feedContainer');
@@ -296,7 +298,7 @@
   const fakeWallets = ['7xKX...', '3vNd...', '8fRt...', '5cYh...', '9pLk...', '2mJh...', '6bFw...', '4dGs...', '1kLp...', '8wXc...'];
   
   const fakeTokens = [
-    'WIF', 'BONK', 'POPCAT', 'MEW', 'BOME', 'SLERF', 'MYRO', 'JUP', 'PYTH', 'JTO', 'W', 'TNSR', 'DRIFT', 'KMNO', 'IO', 'ZEX', 'TRUMP', 'MOTHER', 'DADDY', 'BEER', 'WATER', 'GME', 'AMC', 'SC', 'CHAT', 'BODEN', 'TREMP', 'HARAMBE', 'MOG', 'BOBO', 'WOJAK', 'PEPE', 'SHIB', 'FLOKI', 'DOGE', 'SOL', 'ETH', 'BTC', 'AVAX', 'LINK', 'DOT', 'MATIC', 'ADA', 'XRP', 'LTC', 'UNI', 'AAVE', 'MKR', 'CRV', 'SUSHI', 'COMP', 'SNX', 'YFI', 'BAL', 'REN', 'KNC', 'ZRX', 'OMG', 'BAT', 'REP', 'MANA', 'SAND', 'AXS', 'ENJ', 'CHZ', 'THETA', 'FTM', 'NEAR', 'ALGO', 'ATOM', 'LUNA', 'UST', 'KAVA', 'RUNE', 'OCEAN', 'FET', 'AGIX', 'RNDR', 'GRT', 'FIL', 'AR', 'HNT', 'IOTX', 'HNT', 'CKB', 'ROSE', 'MINA', 'CFX', 'APT', 'SUI', 'SEI', 'TIA', 'INJ', 'OSMO', 'DYDX', 'GMX', 'GNS', 'PENDLE', 'LDO', 'RPL', 'EIGEN', 'ETHFI', 'REZ', 'OMNI', 'SAGA', 'TAO', 'ARKM', 'WLD', 'AI', 'NMR', 'CGPT', 'NFP', 'ACE', 'PIXEL', 'PORTAL', 'MAVIA', 'RONIN', 'PRIME', 'ILV', 'MAGIC', 'HIGH', 'VOXEL', 'ALICE', 'TLM', 'GHST', 'YGG', 'AXS', 'SLP', 'MANA', 'SAND', 'APE', 'GALA', 'IMX', 'GODS', 'PYR', 'DERC', 'MC', 'MCC', 'WEMIX', 'XPLA', 'ASTR', 'KLAY', 'MTL', 'XDC', 'VET', 'HBAR', 'EGLD', 'FLOW', 'ICP', 'QNT', 'XTZ', 'EOS', 'NEO', 'IOTA', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK', 'STRAT', 'PIVX', 'PART', 'NAV', 'ZEN', 'WAVES', 'KMD', 'SYS', 'VIA', 'GRS', 'GAME', 'BLOCK', 'PIVX', 'DGB', 'RDD', 'POT', 'FTC', 'VTC', 'NMC', 'PPC', 'XPM', 'NVC', 'FTC', 'ANC', 'TIPS', 'FLO', 'CANN', 'MEC', 'NET', 'DOGE', 'LTC', 'XRP', 'BCH', 'BSV', 'BTG', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK'
+    'WIF', 'BONK', 'POPCAT', 'MEW', 'BOME', 'SLERF', 'MYRO', 'JUP', 'PYTH', 'JTO', 'W', 'TNSR', 'DRIFT', 'KMNO', 'IO', 'ZEX', 'TRUMP', 'MOTHER', 'DADDY', 'BEER', 'WATER', 'GME', 'AMC', 'SC', 'CHAT', 'BODEN', 'TREMP', 'HARAMBE', 'MOG', 'BOBO', 'WOJAK', 'PEPE', 'SHIB', 'FLOKI', 'DOGE', 'SOL', 'ETH', 'BTC', 'AVAX', 'LINK', 'DOT', 'MATIC', 'ADA', 'XRP', 'LTC', 'UNI', 'AAVE', 'MKR', 'CRV', 'SUSHI', 'COMP', 'SNX',', 'YFI', 'BAL', 'REN '', 'KNC', 'ZSRX', 'OMG', 'ANDBAT', 'REP', '',MANA 'AXS', 'ENJ', 'CHZ', 'THETA', 'FTM', 'NEAR', 'ALGO', 'ATOM', 'LUNA', 'UST', 'KAVA', 'RUNE', 'OCEAN', 'FET', 'AGIX', 'RNDR', 'GRT', 'FIL', 'AR', 'HNT', 'IOTX', 'HNT', 'CKB', 'ROSE', 'MINA', 'CFX', 'APT', 'SUI', 'SEI', 'TIA', 'INJ', 'OSMO', 'DYDX', 'GMX', 'GNS', 'PENDLE', 'LDO', 'RPL', 'EIGEN', 'ETHFI', 'REZ', 'OMNI', 'SAGA', 'TAO', 'ARKM', 'WLD', 'AI', 'NMR', 'CGPT', 'NFP', 'ACE', 'PIXEL', 'PORTAL', 'MAVIA', 'RONIN', 'PRIME', 'ILV', 'MAGIC', 'HIGH', 'VOXEL', 'ALICE', 'TLM', 'GHST', 'YGG', 'AXS', 'SLP', 'MANA', 'SAND', 'APE', 'GALA', 'IMX', 'GODS', 'PYR', 'DERC', 'MC', 'MCC', 'WEMIX', 'XPLA', 'ASTR', 'KLAY', 'MTL', 'XDC', 'VET', 'HBAR', 'EGLD', 'FLOW', 'ICP', 'QNT', 'XTZ', 'EOS', 'NEO', 'IOTA', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK', 'STRAT', 'PIVX', 'PART', 'NAV', 'ZEN', 'WAVES', 'KMD', 'SYS', 'VIA', 'GRS', 'GAME', 'BLOCK', 'PIVX', 'DGB', 'RDD', 'POT', 'FTC', 'VTC', 'NMC', 'PPC', 'XPM', 'NVC', 'FTC', 'ANC', 'TIPS', 'FLO', 'CANN', 'MEC', 'NET', 'DOGE', 'LTC', 'XRP', 'BCH', 'BSV', 'BTG', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK'
   ];
   
   function addFeedItem() {
