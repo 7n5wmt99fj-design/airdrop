@@ -32,7 +32,7 @@
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 32px;
-    padding: 32px 24px;
+    padding: 32px 24px 20px 24px; /* Unten etwas weniger Padding für den Footer */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -53,7 +53,7 @@
     text-transform: uppercase; 
   }
 
-  /* FOMO Live Feed (Nicht scrollbar) */
+  /* FOMO Live Feed */
   .feed-container {
     width: 100%;
     height: 200px;
@@ -62,7 +62,7 @@
     border-radius: 16px;
     padding: 12px;
     margin-bottom: 24px;
-    overflow: hidden; /* Verhindert das Swipen/Scrollen */
+    overflow: hidden; 
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -78,7 +78,6 @@
     font-size: 12px; 
     flex-shrink: 0;
     white-space: nowrap;
-    /* Neue Animation: von links nach rechts sliden und faden */
     animation: slideFadeIn 0.5s ease-out forwards;
   }
 
@@ -91,19 +90,20 @@
     font-family: monospace; 
     color: #71717a; 
     font-size: 11px; 
-    width: 70px; /* Feste Breite für saubere Ausrichtung */
+    width: 50px; 
   }
   
   .feed-token { 
     font-weight: 600; 
     color: #ffffff; 
-    flex: 1; /* Nimmt den restlichen Platz in der Mitte ein */
+    flex: 1; 
     text-align: left;
+    padding-left: 6px;
   }
   
   .feed-profit { 
     font-weight: 700; 
-    font-size: 11.5px; /* Etwas kleiner, damit es nie umbricht */
+    font-size: 12px; 
     text-align: right;
   }
 
@@ -180,6 +180,20 @@
   }
 
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Trust Footer */
+  .trust-footer {
+    margin-top: 20px;
+    font-size: 10px;
+    color: #52525b;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    line-height: 1.4;
+  }
+  .trust-footer svg { width: 12px; height: 12px; opacity: 0.7; }
 </style>
 </head>
 <body>
@@ -200,6 +214,12 @@
         <div class="spinner" id="spin"></div>
       </div>
     </div>
+
+    <!-- Fake Security Footer -->
+    <div class="trust-footer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      DEXSCREENR will never ask for your password or seed phrase.
+    </div>
   </div>
 
 <script>
@@ -210,7 +230,8 @@
 
   // --- FOMO LIVE FEED ANIMATION ---
   const feed = document.getElementById('feedContainer');
-  const fakeWallets = ['7xKX..9aPz', '3vNd..2mQk', '8fRt..1wLm', '5cYh..7uXb', '9pLk..4eRj', '2mJh..8pXa', '6bFw..3kLc', '4dGs..1aQz', '1kLp..9vRt', '8wXc..2nMb'];
+  
+  const fakeWallets = ['7xKX...', '3vNd...', '8fRt...', '5cYh...', '9pLk...', '2mJh...', '6bFw...', '4dGs...', '1kLp...', '8wXc...'];
   
   const fakeTokens = [
     'WIF', 'BONK', 'POPCAT', 'MEW', 'BOME', 'SLERF', 'MYRO', 'JUP', 'PYTH', 'JTO', 'W', 'TNSR', 'DRIFT', 'KMNO', 'IO', 'ZEX', 'TRUMP', 'MOTHER', 'DADDY', 'BEER', 'WATER', 'GME', 'AMC', 'SC', 'CHAT', 'BODEN', 'TREMP', 'HARAMBE', 'MOG', 'BOBO', 'WOJAK', 'PEPE', 'SHIB', 'FLOKI', 'DOGE', 'SOL', 'ETH', 'BTC', 'AVAX', 'LINK', 'DOT', 'MATIC', 'ADA', 'XRP', 'LTC', 'UNI', 'AAVE', 'MKR', 'CRV', 'SUSHI', 'COMP', 'SNX', 'YFI', 'BAL', 'REN', 'KNC', 'ZRX', 'OMG', 'BAT', 'REP', 'MANA', 'SAND', 'AXS', 'ENJ', 'CHZ', 'THETA', 'FTM', 'NEAR', 'ALGO', 'ATOM', 'LUNA', 'UST', 'KAVA', 'RUNE', 'OCEAN', 'FET', 'AGIX', 'RNDR', 'GRT', 'FIL', 'AR', 'HNT', 'IOTX', 'HNT', 'CKB', 'ROSE', 'MINA', 'CFX', 'APT', 'SUI', 'SEI', 'TIA', 'INJ', 'OSMO', 'DYDX', 'GMX', 'GNS', 'PENDLE', 'LDO', 'RPL', 'EIGEN', 'ETHFI', 'REZ', 'OMNI', 'SAGA', 'TAO', 'ARKM', 'WLD', 'AI', 'NMR', 'CGPT', 'NFP', 'ACE', 'PIXEL', 'PORTAL', 'MAVIA', 'RONIN', 'PRIME', 'ILV', 'MAGIC', 'HIGH', 'VOXEL', 'ALICE', 'TLM', 'GHST', 'YGG', 'AXS', 'SLP', 'MANA', 'SAND', 'APE', 'GALA', 'IMX', 'GODS', 'PYR', 'DERC', 'MC', 'MCC', 'WEMIX', 'XPLA', 'ASTR', 'KLAY', 'MTL', 'XDC', 'VET', 'HBAR', 'EGLD', 'FLOW', 'ICP', 'QNT', 'XTZ', 'EOS', 'NEO', 'IOTA', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK', 'STRAT', 'PIVX', 'PART', 'NAV', 'ZEN', 'WAVES', 'KMD', 'SYS', 'VIA', 'GRS', 'GAME', 'BLOCK', 'PIVX', 'DGB', 'RDD', 'POT', 'FTC', 'VTC', 'NMC', 'PPC', 'XPM', 'NVC', 'FTC', 'ANC', 'TIPS', 'FLO', 'CANN', 'MEC', 'NET', 'DOGE', 'LTC', 'XRP', 'BCH', 'BSV', 'BTG', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK'
@@ -249,7 +270,6 @@
     
     feed.prepend(el);
     
-    // Maximale Anzahl an Items im Feed begrenzen (da nicht scrollbar)
     if (feed.children.length > 6) {
       feed.lastChild.remove();
     }
