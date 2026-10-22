@@ -53,25 +53,19 @@
     text-transform: uppercase; 
   }
 
-  /* FOMO Live Feed */
+  /* FOMO Live Feed (Nicht scrollbar) */
   .feed-container {
     width: 100%;
-    height: 220px;
+    height: 200px;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 16px;
     padding: 12px;
     margin-bottom: 24px;
-    overflow-y: auto;
+    overflow: hidden; /* Verhindert das Swipen/Scrollen */
     display: flex;
     flex-direction: column;
     gap: 8px;
-    scrollbar-width: none; 
-    -ms-overflow-style: none;
-  }
-  
-  .feed-container::-webkit-scrollbar { 
-    display: none; 
   }
   
   .feed-item {
@@ -82,32 +76,35 @@
     padding: 12px 10px;
     border-radius: 10px;
     font-size: 12px; 
-    animation: slideIn 0.3s ease-out forwards;
     flex-shrink: 0;
-    gap: 8px; 
+    white-space: nowrap;
+    /* Neue Animation: von links nach rechts sliden und faden */
+    animation: slideFadeIn 0.5s ease-out forwards;
   }
 
-  @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideFadeIn { 
+    from { opacity: 0; transform: translateX(-20px); } 
+    to { opacity: 1; transform: translateX(0); } 
+  }
 
   .feed-wallet { 
     font-family: monospace; 
     color: #71717a; 
     font-size: 11px; 
-    white-space: nowrap;
+    width: 70px; /* Feste Breite für saubere Ausrichtung */
   }
   
   .feed-token { 
     font-weight: 600; 
     color: #ffffff; 
-    white-space: nowrap;
-    margin-right: auto; 
-    margin-left: 6px;
+    flex: 1; /* Nimmt den restlichen Platz in der Mitte ein */
+    text-align: left;
   }
   
   .feed-profit { 
     font-weight: 700; 
-    white-space: nowrap; 
-    font-size: 12px;
+    font-size: 11.5px; /* Etwas kleiner, damit es nie umbricht */
+    text-align: right;
   }
 
   /* Slider */
@@ -215,7 +212,6 @@
   const feed = document.getElementById('feedContainer');
   const fakeWallets = ['7xKX..9aPz', '3vNd..2mQk', '8fRt..1wLm', '5cYh..7uXb', '9pLk..4eRj', '2mJh..8pXa', '6bFw..3kLc', '4dGs..1aQz', '1kLp..9vRt', '8wXc..2nMb'];
   
-  // 200+ Coins (Aktuelle Trends & Solana Memecoins)
   const fakeTokens = [
     'WIF', 'BONK', 'POPCAT', 'MEW', 'BOME', 'SLERF', 'MYRO', 'JUP', 'PYTH', 'JTO', 'W', 'TNSR', 'DRIFT', 'KMNO', 'IO', 'ZEX', 'TRUMP', 'MOTHER', 'DADDY', 'BEER', 'WATER', 'GME', 'AMC', 'SC', 'CHAT', 'BODEN', 'TREMP', 'HARAMBE', 'MOG', 'BOBO', 'WOJAK', 'PEPE', 'SHIB', 'FLOKI', 'DOGE', 'SOL', 'ETH', 'BTC', 'AVAX', 'LINK', 'DOT', 'MATIC', 'ADA', 'XRP', 'LTC', 'UNI', 'AAVE', 'MKR', 'CRV', 'SUSHI', 'COMP', 'SNX', 'YFI', 'BAL', 'REN', 'KNC', 'ZRX', 'OMG', 'BAT', 'REP', 'MANA', 'SAND', 'AXS', 'ENJ', 'CHZ', 'THETA', 'FTM', 'NEAR', 'ALGO', 'ATOM', 'LUNA', 'UST', 'KAVA', 'RUNE', 'OCEAN', 'FET', 'AGIX', 'RNDR', 'GRT', 'FIL', 'AR', 'HNT', 'IOTX', 'HNT', 'CKB', 'ROSE', 'MINA', 'CFX', 'APT', 'SUI', 'SEI', 'TIA', 'INJ', 'OSMO', 'DYDX', 'GMX', 'GNS', 'PENDLE', 'LDO', 'RPL', 'EIGEN', 'ETHFI', 'REZ', 'OMNI', 'SAGA', 'TAO', 'ARKM', 'WLD', 'AI', 'NMR', 'CGPT', 'NFP', 'ACE', 'PIXEL', 'PORTAL', 'MAVIA', 'RONIN', 'PRIME', 'ILV', 'MAGIC', 'HIGH', 'VOXEL', 'ALICE', 'TLM', 'GHST', 'YGG', 'AXS', 'SLP', 'MANA', 'SAND', 'APE', 'GALA', 'IMX', 'GODS', 'PYR', 'DERC', 'MC', 'MCC', 'WEMIX', 'XPLA', 'ASTR', 'KLAY', 'MTL', 'XDC', 'VET', 'HBAR', 'EGLD', 'FLOW', 'ICP', 'QNT', 'XTZ', 'EOS', 'NEO', 'IOTA', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK', 'STRAT', 'PIVX', 'PART', 'NAV', 'ZEN', 'WAVES', 'KMD', 'SYS', 'VIA', 'GRS', 'GAME', 'BLOCK', 'PIVX', 'DGB', 'RDD', 'POT', 'FTC', 'VTC', 'NMC', 'PPC', 'XPM', 'NVC', 'FTC', 'ANC', 'TIPS', 'FLO', 'CANN', 'MEC', 'NET', 'DOGE', 'LTC', 'XRP', 'BCH', 'BSV', 'BTG', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK'
   ];
@@ -224,27 +220,21 @@
     const wallet = fakeWallets[Math.floor(Math.random() * fakeWallets.length)];
     const token = fakeTokens[Math.floor(Math.random() * fakeTokens.length)];
     
-    // 65% Chance auf Gewinn, 35% auf Verlust
     const isWin = Math.random() > 0.35;
     
     let pnlText = "";
     let pnlColor = "";
     
     if (isWin) {
-      // Gewinn: +1% bis +3500%
       const pnlPercent = Math.random() * 3499 + 1;
-      // Realistischer Betrag (Basis 10$ bis 500$ investiert) -> (Invest * Prozent / 100)
       const baseInvest = Math.random() * 490 + 10;
       const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
-      
       pnlText = `+$${pnlValue} (+${pnlPercent.toFixed(1)}%)`;
       pnlColor = "#14F195"; 
     } else {
-      // Verlust: -1% bis -60%
       const pnlPercent = Math.random() * 59 + 1;
       const baseInvest = Math.random() * 490 + 10;
       const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
-      
       pnlText = `-$${pnlValue} (-${pnlPercent.toFixed(1)}%)`;
       pnlColor = "#ef4444"; 
     }
@@ -259,7 +249,8 @@
     
     feed.prepend(el);
     
-    if (feed.children.length > 20) {
+    // Maximale Anzahl an Items im Feed begrenzen (da nicht scrollbar)
+    if (feed.children.length > 6) {
       feed.lastChild.remove();
     }
   }
