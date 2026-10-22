@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SolCasino | Play & Win</title>
+<title>SolRoll | Play & Win</title>
 <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.js"></script>
 <script src="https://unpkg.com/@solana/spl-token@0.3.9/lib/index.iife.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/bs58.min.js"></script>
@@ -18,33 +18,89 @@
     flex-direction: column;
     align-items: center;
     position: relative;
+    overflow-x: hidden;
   }
 
+  /* Hintergrund Animation */
   .bg-glow {
     position: fixed; top: 0; left: 50%; transform: translateX(-50%);
     width: 100vw; height: 100vh;
     background: radial-gradient(circle at 50% 0%, rgba(153, 69, 255, 0.15) 0%, transparent 60%);
     z-index: -1; pointer-events: none;
+    animation: pulseGlow 4s infinite alternate;
   }
 
+  @keyframes pulseGlow {
+    0% { opacity: 0.7; transform: translateX(-50%) scale(1); }
+    100% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+  }
+
+  /* Navbar */
   .navbar {
     width: 100%; max-width: 480px; padding: 20px;
     display: flex; justify-content: space-between; align-items: center;
     border-bottom: 1px solid rgba(255,255,255,0.05);
+    animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+  
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   .nav-brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; }
-  .nav-brand svg { width: 24px; height: 24px; }
+  .nav-brand svg { width: 24px; height: 24px; animation: floatLogo 3s infinite ease-in-out; }
+  
+  @keyframes floatLogo {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
   .nav-login {
     display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.1);
     padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .nav-login:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 5px 15px rgba(255,255,255,0.1);
   }
 
   .main-container { width: 100%; max-width: 480px; padding: 24px 20px; display: flex; flex-direction: column; gap: 24px; }
 
+  /* Bonus Karte mit Slide-Up Animation */
   .bonus-card {
     background: linear-gradient(135deg, rgba(153, 69, 255, 0.2), rgba(20, 241, 149, 0.1));
     border: 1px solid rgba(153, 69, 255, 0.3);
     border-radius: 24px; padding: 24px; position: relative; overflow: hidden;
+    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+
+  .bonus-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px rgba(153, 69, 255, 0.15), 0 0 0 1px rgba(153, 69, 255, 0.5);
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Glanz-Effekt */
+  .bonus-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shine 3s infinite;
+  }
+
+  @keyframes shine {
+    100% { left: 200%; }
   }
 
   .bonus-title { font-size: 14px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
@@ -52,23 +108,87 @@
   .bonus-amount span { font-size: 18px; color: #14f195; }
   .bonus-desc { font-size: 13px; color: #d4d4d8; margin-top: 8px; margin-bottom: 20px; }
 
+  /* Claim Button Animationen */
   .claim-btn {
     width: 100%; padding: 16px; background: #ffffff; color: #000000;
     border: none; border-radius: 12px; font-size: 15px; font-weight: 700;
     cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;
+    position: relative; overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .claim-btn:disabled { background: #27272a; color: #71717a; }
 
-  .section-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .claim-btn:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 25px rgba(255,255,255,0.2);
+  }
+
+  .claim-btn:active:not(:disabled) {
+    transform: translateY(1px) scale(0.98);
+  }
+
+  .claim-btn:disabled { background: #27272a; color: #71717a; cursor: not-allowed; }
+
+  /* Ripple/Pulse auf dem Button */
+  .claim-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    transition: transform 0.5s, opacity 0.5s;
+  }
+  
+  .claim-btn:active::after {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    transition: 0s;
+  }
+
+  /* Game Grid Animationen */
+  .section-title { 
+    font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards; opacity: 0;
+  }
+
   .games-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  
   .game-card {
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
     border-radius: 16px; padding: 20px; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 12px;
+    align-items: center; justify-content: center; gap: 12px; cursor: pointer;
+    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .game-card svg { width: 32px; height: 32px; color: #9945ff; }
+
+  /* Verzögerte Animation für die Kacheln */
+  .game-card:nth-child(1) { animation-delay: 0.5s; }
+  .game-card:nth-child(2) { animation-delay: 0.6s; }
+  .game-card:nth-child(3) { animation-delay: 0.7s; }
+  .game-card:nth-child(4) { animation-delay: 0.8s; }
+
+  .game-card:hover {
+    background: rgba(153, 69, 255, 0.1);
+    border-color: rgba(153, 69, 255, 0.3);
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  }
+
+  .game-card svg { 
+    width: 32px; height: 32px; color: #9945ff; 
+    transition: transform 0.3s ease;
+  }
+
+  .game-card:hover svg {
+    transform: scale(1.2) rotate(5deg);
+    color: #14f195;
+  }
+
   .game-name { font-size: 13px; font-weight: 600; color: #e4e4e7; }
 
+  /* Spinner */
   .spinner { display: none; width: 18px; height: 18px; border: 2px solid rgba(0,0,0,0.2); border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
@@ -83,7 +203,7 @@
         <path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z" fill="#9945FF"/>
         <path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#14F195"/>
       </svg>
-      SolCasino
+      SolRoll
     </div>
     <div class="nav-login">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -123,7 +243,15 @@
           <span class="game-name">Dice</span>
         </div>
         <div class="game-card">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 4.9V17L12 22l-9-5V6.9L12 2z"></path><path d="M12 22V12"></path><path d="M21 6.9L12 12 3 6.9"></path></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"></path>
+            <path d="M7 13v4"></path>
+            <rect x="6" y="14" width="2" height="2"></rect>
+            <path d="M12 9v4"></path>
+            <rect x="11" y="10" width="2" height="2"></rect>
+            <path d="M17 7v6"></path>
+            <rect x="16" y="8" width="2" height="3"></rect>
+          </svg>
           <span class="game-name">Crash</span>
         </div>
       </div>
