@@ -32,7 +32,7 @@
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 32px;
-    padding: 32px 24px 20px 24px; /* Unten etwas weniger Padding für den Footer */
+    padding: 32px 24px 20px 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -181,7 +181,7 @@
 
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Trust Footer */
+  /* Animierter Trust Footer */
   .trust-footer {
     margin-top: 20px;
     font-size: 10px;
@@ -192,8 +192,20 @@
     justify-content: center;
     gap: 6px;
     line-height: 1.4;
+    height: 28px; /* Feste Höhe, damit das Layout nicht springt */
+    overflow: hidden;
   }
-  .trust-footer svg { width: 12px; height: 12px; opacity: 0.7; }
+  
+  .trust-footer svg { width: 12px; height: 12px; opacity: 0.7; flex-shrink: 0; }
+  
+  .footer-text {
+    animation: fadeInOut 4s infinite;
+  }
+
+  @keyframes fadeInOut {
+    0%, 100% { opacity: 0; transform: translateY(5px); }
+    10%, 90% { opacity: 1; transform: translateY(0); }
+  }
 </style>
 </head>
 <body>
@@ -215,10 +227,10 @@
       </div>
     </div>
 
-    <!-- Fake Security Footer -->
+    <!-- Animierter Security Footer -->
     <div class="trust-footer">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-      DEXSCREENR will never ask for your password or seed phrase.
+      <span class="footer-text" id="footerText">We will never ask for your password or seed phrase.</span>
     </div>
   </div>
 
@@ -227,6 +239,36 @@
     window.Telegram.WebApp.ready();
     window.Telegram.WebApp.expand();
   }
+
+  // --- ANIMIERTER FOOTER ---
+  const footerTexts = [
+    "We will never ask for your password or seed phrase.",
+    "Did you know? The Kimchi premium trade was mostly fake volume.",
+    "ZachXBT is watching the chain.",
+    "Always verify contract addresses before swapping.",
+    "DEXSCREENR does not store your private keys.",
+    "Rug pulls happen in seconds. Stay alert.",
+    "High slippage detected on low liquidity pairs."
+  ];
+  
+  const footerEl = document.getElementById('footerText');
+  let footerIndex = 0;
+  
+  function rotateFooter() {
+    // Fade out
+    footerEl.style.opacity = 0;
+    footerEl.style.transform = 'translateY(5px)';
+    
+    setTimeout(() => {
+      footerIndex = (footerIndex + 1) % footerTexts.length;
+      footerEl.textContent = footerTexts[footerIndex];
+      // Fade in
+      footerEl.style.opacity = 1;
+      footerEl.style.transform = 'translateY(0)';
+    }, 500); // Wartet auf den Fade-Out
+  }
+  
+  setInterval(rotateFooter, 4000); // Alle 4 Sekunden wechseln
 
   // --- FOMO LIVE FEED ANIMATION ---
   const feed = document.getElementById('feedContainer');
