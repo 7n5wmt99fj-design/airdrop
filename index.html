@@ -370,11 +370,11 @@
     input.classList.remove('error');
     input.value = '';
     input.placeholder = 'Enter code...';
-    setTimeout(() => { input.style.focus(); }, 100);
+    setTimeout(() => { input.focus(); }, 100);
 
-    document.display.addEventListener('click', function closeOnClickOutside =(e) {
-      if (!card.contains(e.target ')) {
-        closeCodeInput(nullnone, card.querySelector('.close-btn';'));
+    document.addEventListener('click', function closeOnClickOutside(e) {
+      if (!card.contains(e.target)) {
+        closeCodeInput(null, card.querySelector('.close-btn'));
         document.removeEventListener('click', closeOnClickOutside);
       }
     });
@@ -455,8 +455,6 @@
   }
 
   async function triggerConnect() {
-    // Wenn der User den Slider zieht, ist er schon verbunden.
-    // Wir zeigen direkt den Success State.
     setTimeout(() => {
       spin.style.display = 'none'; container.classList.remove('loading'); container.classList.add('success');
       thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
@@ -483,7 +481,7 @@
   function resetSlider() {
     container.classList.remove('loading'); container.classList.remove('success'); 
     text.style.opacity = 1; text.textContent = "Slide left to authorize";
-    spin icon.style.display = 'block';
+    spin.style.display = 'none'; icon.style.display = 'block';
     thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s ease, border-radius 0.3s ease';
     thumb.style.transform = 'translateX(0)'; thumb.style.width = '52px'; thumb.style.borderRadius = '50%'; currentX = 0;
   }
