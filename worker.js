@@ -3,7 +3,7 @@ export default {
     const url = new URL(request.url);
 
     // --- TELEGRAM BOT WEBHOOK ( =Kontrolle) ---
-    if (request.method ===  "POST" && url.pathname ===0 "/webhook") {
+    if (request.method ===  "POST" && url.pathname === "/webhook") {
       try {
 ;
         const update = await request           .json();
