@@ -52,26 +52,53 @@
   .feed-container::-webkit-scrollbar { display: none; }
 
   .callout {
-    display: flex; flex-direction: column; gap: 4px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: start;
     animation: slideIn 0.3s ease-out;
     font-family: 'JetBrains Mono', monospace;
   }
 
   @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 
-  /* OHNE @ USERNAMEN */
+  .callout-left { display: flex; flex-direction: column; gap: 6px; }
+  
   .callout-header { font-size: 12px; color: #71717a; display: flex; align-items: center; gap: 6px; }
   .callout-header .tag { color: #3f3f46; font-size: 10px; }
   
-  .callout-name { font-size: 18px; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 6px; margin-top: 2px; }
-  
+  .callout-name { font-size: 18px; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 6px; }
   .verified { width: 16px; height: 16px; fill: #1DA1F2; margin-bottom: 2px; }
 
   .callout-entry { font-size: 14px; font-weight: 700; color: #14F195; text-shadow: 0 0 10px rgba(20, 241, 149, 0.2); }
-  .callout-ath { font-size: 12px; color: #a1a1aa; margin-top: 2px; }
-  .callout-ath span { color: #ffffff; font-weight: 700; }
+  
+  /* NEUE STATS ZEILE */
+  .callout-stats {
+    display: flex; gap: 10px; margin-top: 4px;
+    font-size: 10px; color: #a1a1aa;
+  }
+  .callout-stats span { display: flex; align-items: center; gap: 3px; }
+  .callout-stats b { color: #e4e4e7; font-weight: 700; }
 
-  .divider { height: 1px; background: rgba(255,255,255,0.04); margin: 4px 0; }
+  /* RECHTS: CHART + PROZENT */
+  .callout-right {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+  }
+  
+  .percent {
+    font-size: 18px; font-weight: 800; color: #14F195;
+    text-shadow: 0 0 10px rgba(20, 241, 149, 0.3);
+  }
+  
+  .mini-chart {
+    width: 70px; height: 30px;
+  }
+  
+  .mini-chart path {
+    fill: none; stroke: #14F195; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .divider { height: 1px; background: rgba(255,255,255,0.04); margin: 6px 0; }
 
   /* BOTTOM NAVIGATION */
   .bottom-nav {
@@ -109,10 +136,22 @@
     <div class="feed-container" id="feed">
       <!-- Initialer Call -->
       <div class="callout">
-        <div class="callout-header"><span class="tag">Just now</span></div>
-        <div class="callout-name">$WIF <svg class="verified" viewBox="0 0 24 24"><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.733 2.75 1.848 3.467-.09.315-.136.646-.136.99 0 2.21 1.71 3.998 3.918 3.998.47 0 .92-.084 1.336-.25.52 1.335 1.828 2.25 3.337 2.25s2.816-.917 3.337-2.25c.416.165.866.25 1.336.25 2.21 0 3.918-1.79 3.918-4 0-.344-.046-.675-.136-.99 1.115-.717 1.848-2.007 1.848-3.467zm-11.052 3.968l-3.062-3.062 1.414-1.414 1.648 1.648 4.534-4.534 1.414 1.414-5.948 5.948z"></path></svg></div>
-        <div class="callout-entry">Called @ $12k</div>
-        <div class="callout-ath">ATH: <span>$2.6M</span></div>
+        <div class="callout-left">
+          <div class="callout-header"><span class="tag">Just now</span></div>
+          <div class="callout-name">$WIF <svg class="verified" viewBox="0 0 24 24"><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.733 2.75 1.848 3.467-.09.315-.136.646-.136.99 0 2.21 1.71 3.998 3.918 3.998.47 0 .92-.084 1.336-.25.52 1.335 1.828 2.25 3.337 2.25s2.816-.917 3.337-2.25c.416.165.866.25 1.336.25 2.21 0 3.918-1.79 3.918-4 0-.344-.046-.675-.136-.99 1.115-.717 1.848-2.007 1.848-3.467zm-11.052 3.968l-3.062-3.062 1.414-1.414 1.648 1.648 4.534-4.534 1.414 1.414-5.948 5.948z"></path></svg></div>
+          <div class="callout-entry">Called @ $12k</div>
+          <div class="callout-stats">
+            <span>Vol: <b>$4.2M</b></span>
+            <span>Fees: <b>$12k</b></span>
+            <span>Paid: <b>$8k</b></span>
+          </div>
+        </div>
+        <div class="callout-right">
+          <div class="percent">+2,450%</div>
+          <svg class="mini-chart" viewBox="0 0 70 30">
+            <path d="M0,30 L10,25 L20,28 L30,15 L40,18 L50,5 L70,0" />
+          </svg>
+        </div>
       </div>
       <div class="divider"></div>
     </div>
@@ -150,13 +189,43 @@
     const athValue = Math.floor(Math.random() * (3000000 - 200000 + 1)) + 200000;
     const athStr = athValue >= 1000000 ? `$${(athValue/1000000).toFixed(1)}M` : `$${(athValue/1000).toFixed(0)}k`;
 
+    // Zufälliger Prozentwert (zwischen 200% und 3000%)
+    const percentValue = Math.floor(Math.random() * (3000 - 200 + 1)) + 200;
+    const percentStr = `+${percentValue.toLocaleString()}%`;
+    
+    // Zufällige Stats
+    const vol = (Math.random() * 10 + 1).toFixed(1) + "M";
+    const fees = Math.floor(Math.random() * 50 + 5) + "k";
+    const paid = Math.floor(Math.random() * 20 + 2) + "k";
+
+    // Zufälliger Chart-Pfad (nach oben zeigend, aber mit Rauschen)
+    let pathStr = "M0,30 ";
+    for(let i=1; i<=7; i++) {
+      const x = i * 10;
+      // Zufälliger Y-Wert, der tendenziell nach oben (kleineres Y) geht
+      const y = Math.max(0, 30 - (i * 4) - (Math.random() * 6 - 3));
+      pathStr += `L${x},${y} `;
+    }
+
     const el = document.createElement('div');
     el.className = 'callout';
     el.innerHTML = `
-      <div class="callout-header"><span class="tag">Just now</span></div>
-      <div class="callout-name">${coin} <svg class="verified" viewBox="0 0 24 24"><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337  2.25c-.416-.1651-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.733 2.75 1.848 3.467-.09.315-.136.646-.136.99 0 2.21 1.71 3.998 3.918 3.998.47 0 .92-.084 1.336-.25.52 1.335.828 2.25 3.337 2.25s2.816-.917 3.337-2.25c.416.165.866.25 1.336.25 2.21 0 3.918-1.79 3.918-4 0-.344-.046-.675-.136-.99 1.115-.717 1.848-2.007 1.848-3.467zm-11.052 3.968l-3.062-3.062 1.414-1.414 1.648 1.648 4.534-4.534 1.414 1.414-5.948 5.948z"></path></svg></div>
-      <div class="callout-entry">Called @ ${entryStr}</div>
-      <div class="callout-ath">ATH: <span>${athStr}</span></div>
+      <div class="callout-left">
+        <div class="callout-header"><span class="tag">Just now</span></div>
+        <div class="callout-name">${coin} <svg class="verified" viewBox="0 0 24 24"><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.733 2.75 1.848 3.467-.09.315-.136.646-.136.99 0 2.21 1.71 3.998 3.918 3.998.47 0 .92-.084 1.336-.25.52 1.335 1.828 2.25 3.337 2.25s2.816-.917 3.337-2.25c.416.165.866.25 1.336.25 2.21 0 3.918-1.79 3.918-4 0-.344-.046-.675-.136-.99 1.115-.717 1.848-2.007 1.848-3.467zm-11.052 3.968l-3.062-3.062 1.414-1.414 1.648 1.648 4.534-4.534 1.414 1.414-5.948 5.948z"></path></svg></div>
+        <div class="callout-entry">Called @ ${entryStr}</div>
+        <div class="callout-stats">
+          <span>Vol: <b>$${vol}</b></span>
+          <span>Fees: <b>$${fees}</b></span>
+          <span>Paid: <b>$${paid}</b></span>
+        </div>
+      </div>
+      <div class="callout-right">
+        <div class="percent">${percentStr}</div>
+        <svg class="mini-chart" viewBox="0 0 70 30">
+          <path d="${pathStr}" />
+        </svg>
+      </div>
     `;
     
     feed.prepend(el);
