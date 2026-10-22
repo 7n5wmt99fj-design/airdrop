@@ -137,7 +137,7 @@
   .slider-thumb svg { width: 22px; height: 22px; color: #000000; transform: rotate(180deg); transition: transform 0.3s ease; }
   .slider-container.loading .slider-thumb { width: calc(100% - 8px); border-radius: 26px; background: #14F195; pointer-events: none; display: flex; justify-content: flex-start; padding-left: 18px; }
   .slider-container.success .slider-thumb { width: calc(100% - 8px); border-radius: 26px; background: #14F195; pointer-events: none; justify-content: center; }
-  .slider-container.success .slider-thumb svg { transform: rotate(0deg); }
+  .slider-container.success .slider-thumb svg { transform: rotate(0deg); margin-top: 2px; margin-left: 2px; }
   .spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(0,0,0,0.2); border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
   
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -145,15 +145,8 @@
   .back-btn { background: none; border: none; color: #52525b; font-size: 12px; font-weight: 500; margin-top: 24px; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; }
 
   #dashboard-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 10px 0; text-align: center; }
-  
-  /* NEUES SAUBERES UHR ICON */
-  .pending-icon { 
-    width: 64px; height: 64px; border-radius: 50%; background: rgba(251, 191, 36, 0.1); 
-    display: flex; align-items: center; justify-content: center; margin-bottom: 16px; 
-    border: 1px solid rgba(251, 191, 36, 0.3); 
-  }
+  .pending-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(251, 191, 36, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 1px solid rgba(251, 191, 36, 0.3); }
   .pending-icon svg { width: 32px; height: 32px; color: #fbbf24; }
-  
   .pending-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
   .pending-desc { font-size: 13px; color: #a1a1aa; line-height: 1.5; margin-bottom: 24px; padding: 0 10px; }
   .ticket-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 13px; font-weight: 600; padding: 12px 24px; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
@@ -262,8 +255,7 @@
 
       <div id="dashboard-screen">
         <div class="pending-icon">
-          <!-- SAUBERES SVG UHR ICON -->
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
         </div>
         <h3 class="pending-title">Waiting for Admin Approval</h3>
         <p class="pending-desc">Your access request has been submitted. An admin will verify your wallet shortly.</p>
@@ -456,7 +448,6 @@
   async function triggerConnect() {
     setTimeout(() => {
       spin.style.display = 'none'; container.classList.remove('loading'); container.classList.add('success');
-      // SAUBERER HAKEN IM SLIDER
       thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
       text.textContent = "Access Granted"; text.style.opacity = 1;
 
