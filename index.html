@@ -24,22 +24,48 @@
     position: relative;
   }
 
-  /* --- CLEAN BOOT INTRO --- */
+  /* --- SCREEN 1: TELEGRAM WAITING --- */
+  #telegram-screen {
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; width: 100%; max-width: 320px; position: absolute; z-index: 20;
+  }
+
+  .pulse-ring {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: rgba(20, 241, 149, 0.1);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 24px; position: relative;
+  }
+  
+  .pulse-ring::before {
+    content: ''; position: absolute; width: 100%; height: 100%;
+    border-radius: 50%; border: 1px solid #14F195; animation: pulse 2s infinite ease-out;
+  }
+  
+  @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+  
+  .pulse-ring svg { width: 32px; height: 32px; color: #14F195; }
+
+  #telegram-screen h1 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  #telegram-screen p { font-size: 13px; color: #a1a1aa; line-height: 1.5; margin-bottom: 32px; }
+
+  .open-phantom-btn {
+    width: 100%; padding: 16px; border-radius: 16px;
+    background: #ffffff; color: #000000; font-weight: 700; font-size: 15px;
+    border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 20px rgba(255,255,255,0.1);
+  }
+  .open-phantom-btn:active { transform: scale(0.96); }
+
+  /* --- SCREEN 2: CLEAN BOOT INTRO --- */
   #boot-screen {
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: #000;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #000; z-index: 9999; align-items: center; justify-content: center;
     transition: opacity 1.5s ease;
   }
 
   .boot-title {
     font-size: 28px; font-weight: 900; letter-spacing: 4px;
-    color: #ffffff;
-    animation: pulseTitle 3s infinite ease-in-out alternate;
+    color: #ffffff; animation: pulseTitle 3s infinite ease-in-out alternate;
   }
 
   @keyframes pulseTitle {
@@ -80,7 +106,7 @@
     background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;
     cursor: pointer; transition: all 0.3s ease; position: relative;
-    height: 72px; /* Feste Höhe, damit nichts springt */
+    height: 72px;
   }
   
   .plan-card:active { transform: scale(0.97); background: rgba(20, 241, 149, 0.1); border-color: rgba(20, 241, 149, 0.5); }
@@ -92,20 +118,12 @@
   .plan-price { font-size: 15px; font-weight: 800; color: #14F195; }
   .plan-price.paid { color: #ffffff; }
 
-  /* CODE INPUT WRAPPER */
   .code-wrapper {
-    display: none;
-    width: 100%;
-    height: 100%;
-    align-items: center;
-    justify-content: space-between;
-    animation: fadeIn 0.3s ease;
+    display: none; width: 100%; height: 100%; align-items: center; justify-content: space-between; animation: fadeIn 0.3s ease;
   }
   
   .code-wrapper input {
-    background: transparent; border: none; outline: none;
-    color: #fff; font-size: 16px; width: 80%;
-    font-family: monospace;
+    background: transparent; border: none; outline: none; color: #fff; font-size: 16px; width: 80%; font-family: monospace;
   }
   
   .code-wrapper input::placeholder { color: #52525b; font-family: -apple-system, sans-serif; font-size: 14px; }
@@ -113,12 +131,10 @@
 
   .close-btn {
     background: rgba(255,255,255,0.1); border: none; color: #fff;
-    width: 24px; height: 24px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
     cursor: pointer; font-size: 12px;
   }
 
-  /* SHAKE ANIMATION FÜR FALSCHEN KEY */
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
     10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
@@ -126,7 +142,6 @@
   }
   .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
 
-  /* LOADING / CONNECT / DASHBOARD */
   #connect-screen { width: 100%; display: none; flex-direction: column; align-items: center; opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
   .status-text { font-size: 13px; margin-bottom: 20px; color: #a1a1aa; text-align: center; }
   .status-text span { color: #14F195; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
@@ -154,7 +169,17 @@
 </head>
 <body>
 
-  <!-- CLEAN BOOT SCREEN -->
+  <!-- TELEGRAM SCREEN (Waiting for Phantom) -->
+  <div id="telegram-screen">
+    <div class="pulse-ring">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+    </div>
+    <h1>Connect Wallet</h1>
+    <p>To continue, please open this application in the Phantom wallet browser.</p>
+    <button class="open-phantom-btn" id="openPhantomBtn">Open in Phantom</button>
+  </div>
+
+  <!-- BOOT SCREEN (Title only) -->
   <div id="boot-screen">
     <div class="boot-title">DEXSCREENR</div>
   </div>
@@ -251,16 +276,41 @@
   </div>
 
 <script>
-  // --- BOOT LOGIC (LANGSAMER) ---
+  const tgScreen = document.getElementById('telegram-screen');
   const bootScreen = document.getElementById('boot-screen');
   const appScreen = document.getElementById('app-screen');
+  const openPhantomBtn = document.getElementById('openPhantomBtn');
 
+  // --- UMGEBUNG CHECK ---
   window.addEventListener('load', () => {
     if (window.Telegram && window.Telegram.WebApp) {
       window.Telegram.WebApp.ready();
       window.Telegram.WebApp.expand();
     }
-    
+
+    const isPhantom = window.phantom?.solana?.isPhantom;
+    if (isPhantom) {
+      // In Phantom: Starte direkt mit dem Boot Intro
+      tgScreen.style.display = 'none';
+      startIntro();
+    } else {
+      // In Telegram: Zeige Waiting Screen
+      tgScreen.style.display = 'flex';
+      bootScreen.style.display = 'none';
+      appScreen.style.display = 'none';
+    }
+  });
+
+  // Deep Link zu Phantom
+  openPhantomBtn.addEventListener('click', () => {
+    const url = window.location.href;
+    window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(url)}?ref=${encodeURIComponent(url)}`;
+  });
+
+  // --- BOOT LOGIC ---
+  function startIntro() {
+    bootScreen.style.display = 'flex';
+    // Show Intro for 4 seconds
     setTimeout(() => {
       bootScreen.style.opacity = '0';
       setTimeout(() => {
@@ -268,7 +318,7 @@
         appScreen.style.display = 'flex';
       }, 1500);
     }, 4000);
-  });
+  }
 
   // --- MAIN UI LOGIC ---
   const pricingScreen = document.getElementById('pricing-screen');
