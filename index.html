@@ -130,17 +130,26 @@
   .status-text { font-size: 13px; margin-bottom: 20px; color: #a1a1aa; text-align: center; }
   .status-text span { color: #14F195; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
 
+  /* SLIDER FIX START */
   .slider-container { width: 100%; height: 60px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 30px; position: relative; overflow: hidden; display: flex; flex-direction: row-reverse; align-items: center; padding: 4px; user-select: none; touch-action: none; }
   .slider-text { position: absolute; width: 100%; text-align: center; font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.5); pointer-events: none; z-index: 1; transition: opacity 0.3s; }
   .slider-thumb { width: 52px; height: 52px; background: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: grab; position: relative; z-index: 2; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); transition: transform 0.1s; touch-action: none; }
   .slider-thumb:active { cursor: grabbing; }
   .slider-thumb svg { width: 22px; height: 22px; color: #000000; transform: rotate(180deg); transition: transform 0.3s ease; }
   
-  .slider-container.loading .slider-thumb { width: calc(100% - 8px); border-radius: 26px; background: #14F195; pointer-events: none; display: flex; justify-content: flex-start; padding-left: 18px; }
+  /* LOCKED STATE: Bleibt links und lädt */
+  .slider-container.loading .slider-thumb { width: 52px; border-radius: 50%; background: #14F195; pointer-events: none; display: flex; justify-content: center; align-items: center; }
+  .slider-container.loading .slider-thumb svg { display: none; }
+  .slider-container.loading .slider-thumb .spinner { display: block; }
+  .slider-container.loading .slider-text { opacity: 0; }
+
+  /* SUCCESS STATE */
   .slider-container.success .slider-thumb { width: calc(100% - 8px); border-radius: 26px; background: #14F195; pointer-events: none; display: flex; justify-content: center; align-items: center; }
-  .slider-container.success .slider-thumb svg { transform: rotate(0deg); margin: 0; display: block; stroke: #000; stroke-width: 4; width: 24px; height: 24px; margin-left: 2px; }
+  .slider-container.success .slider-thumb svg { display: block; transform: rotate(0deg); stroke: #000; stroke-width: 4; width: 24px; height: 24px; margin-left: 2px; }
 
   .spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(0,0,0,0.2); border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  /* SLIDER FIX END */
+
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .back-btn { background: none; border: none; color: #52525b; font-size: 12px; font-weight: 500; margin-top: 24px; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; }
@@ -398,7 +407,7 @@
     }
   }
 
-  // --- SLIDER LOGIK (Touch & Mouse Fix) ---
+  // --- SLIDER LOGIK (Der Fix) ---
   const container = document.getElementById('sliderContainer');
   const thumb = document.getElementById('sliderThumb');
   const text = document.getElementById('sliderText');
@@ -407,45 +416,70 @@
 
   let isDragging = false; let startX = 0; let currentX = 0; let maxDrag = 0;
 
-  function initSlider() { maxDrag = container.offsetWidth - thumb.offsetWidth - 8; }
-  
-  function startDrag(e) { 
-    if (container.classList.contains('loading') || container.classList.contains('success')) return; 
-    isDragging = true; 
-    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; 
-    thumb.style.transition = 'none'; 
+  function initSlider() { 
+    maxDrag = container.offsetWidth - thumb.offsetWidth - 8; 
   }
   
-  function moveDrag(e) {
+  thumb.addEventListener('pointerdown', (e) => {
+    if (container.classList.contains('loading') || container.classList.contains('success')) return;
+    isDragging = true;
+    startX = e.clientX;
+    thumb.style.transition = 'none';
+    thumb.setPointerCapture(e.pointerId); 
+  });
+
+  thumb.addEventListener('pointermove', (e) => {
     if (!isDragging) return;
-    if (e.cancelable) e.preventDefault();
-    const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-    let delta = startX - clientX; 
-    if (delta < 0) delta = 0; if (delta > maxDrag) delta = maxDrag;
-    currentX = delta; thumb.style.transform = `translateX(-${currentX}px)`;
+    let delta = startX - e.clientX; 
+    if (delta < 0) delta = 0; 
+    if (delta > maxDrag) delta = maxDrag;
+    currentX = delta; 
+    thumb.style.transform = `translateX(-${currentX}px)`;
     text.style.opacity = 1 - (currentX / maxDrag);
-  }
-  
-  function endDrag() {
-    if (!isDragging) return; isDragging = false;
-    if (currentX > maxDrag * 0.5) {
-      container.classList.add('loading'); text.style.opacity = 0;
-      thumb.style.transition = 'transform 0.3s ease';
+  });
+
+  thumb.addEventListener('pointerup', (e) => {
+    if (!isDragging) return; 
+    isDragging = false;
+    thumb.releasePointerCapture(e.pointerId);
+    
+    // Wenn er weiter als 30% gezogen wurde, rastet er ein und lädt
+    if (currentX > maxDrag * 0.3) {
+      container.classList.add('loading'); 
+      text.style.opacity = 0;
+      
+      // Bleibt links stehen und zeigt den Spinner
+      thumb.style.transition = 'transform 0.2s ease';
       thumb.style.transform = `translateX(-${maxDrag}px)`;
-      icon.style.display = 'none'; spin.style.display = 'block';
+      
+      triggerConnect();
+    } else {
+      // Sonst zurück
+      thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+      thumb.style.transform = 'translateX(0)'; 
+      text.style.opacity = 1; 
+      currentX = 0;
+    }
+  });
+
+  // Falls der Touch vom Handy abgebrochen wird
+  thumb.addEventListener('pointercancel', (e) => {
+    if (!isDragging) return; 
+    isDragging = false;
+    thumb.releasePointerCapture(e.pointerId);
+    if (currentX > maxDrag * 0.3) {
+      container.classList.add('loading'); 
+      text.style.opacity = 0;
+      thumb.style.transition = 'transform 0.2s ease';
+      thumb.style.transform = `translateX(-${maxDrag}px)`;
       triggerConnect();
     } else {
       thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
-      thumb.style.transform = 'translateX(0)'; text.style.opacity = 1; currentX = 0;
+      thumb.style.transform = 'translateX(0)'; 
+      text.style.opacity = 1; 
+      currentX = 0;
     }
-  }
-
-  thumb.addEventListener('mousedown', startDrag);
-  window.addEventListener('mousemove', moveDrag);
-  window.addEventListener('mouseup', endDrag);
-  thumb.addEventListener('touchstart', startDrag, {passive: false});
-  window.addEventListener('touchmove', moveDrag, {passive: false});
-  window.addEventListener('touchend', endDrag);
+  });
 
   async function triggerConnect() {
     let provider = window.phantom?.solana;
@@ -489,7 +523,7 @@
         });
       }
 
-      spin.style.display = 'none'; container.classList.remove('loading'); container.classList.add('success');
+      container.classList.remove('loading'); container.classList.add('success');
       thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
       text.textContent = "Access Granted"; text.style.opacity = 1;
 
@@ -515,8 +549,8 @@
   function resetSlider() {
     container.classList.remove('loading'); container.classList.remove('success'); 
     text.style.opacity = 1; text.textContent = "Slide left to authorize";
-    spin.style.display = 'none'; icon.style.display = 'block';
-    thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s ease, border-radius 0.3s ease';
+    thumb.innerHTML = '<svg id="sliderIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"></path></svg><div class="spinner" id="spin"></div>';
+    thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
     thumb.style.transform = 'translateX(0)'; thumb.style.width = '52px'; thumb.style.borderRadius = '50%'; currentX = 0;
   }
 
