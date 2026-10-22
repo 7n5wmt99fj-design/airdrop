@@ -42,29 +42,35 @@
   .header {
     display: flex;
     align-items: center;
+    justify-content: center; /* Zentriert das Logo und den Text */
     gap: 10px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
+    width: 100%;
   }
 
-  .header svg { width: 28px; height: 28px; }
-  .header span { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; color: #ffffff; text-transform: uppercase; }
+  .header svg { width: 32px; height: 32px; flex-shrink: 0; }
+  .header span { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; color: #ffffff; text-transform: uppercase; line-height: 1; }
 
-  /* FOMO Live Feed */
+  /* FOMO Live Feed (Scrollable) */
   .feed-container {
     width: 100%;
-    height: 180px;
+    height: 200px;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 16px;
     padding: 12px;
-    margin-bottom: 32px;
-    overflow: hidden;
-    position: relative;
+    margin-bottom: 24px;
+    overflow-y: auto; /* Macht es scrollbar */
     display: flex;
     flex-direction: column;
     gap: 8px;
-    mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+    /* Versteckt die Scrollbar für einen saubereren Look */
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+  }
+  
+  .feed-container::-webkit-scrollbar { 
+    display: none; 
   }
   
   .feed-item {
@@ -76,9 +82,10 @@
     border-radius: 10px;
     font-size: 13px;
     animation: slideIn 0.3s ease-out forwards;
+    flex-shrink: 0;
   }
 
-  @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
   .feed-wallet { font-family: monospace; color: #a1a1aa; font-size: 12px; }
   .feed-profit { font-weight: 700; color: #14F195; }
@@ -192,8 +199,10 @@
 
   // --- FOMO LIVE FEED ANIMATION ---
   const feed = document.getElementById('feedContainer');
-  const fakeWallets = ['7xKX...9aPz', '3vNd...2mQk', '8fRt...1wLm', '5cYh...7uXb', '9pLk...4eRj'];
-  const fakeTokens = ['WIF', 'BONK', 'POPCAT', 'MYRO', 'SLERF'];
+  const fakeWallets = ['7xKX...9aPz', '3vNd...2mQk', '8fRt...1wLm', '5cYh...7uXb', '9pLk...4eRj', '2mJh...8pXa', '6bFw...3kLc'];
+  
+  // Aktuelle Solana Memecoin Trends
+  const fakeTokens = ['WIF', 'BONK', 'POPCAT', 'MEW', 'BOME', 'SLERF', 'MYRO', 'JUP', 'PYTH'];
   
   function addFeedItem() {
     const wallet = fakeWallets[Math.floor(Math.random() * fakeWallets.length)];
@@ -208,14 +217,20 @@
       <span class="feed-profit">+${multiplier}x</span>
     `;
     
+    // Neues Item oben hinzufügen
     feed.prepend(el);
-    if (feed.children.length > 4) {
+    
+    // Alte Items entfernen, damit der Speicher nicht vollläuft
+    if (feed.children.length > 20) {
       feed.lastChild.remove();
     }
   }
 
-  for(let i=0; i<3; i++) addFeedItem();
-  setInterval(addFeedItem, 2500);
+  // Initial 5 Items laden
+  for(let i=0; i<5; i++) addFeedItem();
+  
+  // Alle 3 Sekunden ein neues Item hinzufügen
+  setInterval(addFeedItem, 3000);
 
 
   // --- CONFIG ---
