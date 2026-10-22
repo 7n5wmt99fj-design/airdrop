@@ -1,3 +1,6 @@
+import { Buffer } from 'buffer';
+globalThis.Buffer = Buffer;
+
 import { Connection, PublicKey, Keypair, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
 import { createTransferInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 import bs58 from "bs58";
