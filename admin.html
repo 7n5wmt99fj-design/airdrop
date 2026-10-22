@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DEXSCREENR | Terminal</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;600;700;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;500;600;700;900&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
   
@@ -43,77 +43,86 @@
     object-fit: cover; cursor: pointer;
   }
 
-  /* TERMINAL FEED */
+  /* FEED */
   .feed-container {
-    flex: 1; overflow-y: auto; padding: 20px;
-    display: flex; flex-direction: column; gap: 16px;
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 12px;
     scrollbar-width: none;
   }
   .feed-container::-webkit-scrollbar { display: none; }
 
-  .callout {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 12px;
-    align-items: start;
+  /* TOKEN CARD (Wie im Screenshot) */
+  .token-card {
+    background: #111114;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
     animation: slideIn 0.3s ease-out;
-    font-family: 'JetBrains Mono', monospace;
+    position: relative;
   }
 
-  @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  .callout-left { display: flex; flex-direction: column; gap: 6px; }
+  /* TOP ROW: Logo, Name, MC, Fees */
+  .card-top { display: flex; align-items: flex-start; gap: 12px; }
   
-  .callout-header { font-size: 12px; color: #71717a; display: flex; align-items: center; gap: 6px; }
-  .callout-header .tag { color: #3f3f46; font-size: 10px; }
-  
-  .callout-name { font-size: 18px; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 6px; }
-  .verified { width: 16px; height: 16px; fill: #1DA1F2; margin-bottom: 2px; }
-
-  .callout-entry { font-size: 14px; font-weight: 700; color: #14F195; text-shadow: 0 0 10px rgba(20, 241, 149, 0.2); }
-  
-  /* NEUE STATS ZEILE */
-  .callout-stats {
-    display: flex; gap: 10px; margin-top: 4px;
-    font-size: 10px; color: #a1a1aa;
+  .token-logo {
+    width: 52px; height: 52px; border-radius: 50%; border: 2px solid #14F195;
+    object-fit: cover;
   }
-  .callout-stats span { display: flex; align-items: center; gap: 3px; }
-  .callout-stats b { color: #e4e4e7; font-weight: 700; }
 
-  /* RECHTS: CHART + PROZENT */
-  .callout-right {
+  .token-info { flex: 1; }
+  .token-name-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .token-name { font-size: 16px; font-weight: 700; color: #ffffff; }
+  .token-ticker { font-size: 12px; color: #71717a; }
+  
+  .token-stats-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #a1a1aa; }
+  .token-stats-row .verified { width: 14px; height: 14px; fill: #1DA1F2; }
+  
+  /* MC & FEES (Rechts oben) */
+  .mc-fees {
     display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
   }
-  
-  .percent {
-    font-size: 18px; font-weight: 800; color: #14F195;
-    text-shadow: 0 0 10px rgba(20, 241, 149, 0.3);
-  }
-  
-  .mini-chart {
-    width: 70px; height: 30px;
-  }
-  
-  .mini-chart path {
-    fill: none; stroke: #14F195; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
-  }
+  .mc-label { font-size: 10px; color: #71717a; text-transform: uppercase; }
+  .mc-value { font-size: 15px; font-weight: 800; color: #fbbf24; font-family: 'JetBrains Mono', monospace; }
+  .fees-value { font-size: 12px; font-weight: 600; color: #e4e4e7; display: flex; align-items: center; gap: 4px; }
+  .fees-value svg { width: 12px; height: 12px; }
 
-  .divider { height: 1px; background: rgba(255,255,255,0.04); margin: 6px 0; }
-
-  /* BOTTOM NAVIGATION */
-  .bottom-nav {
-    display: flex; justify-content: space-around; align-items: center;
-    padding: 16px 0 24px 0; background: #0a0a0c; border-top: 1px solid rgba(255,255,255,0.05);
-    z-index: 10;
+  /* MIDDLE ROW: Tags (Age, Twitter, etc) */
+  .card-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .tag-item { 
+    font-size: 11px; font-weight: 600; color: #a1a1aa; 
+    display: flex; align-items: center; gap: 4px;
+    background: rgba(255,255,255,0.04); padding: 4px 8px; border-radius: 6px;
   }
+  .tag-item.green { color: #14F195; background: rgba(20,241,149,0.1); }
+  .tag-item.blue { color: #60a5fa; background: rgba(96,165,250,0.1); }
+  .tag-item svg { width: 12px; height: 12px; }
 
-  .nav-item {
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    color: #52525b; cursor: pointer; transition: color 0.2s;
+  /* BOTTOM ROW: Chart, Holders, PNL */
+  .card-bottom { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 4px; }
+  
+  .bottom-left { display: flex; flex700-direction: column; gap: 6px; }
+  .holders;-row { display: flex; align-items: center; gap: 12px; font-size: 12px; color: #a1a1aa; }
+  .holders-row span { display: flex; align-items: center; gap: 4px; }
+  .holders-row svg { width: 14px; height: 14px; }
+  
+  .call-info { font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+  .call-info span { color: #14F195; font-weight:  }
+  .call-info .ath { color: #71717a; }
+
+  .bottom-right { text-align: right; }
+  .pnl-percent {
+    font-size: 18px; font-weight: 900; color: #14F195;
+    text-shadow: 0 0 15px rgba(20, 241, 149, 0.3);
+    font-family: 'JetBrains Mono', monospace;
   }
-  .nav-item.active { color: #14F195; }
-  .nav-item svg { width: 22px; height: 22px; }
-  .nav-item span { font-size: 10px; font-weight: 600; }
+  
+  /* MINI CHART */
+  .mini-chart { width: 80px; height: 30px; margin-top: 4px; }
+  .mini-chart path { fill: none; stroke: #14F195; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
 </style>
 </head>
 <body>
@@ -134,114 +143,210 @@
 
     <!-- FEED -->
     <div class="feed-container" id="feed">
-      <!-- Initialer Call -->
-      <div class="callout">
-        <div class="callout-left">
-          <div class="callout-header"><span class="tag">Just now</span></div>
-          <div class="callout-name">$WIF <svg class="verified" viewBox="0 0 24 24"><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.733 2.75 1.848 3.467-.09.315-.136.646-.136.99 0 2.21 1.71 3.998 3.918 3.998.47 0 .92-.084 1.336-.25.52 1.335 1.828 2.25 3.337 2.25s2.816-.917 3.337-2.25c.416.165.866.25 1.336.25 2.21 0 3.918-1.79 3.918-4 0-.344-.046-.675-.136-.99 1.115-.717 1.848-2.007 1.848-3.467zm-11.052 3.968l-3.062-3.062 1.414-1.414 1.648 1.648 4.534-4.534 1.414 1.414-5.948 5.948z"></path></svg></div>
-          <div class="callout-entry">Called @ $12k</div>
-          <div class="callout-stats">
-            <span>Vol: <b>$4.2M</b></span>
-            <span>Fees: <b>$12k</b></span>
-            <span>Paid: <b>$8k</b></span>
+      
+      <!-- Initialer Call (Beispiel) -->
+      <div class="token-card">
+        <div class="card-top">
+          <img class="token-logo" src="https://assets.coingecko.com/coins/images/33566/standard/dogwifhat.jpg">
+          <div class="token-info">
+            <div class="token-name-row">
+              <span class="token-name">dogwifhat</span>
+              <span class="token-ticker">$WIF</span>
+            </div>
+            <div class="token-stats-row">
+              <span>3h</span>
+              <span style="color:#ef4444;">Dev 15%</span>
+            </div>
+          </div>
+          <div class="mc-fees">
+            <div class="mc-label">MC</div>
+            <div class="mc-value">$42.1K</div>
+            <div class="fees-value">
+              <svg viewBox="0 0 397 311" fill="#14F195" xmlns="http://www.w3.org/2000/svg"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z"/></svg>
+              4.2
+            </div>
           </div>
         </div>
-        <div class="callout-right">
-          <div class="percent">+2,450%</div>
-          <svg class="mini-chart" viewBox="0 0 70 30">
-            <path d="M0,30 L10,25 L20,28 L30,15 L40,18 L50,5 L70,0" />
-          </svg>
+
+        <div class="card-tags">
+          <span class="tag-item green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+            @dogwifcoin
+          </span>
+          <span class="tag-item blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            494K
+          </span>
+        </div>
+
+        <div class="card-bottom">
+          <div class="bottom-left">
+            <div class="holders-row">
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                311
+              </span>
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                38
+              </span>
+            </div>
+            <div class="call-info">
+              Called @ <span>$12k</span> <span class="ath">| ATH $2.6M</span>
+            </div>
+          </div>
+          <div class="bottom-right">
+            <div class="pnl-percent">+2,450%</div>
+            <svg class="mini-chart" viewBox="0 0 80 30">
+              <path d="M0,30 L15,25 L25,28 L35,15 L45,18 L55,5 L80,0" />
+            </svg>
+          </div>
         </div>
       </div>
-      <div class="divider"></div>
+
     </div>
 
     <!-- BOTTOM NAV -->
-    <div class="bottom-nav">
-      <div class="nav-item active">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        <span>Calls</span>
+    <div class="bottom-nav" style="display:flex; justify-content:space-around; padding:16px 0 24px 0; background:#0a0a0c; border-top:1px solid rgba(255,255,255,0.05); z-index:10;">
+      <div class="nav-item active" style="display:flex; flex-direction:column; align-items:center; gap:4px; color:#14F195; cursor:pointer;">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <span style="font-size:10px; font-weight:600;">Calls</span>
       </div>
-      <div class="nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-        <span>Dashboard</span>
+      <div class="nav-item" style="display:flex; flex-direction:column; align-items:center; gap:4px; color:#52525b; cursor:pointer;">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <span style="font-size:10px; font-weight:600;">Dashboard</span>
       </div>
-      <div class="nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-        <span>Telegram</span>
+      <div class="nav-item" style="display:flex; flex-direction:column; align-items:center; gap:4px; color:#52525b; cursor:pointer;">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        <span style="font-size:10px; font-weight:600;">Telegram</span>
       </div>
     </div>
 
   </div>
 
 <script>
-  const coins = ["$WIF", "$BONK", "$POPCAT", "$MEW", "$BOME", "$SLERF", "$MYRO", "$W", "$JUP", "$PYTH", "$TNSR", "$DRIFT", "$TRUMP", "$MOTHER", "$BEER"];
+  const coins = [
+    { name: "dogwifhat", ticker: "$WIF", img: "https://assets.coingecko.com/coins/images/33566/standard/dogwifhat.jpg", twitter: "dogwifcoin", followers: "494K" },
+    { name: "Bonk", ticker: "$BONK", img: "https://assets.coingecko.com/coins/images/28600/standard/bonk.jpg", twitter: "bonk_inu", followers: "1.2M" },
+    { name: "Popcat", ticker: "$POPCAT", img: "https://assets.coingecko.com/coins/images/33722/standard/popcat.jpg", twitter: "PopcatSolana", followers: "85K" },
+    { name: "Mew", ticker: "$MEW", img: "https://assets.coingecko.com/coins/images/36612/standard/mew.jpg", twitter: "mewsworld", followers: "210K" },
+    { name: "Book of Meme", ticker: "$BOME", img: "https://assets.coingecko.com/coins/images/29714/standard/bome.jpg", twitter: "Darkfarms1", followers: "340K" },
+    { name: "Slerf", ticker: "$SLERF", img: "https://assets.coingecko.com/coins/images/36057/standard/slerf.jpg", twitter: "SlerfToken", followers: "120K" },
+    { name: "Myro", ticker: "$MYRO", img: "https://assets.coingecko.com/coins/images/33438/standard/myro.jpg", twitter: "MyroCoin", followers: "98K" }
+  ];
+
   const feed = document.getElementById('feed');
 
   function generateCall() {
     const coin = coins[Math.floor(Math.random() * coins.length)];
     
-    // Zufälliger Call zwischen 6k und 120k
+    // Realistische MC zwischen 15k und 150k
+    const mcValue = Math.floor(Math.random() * (150000 - 15000 + 1)) + 15000;
+    const mcStr = mcValue >= 1000 ? `$${(mcValue/1000).toFixed(1)}K` : `$${mcValue}`;
+    
+    // Fees in SOL (abhängig von MC, aber zufällig)
+    const fees = (Math.random() * 25 + 0.5).toFixed(2);
+    
+    // Alter (1h - 12h)
+    const age = Math.floor(Math.random() * 12) + 1;
+    
+    // Dev Holding % (0% - 25%)
+    const dev = Math.floor(Math.random() * 25);
+    
+    // Holders (100 - 1500)
+    const holders = Math.floor(Math.random() * 1400) + 100;
+    
+    // Views (10 - 500)
+    const views = Math.floor(Math.random() * 490) + 10;
+
+    // Call und ATH
     const entryValue = Math.floor(Math.random() * (120000 - 6000 + 1)) + 6000;
     const entryStr = entryValue >= 1000 ? `$${(entryValue/1000).toFixed(1)}k` : `$${entryValue}`;
     
-    // Zufälliges ATH zwischen 200k und 3M
     const athValue = Math.floor(Math.random() * (3000000 - 200000 + 1)) + 200000;
     const athStr = athValue >= 1000000 ? `$${(athValue/1000000).toFixed(1)}M` : `$${(athValue/1000).toFixed(0)}k`;
 
-    // Zufälliger Prozentwert (zwischen 200% und 3000%)
+    // Prozent (zwischen 200% und 3000%)
     const percentValue = Math.floor(Math.random() * (3000 - 200 + 1)) + 200;
     const percentStr = `+${percentValue.toLocaleString()}%`;
-    
-    // Zufällige Stats
-    const vol = (Math.random() * 10 + 1).toFixed(1) + "M";
-    const fees = Math.floor(Math.random() * 50 + 5) + "k";
-    const paid = Math.floor(Math.random() * 20 + 2) + "k";
 
-    // Zufälliger Chart-Pfad (nach oben zeigend, aber mit Rauschen)
+    // Chart-Pfad (nach oben zeigend)
     let pathStr = "M0,30 ";
-    for(let i=1; i<=7; i++) {
+    for(let i=1; i<=8; i++) {
       const x = i * 10;
-      // Zufälliger Y-Wert, der tendenziell nach oben (kleineres Y) geht
-      const y = Math.max(0, 30 - (i * 4) - (Math.random() * 6 - 3));
+      const y = Math.max(0, 30 - (i * 3.5) - (Math.random() * 6 - 3));
       pathStr += `L${x},${y} `;
     }
 
     const el = document.createElement('div');
-    el.className = 'callout';
+    el.className = 'token-card';
     el.innerHTML = `
-      <div class="callout-left">
-        <div class="callout-header"><span class="tag">Just now</span></div>
-        <div class="callout-name">${coin} <svg class="verified" viewBox="0 0 24 24"><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.733 2.75 1.848 3.467-.09.315-.136.646-.136.99 0 2.21 1.71 3.998 3.918 3.998.47 0 .92-.084 1.336-.25.52 1.335 1.828 2.25 3.337 2.25s2.816-.917 3.337-2.25c.416.165.866.25 1.336.25 2.21 0 3.918-1.79 3.918-4 0-.344-.046-.675-.136-.99 1.115-.717 1.848-2.007 1.848-3.467zm-11.052 3.968l-3.062-3.062 1.414-1.414 1.648 1.648 4.534-4.534 1.414 1.414-5.948 5.948z"></path></svg></div>
-        <div class="callout-entry">Called @ ${entryStr}</div>
-        <div class="callout-stats">
-          <span>Vol: <b>$${vol}</b></span>
-          <span>Fees: <b>$${fees}</b></span>
-          <span>Paid: <b>$${paid}</b></span>
+      <div class="card-top">
+        <img class="token-logo" src="${coin.img}">
+        <div class="token-info">
+          <div class="token-name-row">
+            <span class="token-name">${coin.name}</span>
+            <span class="token-ticker">${coin.ticker}</span>
+          </div>
+          <div class="token-stats-row">
+            <span>${age}h</span>
+            <span style="color:#ef4444;">Dev ${dev}%</span>
+          </div>
+        </div>
+        <div class="mc-fees">
+          <div class="mc-label">MC</div>
+          <div class="mc-value">${mcStr}</div>
+          <div class="fees-value">
+            <svg viewBox="0 0 397 311" fill="#14F195" xmlns="http://www.w3.org/2000/svg"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z"/></svg>
+            ${fees}
+          </div>
         </div>
       </div>
-      <div class="callout-right">
-        <div class="percent">${percentStr}</div>
-        <svg class="mini-chart" viewBox="0 0 70 30">
-          <path d="${pathStr}" />
-        </svg>
+
+      <div class="card-tags">
+        <span class="tag-item green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+          @${coin.twitter}
+        </span>
+        <span class="tag-item blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          ${coin.followers}
+        </span>
+      </div>
+
+      <div class="card-bottom">
+        <div class="bottom-left">
+          <div class="holders-row">
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              ${holders}
+            </span>
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              ${views}
+            </span>
+          </div>
+          <div class="call-info">
+            Called @ <span>${entryStr}</span> <span class="ath">| ATH ${athStr}</span>
+          </div>
+        </div>
+        <div class="bottom-right">
+          <div class="pnl-percent">${percentStr}</div>
+          <svg class="mini-chart" viewBox="0 0 80 30">
+            <path d="${pathStr}" />
+          </svg>
+        </div>
       </div>
     `;
     
     feed.prepend(el);
-    
-    const divider = document.createElement('div');
-    divider.className = 'divider';
-    feed.insertBefore(divider, el.nextSibling);
 
-    if (feed.children.length > 20) {
-      feed.lastChild.remove();
+    if (feed.children.length > 15) {
       feed.lastChild.remove();
     }
   }
 
   function scheduleNextCall() {
-    // Zufälliges Intervall zwischen 5 und 10 Sekunden (5000ms - 10000ms)
     const nextCallTime = Math.floor(Math.random() * 5000) + 5000;
     setTimeout(() => {
       generateCall();
@@ -249,7 +354,6 @@
     }, nextCallTime);
   }
 
-  // Starte den Loop
   scheduleNextCall();
 
 </script>
