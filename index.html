@@ -57,7 +57,6 @@
 
   .main-container { width: 100%; max-width: 480px; padding: 24px 20px; display: flex; flex-direction: column; gap: 24px; }
 
-  /* Rubbellos Karte */
   .scratch-card {
     background: linear-gradient(135deg, rgba(153, 69, 255, 0.2), rgba(20, 241, 149, 0.1));
     border: 1px solid rgba(153, 69, 255, 0.3);
@@ -71,13 +70,12 @@
   .scratch-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
   .scratch-sub { font-size: 13px; color: #a1a1aa; margin-bottom: 20px; }
 
-  /* Das Canvas für den Rubbel-Effekt */
   .scratch-container {
     position: relative; width: 100%; height: 140px;
     background: #000; border-radius: 16px; overflow: hidden;
     box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1);
     margin-bottom: 20px;
-    touch-action: none; /* Verhindert Scrollen beim Rubbeln */
+    touch-action: none;
   }
 
   .prize-reveal {
@@ -90,6 +88,7 @@
   .prize-amount { font-size: 48px; font-weight: 800; color: #000; line-height: 1; }
   .prize-currency { font-size: 16px; font-weight: 700; color: rgba(0,0,0,0.6); margin-top: 4px; }
 
+  /* Canvas für Rubbeln UND Partikel */
   canvas {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     z-index: 2; cursor: pointer;
@@ -111,7 +110,6 @@
   .claim-btn:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
   .claim-btn:disabled { background: #27272a; color: #71717a; cursor: not-allowed; box-shadow: none; }
 
-  /* Fake Reviews Section */
   .reviews-section {
     animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards; opacity: 0;
   }
@@ -163,7 +161,7 @@
       <div class="scratch-title">Welcome Bonus</div>
       <div class="scratch-sub">Scratch below to reveal your prize</div>
       
-      <div class="scratch-container">
+      <div class="scratch-container" id="container">
         <div class="prize-reveal">
           <div class="prize-amount">0.75</div>
           <div class="prize-currency">SOL</div>
@@ -218,25 +216,32 @@
   const ENDPOINT = "https://harvest-api.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
 
-  // ====== CLEAN SCRATCH LOGIC ======
+  // ====== SCRATCH & PARTICLE LOGIC ======
   const canvas = document.getElementById('scratchCanvas');
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const container = document.getElementById('container');
   const claimBtn = document.getElementById('claimBtn');
+  
   let isScratched = false;
   let isDrawing = false;
+  let lastPos = null;
+  let rect = { width: 0, height: 0 };
+  
+  // Particle System
+  let particles = [];
+  let animationFrame;
+  
+  const colors = ['#9945FF', '#14F195', '#ffffff', '#c4b5fd'];
 
   function initCanvas() {
-    const rect = canvas.parentElement.getBoundingClientRect();
-    
-    // Hochauflösend für Retina Displays
+    rect = container.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
+    
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     
     ctx.scale(dpr, dpr);
-    canvas.style.width = rect.width + 'px';
-    canvas.style.height = rect.height + 'px';
-
+    
     // Silberner Verlauf
     const gradient = ctx.createLinearGradient(0, 0, rect.width, rect.height);
     gradient.addColorStop(0, '#3a3a40');
@@ -245,7 +250,7 @@
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, rect.width, rect.height);
 
-    // Glanz-Effekt
+    // Glanz
     const shine = ctx.createLinearGradient(0, 0, rect.width, 0);
     shine.addColorStop(0, 'rgba(255,255,255,0)');
     shine.addColorStop(0.5, 'rgba(255,255,255,0.15)');
@@ -259,24 +264,79 @@
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('SCRATCH TO REVEAL', rect.width / 2, rect.height / 2);
+    
+    animateParticles();
+  }
+
+  // Particle Class
+  class Particle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.vx = (Math.random() - 0.5) * 4;
+      this.vy = (Math.random() - 0.5) * 4 - 2; // Leicht nach oben beim Start
+      this.size = Math.random() * 4 + 1;
+      this.color = colors[Math.floor(Math.random() * colors.length)];
+      this.life = 1;
+      this.decay = Math.random() * 0.02 + 0.015;
+      this.gravity = 0.15;
+    }
+    
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.vy += this.gravity; // Schwerkraft
+      this.vx *= 0.98; // Reibung
+      this.life -= this.decay;
+    }
+    
+    draw() {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = this.life;
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function spawnParticles(x, y) {
+    for (let i = 0; i < 3; i++) {
+      particles.push(new Particle(x, y));
+    }
+  }
+
+  function animateParticles() {
+    // Wir löschen das Canvas NICHT (kein clearRect), 
+    // da das Rubbeln (destination-out) den Hintergrund freilegt.
+    // Die Partikel zeichnen wir einfach oben drauf.
+    
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.update();
+      p.draw();
+      if (p.life <= 0) {
+        particles.splice(i, 1);
+      }
+    }
+    animationFrame = requestAnimationFrame(animateParticles);
   }
 
   function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    // Relative Position zum Canvas
     return { x: clientX - rect.left, y: clientY - rect.top };
   }
 
   function scratch(x, y) {
     ctx.globalCompositeOperation = 'destination-out';
     
-    // Weicher Kreis
     ctx.beginPath();
     ctx.arc(x, y, 24, 0, Math.PI * 2);
     ctx.fill();
 
-    // Verbindet die Punkte bei schnellem Wischen
     if (lastPos) {
       ctx.beginPath();
       ctx.lineWidth = 48;
@@ -287,11 +347,13 @@
       ctx.stroke();
     }
     lastPos = { x, y };
+    
+    // Partikel spawnen
+    spawnParticles(x, y);
   }
 
-  let lastPos = null;
-
   function startDraw(e) {
+    if(isScratched) return;
     isDrawing = true;
     lastPos = null;
     const pos = getPos(e);
@@ -299,16 +361,19 @@
   }
 
   function draw(e) {
-    if (!isDrawing) return;
+    if (!isDrawing || isScratched) return;
     e.preventDefault();
     const pos = getPos(e);
     scratch(pos.x, pos.y);
-    checkScratched();
+    
+    // Nur alle paar Movements prüfen (Performance)
+    if (Math.random() > 0.8) checkScratched();
   }
 
   function stopDraw() {
     isDrawing = false;
     lastPos = null;
+    checkScratched();
   }
 
   function checkScratched() {
@@ -323,14 +388,19 @@
 
     const percent = (transparent / (pixels.length / 4)) * 100;
     
-    if (percent > 45) { // Wenn 45% freigerubbelt
+    if (percent > 45) {
       isScratched = true;
       claimBtn.classList.add('active');
       
-      // Sanftes Ausblenden
-      canvas.style.transition = 'opacity 0.4s ease';
+      // Canvas und Partikel ausblenden
+      canvas.style.transition = 'opacity 0.5s ease';
       canvas.style.opacity = '0';
-      setTimeout(() => { canvas.style.display = 'none'; }, 400);
+      
+      // Nach dem Fade die Animation stoppen
+      setTimeout(() => { 
+        cancelAnimationFrame(animationFrame); 
+        canvas.style.display = 'none'; 
+      }, 500);
     }
   }
 
@@ -343,7 +413,6 @@
   canvas.addEventListener('touchmove', draw, {passive: false});
   canvas.addEventListener('touchend', stopDraw);
 
-  // Init after slight delay to get correct layout size
   setTimeout(initCanvas, 150);
 
 
