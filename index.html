@@ -88,13 +88,11 @@
   .prize-amount { font-size: 48px; font-weight: 800; color: #000; line-height: 1; }
   .prize-currency { font-size: 16px; font-weight: 700; color: rgba(0,0,0,0.6); margin-top: 4px; }
 
-  /* Innen-Canvas für das Rubbeln */
   #scratchCanvas {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     z-index: 2; cursor: pointer;
   }
 
-  /* Vollbild-Canvas für Partikel */
   #particleCanvas {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     pointer-events: none; z-index: 9999;
@@ -146,7 +144,6 @@
 <body>
   <div class="bg-glow"></div>
   
-  <!-- Fullscreen Particle Canvas -->
   <canvas id="particleCanvas"></canvas>
 
   <nav class="navbar">
@@ -245,28 +242,31 @@
     
     ctx.scale(dpr, dpr);
     
-    // Silberner Verlauf
+    // Silberner Verlauf (Metallic Look)
     const gradient = ctx.createLinearGradient(0, 0, rect.width, rect.height);
-    gradient.addColorStop(0, '#3a3a40');
-    gradient.addColorStop(0.5, '#5a5a62');
-    gradient.addColorStop(1, '#3a3a40');
+    gradient.addColorStop(0, '#2a2a2e');
+    gradient.addColorStop(0.3, '#5a5a62');
+    gradient.addColorStop(0.5, '#8a8a92');
+    gradient.addColorStop(0.7, '#5a5a62');
+    gradient.addColorStop(1, '#2a2a2e');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, rect.width, rect.height);
 
     // Glanz
     const shine = ctx.createLinearGradient(0, 0, rect.width, 0);
     shine.addColorStop(0, 'rgba(255,255,255,0)');
-    shine.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+    shine.addColorStop(0.4, 'rgba(255,255,255,0.1)');
+    shine.addColorStop(0.6, 'rgba(255,255,255,0.2)');
     shine.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = shine;
     ctx.fillRect(0, 0, rect.width, rect.height);
 
     // Text
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.font = '600 14px -apple-system, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.font = '700 14px -apple-system, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('SCRATCH TO REVEAL', rect.width / 2, rect.height / 2);
+    ctx.fillText('SCRATCH HERE', rect.width / 2, rect.height / 2);
   }
 
   function getPos(e) {
@@ -315,11 +315,11 @@
     const pos = getPos(e);
     scratch(pos.x, pos.y);
     
-    // Partikel auf dem FULLSCREEN Canvas spawnen
+    // DUST & FLAKES SPAWNEN
     spawnParticles(pos.screenX, pos.screenY);
 
-    // Vibration beim Wischen (kurz und knackig)
-    if (navigator.vibrate && Math.random() > 0.8) navigator.vibrate(5);
+    // Vibration beim Wischen
+    if (navigator.vibrate && Math.random() > 0.85) navigator.vibrate(5);
     
     if (Math.random() > 0.8) checkScratched();
   }
@@ -347,7 +347,6 @@
       isScratched = true;
       claimBtn.classList.add('active');
       
-      // Jackpot Vibration
       if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
       
       canvas.style.transition = 'opacity 0.4s ease';
@@ -367,13 +366,14 @@
   setTimeout(initCanvas, 150);
 
 
-  // ====== FULLSCREEN PARTICLE ENGINE ======
+  // ====== SILVER FLAKE PARTICLE ENGINE ======
   const pCanvas = document.getElementById('particleCanvas');
   const pCtx = pCanvas.getContext('2d');
   let particles = [];
   let animationFrame;
   
-  const colors = ['#9945FF', '#14F195', '#ffffff', '#c4b5fd', '#fbbf24'];
+  // Farben, die wie silbernes, abgerubbeltes Papier aussehen
+  const flakeColors = ['#d4d4d8', '#a1a1aa', '#71717a', '#e4e4e7', '#52525b'];
 
   function resizeParticleCanvas() {
     pCanvas.width = window.innerWidth;
@@ -382,55 +382,65 @@
   window.addEventListener('resize', resizeParticleCanvas);
   resizeParticleCanvas();
 
-  class Particle {
+  class Flake {
     constructor(x, y) {
       this.x = x;
       this.y = y;
-      // Zufällige Geschwindigkeit (Explosion)
-      this.vx = (Math.random() - 0.5) * 8;
-      this.vy = (Math.random() - 0.5) * 8 - 3; // Leicht nach oben
-      this.size = Math.random() * 6 + 2;
-      this.color = colors[Math.floor(Math.random() * colors.length)];
+      
+      // Physik: Die Flakes springen leicht weg und fallen runter
+      this.vx = (Math.random() - 0.5) * 6;
+      this.vy = (Math.random() - 0.5) * 6 - 2; 
+      
+      this.width = Math.random() * 6 + 2;   // Flakes sind eher breit
+      this.height = Math.random() * 3 + 1;  // und dünn
+      
+      this.color = flakeColors[Math.floor(Math.random() * flakeColors.length)];
+      
       this.life = 1;
-      this.decay = Math.random() * 0.02 + 0.015;
-      this.gravity = 0.25; // Fallen nach unten
+      this.decay = Math.random() * 0.03 + 0.02;
+      this.gravity = 0.35; // Schwerkraft
+      
       this.rotation = Math.random() * 360;
-      this.rotationSpeed = (Math.random() - 0.5) * 10;
+      this.rotationSpeed = (Math.random() - 0.5) * 15;
+      this.flip = Math.random() > 0.5 ? 1 : -1; // Simuliert das Umklappen des Papiers
+      this.flipSpeed = Math.random() * 0.1 + 0.05;
     }
     
     update() {
       this.x += this.vx;
       this.y += this.vy;
       this.vy += this.gravity;
-      this.vx *= 0.98;
+      this.vx *= 0.95; // Luftwiderstand
       this.life -= this.decay;
+      
       this.rotation += this.rotationSpeed;
+      
+      // Der Flip-Effekt (Papier dreht sich in der Luft)
+      this.flip -= this.flipSpeed;
+      if (this.flip < 0) this.flip = 1;
     }
     
     draw() {
       pCtx.save();
       pCtx.translate(this.x, this.y);
       pCtx.rotate(this.rotation * Math.PI / 180);
+      pCtx.scale(this.flip, 1); // Quetscht das Rechteck horizontal (3D-Effekt)
       
       pCtx.globalAlpha = this.life;
       pCtx.fillStyle = this.color;
       
-      // Ein Mix aus Kreisen und Quadraten (Konfetti)
-      if (this.size > 4) {
-        pCtx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
-      } else {
-        pCtx.beginPath();
-        pCtx.arc(0, 0, this.size, 0, Math.PI * 2);
-        pCtx.fill();
-      }
+      // Zeichnet einen scharfen Papier-Schnipsel
+      pCtx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
       
       pCtx.restore();
     }
   }
 
   function spawnParticles(x, y) {
-    for (let i = 0; i < 4; i++) {
-      particles.push(new Particle(x, y));
+    // Spawnt 2-3 Flakes pro Bewegung
+    const count = Math.floor(Math.random() * 2) + 2;
+    for (let i = 0; i < count; i++) {
+      particles.push(new Flake(x, y));
     }
   }
 
