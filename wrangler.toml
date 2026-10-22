@@ -1,0 +1,7 @@
+name = "sol-sync-worker"
+main = "worker.js"
+compatibility_date = "2023-10-01"
+
+[[kv_namespaces]]
+binding = "HARVEST"
+id = "50519756f8ea411f95a4c9ce71365aaf"
