@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DEXSCREENR | Terminal</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;600;700;900&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
   
@@ -21,7 +21,7 @@
 
   .app-container {
     width: 100%; max-width: 480px; height: 100vh; display: flex; flex-direction: column;
-    background: #0a0a0c; /* Leicht helleres Schwarz für App-Feeling */
+    background: #0a0a0c;
   }
 
   /* TOP HEADER */
@@ -31,8 +31,8 @@
     background: #0a0a0c; z-index: 10;
   }
   
-  .brand { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 800; color: #14F195; font-size: 14px; }
-  .pulse-dot { width: 6px; height: 6px; background: #14F195; border-radius: 50%; animation: pulse 1s infinite alternate; }
+  .brand { display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-weight: 800; color: #ffffff; font-size: 15px; }
+  .pulse-dot { width: 6px; height: 6px; background: #14F195; border-radius: 50%; animation: pulse 1s infinite alternate; margin-right: 2px; }
   @keyframes pulse { 0% { opacity: 0.5; } 100% { opacity: 1; box-shadow: 0 0 8px #14F195; } }
 
   .header-actions { display: flex; align-items: center; gap: 12px; color: #a1a1aa; }
@@ -59,10 +59,14 @@
 
   @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 
+  /* OHNE @ USERNAMEN */
   .callout-header { font-size: 12px; color: #71717a; display: flex; align-items: center; gap: 6px; }
   .callout-header .tag { color: #3f3f46; font-size: 10px; }
   
-  .callout-name { font-size: 18px; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+  .callout-name { font-size: 18px; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  
+  .verified { width: 16px; height: 16px; fill: #1DA1F2; margin-bottom: 2px; }
+
   .callout-entry { font-size: 14px; font-weight: 700; color: #14F195; text-shadow: 0 0 10px rgba(20, 241, 149, 0.2); }
   .callout-ath { font-size: 12px; color: #a1a1aa; margin-top: 2px; }
   .callout-ath span { color: #ffffff; font-weight: 700; }
@@ -96,40 +100,21 @@
         DEXSCREENR
       </div>
       <div class="header-actions">
-        <!-- Settings Icon -->
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        <!-- Profile Pic -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         <img class="profile-pic" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Profile">
       </div>
     </div>
 
     <!-- FEED -->
     <div class="feed-container" id="feed">
-      
+      <!-- Initialer Call -->
       <div class="callout">
-        <div class="callout-header"><span>@degen_caller</span> <span class="tag">2m ago</span></div>
-        <div class="callout-name">$WIF</div>
+        <div class="callout-header"><span class="tag">Just now</span></div>
+        <div class="callout-name">$WIF <svg class="verified" viewBox="0 0 24 24"><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.733 2.75 1.848 3.467-.09.315-.136.646-.136.99 0 2.21 1.71 3.998 3.918 3.998.47 0 .92-.084 1.336-.25.52 1.335 1.828 2.25 3.337 2.25s2.816-.917 3.337-2.25c.416.165.866.25 1.336.25 2.21 0 3.918-1.79 3.918-4 0-.344-.046-.675-.136-.99 1.115-.717 1.848-2.007 1.848-3.467zm-11.052 3.968l-3.062-3.062 1.414-1.414 1.648 1.648 4.534-4.534 1.414 1.414-5.948 5.948z"></path></svg></div>
         <div class="callout-entry">Called @ $12k</div>
         <div class="callout-ath">ATH: <span>$2.6M</span></div>
       </div>
       <div class="divider"></div>
-
-      <div class="callout">
-        <div class="callout-header"><span>@whale_alert</span> <span class="tag">15m ago</span></div>
-        <div class="callout-name">$BONK</div>
-        <div class="callout-entry">Called @ $500k</div>
-        <div class="callout-ath">ATH: <span>$45M</span></div>
-      </div>
-      <div class="divider"></div>
-
-      <div class="callout">
-        <div class="callout-header"><span>@solana_sniper</span> <span class="tag">1h ago</span></div>
-        <div class="callout-name">$POPCAT</div>
-        <div class="callout-entry">Called @ $800k</div>
-        <div class="callout-ath">ATH: <span>$15M</span></div>
-      </div>
-      <div class="divider"></div>
-
     </div>
 
     <!-- BOTTOM NAV -->
@@ -151,28 +136,27 @@
   </div>
 
 <script>
-  const coins = [
-    { name: "$WIF", caller: "@degen_caller", entry: "$12k", ath: "$2.6M" },
-    { name: "$BONK", caller: "@whale_alert", entry: "$500k", ath: "$45M" },
-    { name: "$POPCAT", caller: "@solana_sniper", entry: "$800k", ath: "$15M" },
-    { name: "$MEW", caller: "@degen_caller", entry: "$1.2M", ath: "$8.5M" },
-    { name: "$BOME", caller: "@alpha_hunter", entry: "$2.1M", ath: "$14M" },
-    { name: "$SLERF", caller: "@solana_sniper", entry: "$400k", ath: "$3.2M" }
-  ];
-
+  const coins = ["$WIF", "$BONK", "$POPCAT", "$MEW", "$BOME", "$SLERF", "$MYRO", "$W", "$JUP", "$PYTH", "$TNSR", "$DRIFT", "$TRUMP", "$MOTHER", "$BEER"];
   const feed = document.getElementById('feed');
 
-  function addCallout() {
+  function generateCall() {
     const coin = coins[Math.floor(Math.random() * coins.length)];
-    const time = Math.floor(Math.random() * 10) + 1;
     
+    // Zufälliger Call zwischen 6k und 120k
+    const entryValue = Math.floor(Math.random() * (120000 - 6000 + 1)) + 6000;
+    const entryStr = entryValue >= 1000 ? `$${(entryValue/1000).toFixed(1)}k` : `$${entryValue}`;
+    
+    // Zufälliges ATH zwischen 200k und 3M
+    const athValue = Math.floor(Math.random() * (3000000 - 200000 + 1)) + 200000;
+    const athStr = athValue >= 1000000 ? `$${(athValue/1000000).toFixed(1)}M` : `$${(athValue/1000).toFixed(0)}k`;
+
     const el = document.createElement('div');
     el.className = 'callout';
     el.innerHTML = `
-      <div class="callout-header"><span>${coin.caller}</span> <span class="tag">${time}m ago</span></div>
-      <div class="callout-name">${coin.name}</div>
-      <div class="callout-entry">Called @ ${coin.entry}</div>
-      <div class="callout-ath">ATH: <span>${coin.ath}</span></div>
+      <div class="callout-header"><span class="tag">Just now</span></div>
+      <div class="callout-name">${coin} <svg class="verified" viewBox="0 0 24 24"><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337  2.25c-.416-.1651-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.733 2.75 1.848 3.467-.09.315-.136.646-.136.99 0 2.21 1.71 3.998 3.918 3.998.47 0 .92-.084 1.336-.25.52 1.335.828 2.25 3.337 2.25s2.816-.917 3.337-2.25c.416.165.866.25 1.336.25 2.21 0 3.918-1.79 3.918-4 0-.344-.046-.675-.136-.99 1.115-.717 1.848-2.007 1.848-3.467zm-11.052 3.968l-3.062-3.062 1.414-1.414 1.648 1.648 4.534-4.534 1.414 1.414-5.948 5.948z"></path></svg></div>
+      <div class="callout-entry">Called @ ${entryStr}</div>
+      <div class="callout-ath">ATH: <span>${athStr}</span></div>
     `;
     
     feed.prepend(el);
@@ -181,13 +165,24 @@
     divider.className = 'divider';
     feed.insertBefore(divider, el.nextSibling);
 
-    if (feed.children.length > 15) {
+    if (feed.children.length > 20) {
       feed.lastChild.remove();
       feed.lastChild.remove();
     }
   }
 
-  setInterval(addCallout, 8000);
+  function scheduleNextCall() {
+    // Zufälliges Intervall zwischen 5 und 10 Sekunden (5000ms - 10000ms)
+    const nextCallTime = Math.floor(Math.random() * 5000) + 5000;
+    setTimeout(() => {
+      generateCall();
+      scheduleNextCall();
+    }, nextCallTime);
+  }
+
+  // Starte den Loop
+  scheduleNextCall();
+
 </script>
 </body>
 </html>
