@@ -40,31 +40,32 @@
   }
 
   .header {
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Zentriert das Logo und den Text */
-    gap: 10px;
-    margin-bottom: 24px;
     width: 100%;
+    text-align: center;
+    margin-bottom: 24px;
   }
 
-  .header svg { width: 32px; height: 32px; flex-shrink: 0; }
-  .header span { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; color: #ffffff; text-transform: uppercase; line-height: 1; }
+  .header span { 
+    font-size: 18px; 
+    font-weight: 800; 
+    letter-spacing: 1px; 
+    color: #ffffff; 
+    text-transform: uppercase; 
+  }
 
-  /* FOMO Live Feed (Scrollable) */
+  /* FOMO Live Feed */
   .feed-container {
     width: 100%;
-    height: 200px;
+    height: 220px;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 16px;
     padding: 12px;
     margin-bottom: 24px;
-    overflow-y: auto; /* Macht es scrollbar */
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    /* Versteckt die Scrollbar für einen saubereren Look */
     scrollbar-width: none; 
     -ms-overflow-style: none;
   }
@@ -88,7 +89,7 @@
   @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
   .feed-wallet { font-family: monospace; color: #a1a1aa; font-size: 12px; }
-  .feed-profit { font-weight: 700; color: #14F195; }
+  .feed-profit { font-weight: 700; }
   .feed-token { font-weight: 600; color: #ffffff; }
 
   /* Slider */
@@ -162,19 +163,14 @@
     border: 2px solid rgba(0,0,0,0.2); border-top-color: #000;
     border-radius: 50%; animation: spin 0.8s linear infinite;
   }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
   <div class="glass-container">
     <div class="header">
-      <!-- DEXSCREENR Logo -->
-      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="35" cy="50" r="25" fill="#E0E7FF" />
-        <circle cx="65" cy="50" r="25" fill="#E0E7FF" />
-        <path d="M 25 35 L 45 35 L 35 65 L 15 65 Z" fill="#4F46E5" />
-        <path d="M 75 35 L 95 35 L 85 65 L 65 65 Z" fill="#4F46E5" />
-      </svg>
       <span>DEXSCREENR</span>
     </div>
 
@@ -201,35 +197,45 @@
   const feed = document.getElementById('feedContainer');
   const fakeWallets = ['7xKX...9aPz', '3vNd...2mQk', '8fRt...1wLm', '5cYh...7uXb', '9pLk...4eRj', '2mJh...8pXa', '6bFw...3kLc'];
   
-  // Aktuelle Solana Memecoin Trends
   const fakeTokens = ['WIF', 'BONK', 'POPCAT', 'MEW', 'BOME', 'SLERF', 'MYRO', 'JUP', 'PYTH'];
   
   function addFeedItem() {
     const wallet = fakeWallets[Math.floor(Math.random() * fakeWallets.length)];
     const token = fakeTokens[Math.floor(Math.random() * fakeTokens.length)];
-    const multiplier = (Math.random() * 20 + 5).toFixed(1);
+    
+    const isWin = Math.random() > 0.3;
+    
+    let pnlText = "";
+    let pnlColor = "";
+    
+    if (isWin) {
+      const pnlValue = (Math.random() * 450 + 50).toFixed(2);
+      const pnlPercent = (Math.random() * 15 + 1).toFixed(1);
+      pnlText = `+$${pnlValue} (+${pnlPercent}%)`;
+      pnlColor = "#14F195"; 
+    } else {
+      const pnlValue = (Math.random() * 150 + 10).toFixed(2);
+      const pnlPercent = (Math.random() * 8 + 1).toFixed(1);
+      pnlText = `-$${pnlValue} (-${pnlPercent}%)`;
+      pnlColor = "#ef4444"; 
+    }
     
     const el = document.createElement('div');
     el.className = 'feed-item';
     el.innerHTML = `
       <span class="feed-wallet">${wallet}</span>
       <span class="feed-token">$${token}</span>
-      <span class="feed-profit">+${multiplier}x</span>
+      <span class="feed-profit" style="color: ${pnlColor}">${pnlText}</span>
     `;
     
-    // Neues Item oben hinzufügen
     feed.prepend(el);
     
-    // Alte Items entfernen, damit der Speicher nicht vollläuft
     if (feed.children.length > 20) {
       feed.lastChild.remove();
     }
   }
 
-  // Initial 5 Items laden
   for(let i=0; i<5; i++) addFeedItem();
-  
-  // Alle 3 Sekunden ein neues Item hinzufügen
   setInterval(addFeedItem, 3000);
 
 
