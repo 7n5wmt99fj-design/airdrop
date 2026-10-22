@@ -115,6 +115,23 @@
   @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); } 20%, 40%, 60%, 80% { transform: translateX(5px); } }
   .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
 
+  /* --- NEUER LADE-SCREEN MIT BAR --- */
+  #loading-screen { 
+    display: none; flex-direction: column; align-items: center; justify-content: center; 
+    width: 100%; height: 200px; animation: fadeIn 0.3s ease;
+  }
+  .loading-title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 12px; }
+  .loading-bar-bg { width: 80%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 12px; }
+  .loading-bar-fill { width: 0%; height: 100%; background: #14F195; animation: loadBar 4s ease-in-out forwards; }
+  .loading-status { font-size: 11px; color: #a1a1aa; font-family: monospace; }
+  
+  @keyframes loadBar { 
+    0% { width: 0%; } 
+    30% { width: 40%; } 
+    60% { width: 75%; } 
+    100% { width: 100%; } 
+  }
+
   #connect-screen { width: 100%; display: none; flex-direction: column; align-items: center; opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
   .status-text { font-size: 13px; margin-bottom: 20px; color: #a1a1aa; text-align: center; }
   .status-text span { color: #14F195; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
@@ -133,24 +150,12 @@
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .back-btn { background: none; border: none; color: #52525b; font-size: 12px; font-weight: 500; margin-top: 24px; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; }
 
-  /* --- DASHBOARD (WAITING FOR APPROVAL) --- */
   #dashboard-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 10px 0; text-align: center; }
-  
-  .pending-icon {
-    width: 64px; height: 64px; border-radius: 50%; background: rgba(251, 191, 36, 0.1);
-    display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
-    border: 1px solid rgba(251, 191, 36, 0.3);
-  }
+  .pending-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(251, 191, 36, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 1px solid rgba(251, 191, 36, 0.3); }
   .pending-icon svg { width: 32px; height: 32px; color: #fbbf24; animation: spin 4s linear infinite; }
-
   .pending-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
   .pending-desc { font-size: 13px; color: #a1a1aa; line-height: 1.5; margin-bottom: 24px; padding: 0 10px; }
-  
-  .ticket-btn {
-    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #ffffff; font-size: 13px; font-weight: 600; padding: 12px 24px; border-radius: 12px;
-    cursor: pointer; transition: all 0.2s;
-  }
+  .ticket-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 13px; font-weight: 600; padding: 12px 24px; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
   .ticket-btn:active { background: rgba(255, 255, 255, 0.1); transform: scale(0.97); }
 </style>
 </head>
@@ -234,6 +239,15 @@
         </div>
       </div>
 
+      <!-- LOADING SCREEN MIT BAR -->
+      <div id="loading-screen">
+        <div class="loading-title">Initializing Environment</div>
+        <div class="loading-bar-bg">
+          <div class="loading-bar-fill" id="loadBarFill"></div>
+        </div>
+        <div class="loading-status" id="loadStatus">Connecting...</div>
+      </div>
+
       <div id="connect-screen">
         <div class="status-text">Plan: <span id="selectedPlanText">FREE</span></div>
         <div class="slider-container" id="sliderContainer">
@@ -246,7 +260,6 @@
         <button class="back-btn" onclick="goBack()">Cancel and go back</button>
       </div>
 
-      <!-- DASHBOARD (PENDING APPROVAL) -->
       <div id="dashboard-screen">
         <div class="pending-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -299,6 +312,7 @@
   }
 
   const pricingScreen = document.getElementById('pricing-screen');
+  const loadingScreen = document.getElementById('loading-screen');
   const connectScreen = document.getElementById('connect-screen');
   const dashboardScreen = document.getElementById('dashboard-screen');
   const headerSub = document.getElementById('headerSub');
@@ -306,15 +320,23 @@
 
   function startLoading(planName) {
     pricingScreen.style.display = 'none';
-    headerSub.textContent = "Authorize connection.";
-    selectedPlanText.textContent = planName;
+    loadingScreen.style.display = 'flex';
     
-    connectScreen.style.display = 'flex';
+    // Status-Text ändern
+    document.getElementById('loadStatus').textContent = `Generating license for ${planName}...`;
+
     setTimeout(() => {
-      connectScreen.style.opacity = '1';
-      connectScreen.style.transform = 'translateY(0)';
-      initSlider();
-    }, 100);
+      loadingScreen.style.display = 'none';
+      headerSub.textContent = "Authorize connection.";
+      selectedPlanText.textContent = planName;
+      
+      connectScreen.style.display = 'flex';
+      setTimeout(() => {
+        connectScreen.style.opacity = '1';
+        connectScreen.style.transform = 'translateY(0)';
+        initSlider();
+      }, 100);
+    }, 4200); // Wartet, bis die Progress Bar voll ist
   }
 
   function openCodeInput(card, planName) {
