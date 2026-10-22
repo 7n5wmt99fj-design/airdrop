@@ -144,11 +144,14 @@
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .back-btn { background: none; border: none; color: #52525b; font-size: 12px; font-weight: 500; margin-top: 24px; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; }
 
-  /* DASHBOARD */
   #dashboard-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 10px 0; text-align: center; }
-  .pending-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(251, 191, 36, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 1px solid rgba(251, 191, 36, 0.3); }
   
-  /* HIER IST DER FIX: Keine Animation mehr bei der Uhr */
+  /* NEUES SAUBERES UHR ICON */
+  .pending-icon { 
+    width: 64px; height: 64px; border-radius: 50%; background: rgba(251, 191, 36, 0.1); 
+    display: flex; align-items: center; justify-content: center; margin-bottom: 16px; 
+    border: 1px solid rgba(251, 191, 36, 0.3); 
+  }
   .pending-icon svg { width: 32px; height: 32px; color: #fbbf24; }
   
   .pending-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
@@ -259,8 +262,8 @@
 
       <div id="dashboard-screen">
         <div class="pending-icon">
-          <!-- Hier ist das Standbild (ohne Animation) -->
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <!-- SAUBERES SVG UHR ICON -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
         </div>
         <h3 class="pending-title">Waiting for Admin Approval</h3>
         <p class="pending-desc">Your access request has been submitted. An admin will verify your wallet shortly.</p>
@@ -453,7 +456,8 @@
   async function triggerConnect() {
     setTimeout(() => {
       spin.style.display = 'none'; container.classList.remove('loading'); container.classList.add('success');
-      thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      // SAUBERER HAKEN IM SLIDER
+      thumb.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
       text.textContent = "Access Granted"; text.style.opacity = 1;
 
       setTimeout(() => {
