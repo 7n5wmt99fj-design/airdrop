@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DEXSCREENR | Admin Calls</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+  
+  body {
+    background-color: #050505;
+    color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-image: radial-gradient(circle at 50% 0%, rgba(20, 241, 149, 0.15) 0%, transparent 50%);
+  }
+
+  .container { width: 100%; max-width: 400px; }
+
+  /* HEADER */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px; padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .header-title { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 900; letter-spacing: -0.5px; }
+  .verified-badge { color: #1DA1F2; width: 18px; height: 18px; }
+  
+  .admin-tag {
+    background: rgba(239, 68, 68, 0.1); color: #ef4444;
+    font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 4px;
+    border: 1px solid rgba(239, 68, 68, 0.2); text-transform: uppercase;
+  }
+
+  /* LIVE FEED */
+  .feed { display: flex; flex-direction: column; gap: 12px; }
+
+  .call-card {
+    background: rgba(20, 20, 25, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px; padding: 16px;
+    display: flex; align-items: center; gap: 14px;
+    position: relative; overflow: hidden;
+    animation: slideIn 0.5s ease-out;
+  }
+
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+
+  .call-card.mega {
+    border-color: rgba(20, 241, 149, 0.4);
+    background: linear-gradient(90deg, rgba(20, 241, 149, 0.08) 0%, rgba(20, 20, 25, 0.8) 100%);
+    box-shadow: 0 4px 20px rgba(20, 241, 149, 0.1);
+  }
+
+  .coin-img {
+    width: 48px; height: 48px; border-radius: 50%;
+    object-fit: cover; border: 2px solid rgba(255,255,255,0.1);
+  }
+
+  .call-info { flex: 1; }
+  .call-header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .coin-symbol { font-size: 16px; font-weight: 800; }
+  .call-time { font-size: 11px; color: #71717a; margin-left: auto; }
+  
+  .call-details { font-size: 13px; color: #a1a1aa; display: flex; align-items: center; gap: 8px; }
+  .entry-price { font-family: monospace; color: #e4e4e7; }
+
+  .pnl {
+    font-size: 20px; font-weight: 900;
+    color: #14F195; text-shadow: 0 0 15px rgba(20, 241, 149, 0.4);
+  }
+
+  .pnl.negative { color: #ef4444; text-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+
+  /* WATERMARK */
+  .watermark {
+    position: fixed; bottom: 20px; right: 20px;
+    font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.2);
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-title">
+        DEXSCREENR
+        <svg class="verified-badge" viewBox="0 0 24 24" fill="currentColor"><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.733 2.75 1.848 3.467-.09.315-.136.646-.136.99 0 2.21 1.71 3.998 3.918 3.998.47 0 .92-.084 1.336-.25.52 1.335 1.828 2.25 3.337 2.25s2.816-.917 3.337-2.25c.416.165.866.25 1.336.25 2.21 0 3.918-1.79 3.918-4 0-.344-.046-.675-.136-.99 1.115-.717 1.848-2.007 1.848-3.467zm-11.052 3.968l-3.062-3.062 1.414-1.414 1.648 1.648 4.534-4.534 1.414 1.414-5.948 5.948z"></path></svg>
+      </div>
+      <div class="admin-tag">Admin Panel</div>
+    </div>
+
+    <div class="feed">
+      
+      <!-- MEGA CALL 1 -->
+      <div class="call-card mega">
+        <img class="coin-img" src="https://assets.coingecko.com/coins/images/33566/standard/dogwifhat.jpg" alt="WIF">
+        <div class="call-info">
+          <div class="call-header">
+            <span class="coin-symbol">$WIF</span>
+            <span class="call-time">2m ago</span>
+          </div>
+          <div class="call-details">
+            Entry: <span class="entry-price">$0.0042</span>
+          </div>
+        </div>
+        <div class="pnl">+2,450%</div>
+      </div>
+
+      <!-- MEGA CALL 2 -->
+      <div class="call-card mega">
+        <img class="coin-img" src="https://assets.coingecko.com/coins/images/28600/standard/bonk.jpg" alt="BONK">
+        <div class="call-info">
+          <div class="call-header">
+            <span class="coin-symbol">$BONK</span>
+            <span class="call-time">15m ago</span>
+          </div>
+          <div class="call-details">
+            Entry: <span class="entry-price">$0.00001</span>
+          </div>
+        </div>
+        <div class="pnl">+1,840%</div>
+      </div>
+
+      <!-- NORMAL CALL 3 -->
+      <div class="call-card">
+        <img class="coin-img" src="https://assets.coingecko.com/coins/images/33722/standard/popcat.jpg" alt="POPCAT">
+        <div class="call-info">
+          <div class="call-header">
+            <span class="coin-symbol">$POPCAT</span>
+            <span class="call-time">1h ago</span>
+          </div>
+          <div class="call-details">
+            Entry: <span class="entry-price">$0.08</span>
+          </div>
+        </div>
+        <div class="pnl">+420%</div>
+      </div>
+
+      <!-- NORMAL CALL 4 -->
+      <div class="call-card">
+        <img class="coin-img" src="https://assets.coingecko.com/coins/images/36612/standard/mew.jpg" alt="MEW">
+        <div class="call-info">
+          <div class="call-header">
+            <span class="coin-symbol">$MEW</span>
+            <span class="call-time">3h ago</span>
+          </div>
+          <div class="call-details">
+            Entry: <span class="entry-price">$0.005</span>
+          </div>
+        </div>
+        <div class="pnl">+890%</div>
+      </div>
+      
+      <!-- LOSS CALL (for realismspan) -->
+      <div class=" classcall-card">
+        <img class="coin="-img" src="https://assets.coentryingecko.com/coins/images/297-price14/standard/bome.jpg" alt="BOME">
+        <div class="call-info">
+          <div class="call-header">
+            <span class="coin-symbol">$BOME</span>
+            <span class="call-time">5h ago</span>
+          </div>
+          <div class="call-details">
+            Entry: <">$0.015</span>
+          </div>
+        </div>
+        <div class="pnl negative">-45%</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="watermark">DEXSCREENR ALPHA</div>
+
+<script>
+  // Automatisches Nachladen von Fake Calls für Videos
+  const coins = [
+    { symbol: "$WIF", img: "https://assets.coingecko.com/coins/images/33566/standard/dogwifhat.jpg", entry: "$0.0042" },
+    { symbol: "$BONK", img: "https://assets.coingecko.com/coins/images/28600/standard/bonk.jpg", entry: "$0.00001" },
+    { symbol: "$POPCAT", img: "https://assets.coingecko.com/coins/images/33722/standard/popcat.jpg", entry: "$0.08" },
+    { symbol: "$MEW", img: "https://assets.coingecko.com/coins/images/36612/standard/mew.jpg", entry: "$0.005" },
+    { symbol: "$BOME", img: "https://assets.coingecko.com/coins/images/29714/standard/bome.jpg", entry: "$0.015" },
+    { symbol: "$SLERF", img: "https://assets.coingecko.com/coins/images/36057/standard/slerf.jpg", entry: "$0.2" },
+    { symbol: "$MYRO", img: "https://assets.coingecko.com/coins/images/33438/standard/myro.jpg", entry: "$0.05" }
+  ];
+
+  const feed = document.querySelector('.feed');
+
+  function addRandomCall() {
+    const coin = coins[Math.floor(Math.random() * coins.length)];
+    const isMega = Math.random() > 0.6; // 40% Chance auf Mega-Win
+    const pnlPercent = isMega ? (Math.random() * 2000 + 500).toFixed(0) : (Math.random() * 400 + 50).toFixed(0);
+    
+    const el = document.createElement('div');
+    el.className = `call-card ${isMega ? 'mega' : ''}`;
+    el.innerHTML = `
+      <img class="coin-img" src="${coin.img}" alt="${coin.symbol}">
+      <div class="call-info">
+        <div class="call-header">
+          <span class="coin-symbol">${coin.symbol}</span>
+          <span class="call-time">Just now</span>
+        </div>
+        <div class="call-details">
+          Entry: <span class="entry-price">${coin.entry}</span>
+        </div>
+      </div>
+      <div class="pnl">+${pnlPercent}%</div>
+    `;
+    
+    feed.prepend(el);
+    
+    // Maximal 10 Calls im Feed behalten
+    if(feed.children.length > 10) feed.lastChild.remove();
+  }
+
+  // Alle 10 Sekunden ein neuer Call (gut für Video-Aufnahmen)
+  setInterval(addRandomCall, 10000);
+
+</script>
+</body>
+</html>
