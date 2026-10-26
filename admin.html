@@ -8,90 +8,56 @@
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
   :root {
-    --bg: #050505;
-    --panel: #0c0c0e;
-    --panel-hover: #121216;
-    --border: #1f1f24;
-    --text: #ffffff;
-    --text-dim: #8a8a93;
-    --text-dark: #52525b;
-    --green: #14F195;
-    --green-dim: rgba(20,241,149,0.1);
-    --red: #ef4444;
-    --red-dim: rgba(239,68,68,0.1);
-    --yellow: #fbbf24;
-    --yellow-dim: rgba(251,191,36,0.1);
-    --blue: #60a5fa;
+    --bg: #030304; --panel: #0c0c0e; --panel-hover: #121216;
+    --border: #1f1f24; --text: #ffffff; --text-dim: #8a8a93; --text-dark: #52525b;
+    --green: #14F195; --green-dim: rgba(20,241,149,0.1);
+    --red: #ef4444; --red-dim: rgba(239,68,68,0.1);
+    --yellow: #fbbf24; --yellow-dim: rgba(251,191,36,0.1);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
   
-  body {
-    background-color: var(--bg); color: var(--text);
-    height: 100vh; height: 100dvh; display: flex; flex-direction: column;
-    overflow: hidden; align-items: center;
-  }
+  body { background-color: var(--bg); color: var(--text); height: 100vh; height: 100dvh; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
 
-  .app-shell {
-    width: 100%; max-width: 480px; height: 100%; display: flex; flex-direction: column;
-    background: var(--bg); position: relative;
-  }
+  /* Particle Canvas */
+  #particle-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 99; }
+
+  .app-shell { width: 100%; max-width: 480px; height: 100%; display: flex; flex-direction: column; background: var(--bg); position: relative; }
 
   /* HEADER */
-  .top-bar {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 16px 20px; border-bottom: 1px solid var(--border);
-    background: rgba(5,5,5,0.9); backdrop-filter: blur(12px);
-    z-index: 20; position: relative;
-  }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); background: rgba(3,3,4,0.9); backdrop-filter: blur(12px); z-index: 20; position: relative; }
   .brand { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 15px; letter-spacing: 0.5px; }
   .brand-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite alternate; }
   @keyframes pulse { 0% { opacity: 0.5; } 100% { opacity: 1; box-shadow: 0 0 12px var(--green); } }
   .brand span { color: var(--green); }
+  .clock-display { font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 4px; }
 
   /* MAIN CONTENT */
-  .main-content {
-    flex: 1; overflow-y: auto; overflow-x: hidden;
-    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
-    scrollbar-width: none; position: relative;
-  }
+  .main-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)); scrollbar-width: none; position: relative; }
   .main-content::-webkit-scrollbar { display: none; }
   
-  .tab-pane { display: none; animation: fadeIn 0.2s ease-out; padding: 16px; gap: 12px; flex-direction: column; }
-  .tab-pane.active { display: flex; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .tab-pane { display: none; padding: 16px; gap: 12px; flex-direction: column; }
+  .tab-pane.active { display: flex; animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
   /* BOTTOM NAV */
-  .bottom-nav {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    display: flex; justify-content: space-around;
-    padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px)) 0;
-    background: rgba(8,8,10,0.95); backdrop-filter: blur(16px);
-    border-top: 1px solid var(--border); z-index: 20;
-  }
-  .nav-item {
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    color: var(--text-dark); cursor: pointer; transition: color 0.2s;
-    width: 60px;
-  }
+  .bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px)) 0; background: rgba(8,8,10,0.95); backdrop-filter: blur(16px); border-top: 1px solid var(--border); z-index: 20; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-dark); cursor: pointer; transition: color 0.2s; width: 60px; position: relative; }
   .nav-item svg { width: 22px; height: 22px; transition: transform 0.2s; }
   .nav-item span { font-size: 10px; font-weight: 600; }
   .nav-item.active { color: var(--green); }
   .nav-item.active svg { transform: translateY(-2px); filter: drop-shadow(0 2px 4px rgba(20,241,149,0.4)); }
+  .nav-item.has-new svg { animation: navGlow 1s ease-out 1; }
+  @keyframes navGlow { 0% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(0 0 8px var(--green)); color: var(--green); } 100% { filter: drop-shadow(0 0 0 transparent); } }
 
   /* GENERAL UI */
-  .card {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px;
-    transition: border-color 0.2s;
-  }
-  .card:hover { border-color: #2a2a30; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; transition: border-color 0.2s, box-shadow 0.3s; }
   
   .badge { font-size: 9px; font-weight: 800; padding: 3px 6px; border-radius: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
-  .badge.sim { background: var(--blue); color: #000; display: inline-flex; align-items: center; gap: 4px; }
   .badge.green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(20,241,149,0.3); }
   .badge.red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
   .badge.yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+  .badge.blue { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.3); }
 
   .row { display: flex; justify-content: space-between; align-items: center; }
   .mono { font-family: 'JetBrains Mono', monospace; }
@@ -100,24 +66,20 @@
   .text-dim { color: var(--text-dim); }
   .text-dark { color: var(--text-dark); }
 
+  /* FLASH ANIMATIONS */
+  .flash-green { animation: flashGreen 0.8s ease-out; }
+  @keyframes flashGreen { 0% { background: rgba(20,241,149,0.2); } 100% { background: transparent; } }
+  .flash-red { animation: flashRed 0.8s ease-out; }
+  @keyframes flashRed { 0% { background: rgba(239,68,68,0.2); } 100% { background: transparent; } }
+
   /* INPUTS & BUTTONS */
   .input-group { display: flex; gap: 8px; }
-  input[type="text"] {
-    flex: 1; background: #121216; border: 1px solid #2a2a30; color: #fff;
-    padding: 12px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px;
-    outline: none; transition: border-color 0.2s;
-  }
+  input[type="text"] { flex: 1; background: #121216; border: 1px solid #2a2a30; color: #fff; padding: 12px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none; transition: border-color 0.2s; }
   input[type="text"]:focus { border-color: var(--green); }
-  .btn {
-    background: var(--green); color: #000; border: none;
-    padding: 12px 20px; border-radius: 8px; font-weight: 800; font-size: 12px;
-    cursor: pointer; transition: opacity 0.2s, transform 0.1s;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
+  .btn { background: var(--green); color: #000; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; transition: opacity 0.2s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 6px; }
   .btn:active { transform: scale(0.96); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn-outline { background: transparent; border: 1px solid var(--border); color: #fff; }
-  .btn-outline:hover { background: var(--panel-hover); }
   
   /* FILTERS */
   .filter-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
@@ -126,68 +88,68 @@
   .filter-btn.active { background: var(--green-dim); border-color: var(--green); color: var(--green); }
 
   /* CALLOUTS */
-  .callout-card { position: relative; overflow: hidden; cursor: pointer; border-left: 2px solid var(--border); }
-  .callout-card.sig-Early-Momentum { border-left-color: var(--green); }
-  .callout-card.sig-Smart-Money-Entry { border-left-color: var(--blue); }
-  .callout-card.sig-Whale-Accumulation { border-left-color: var(--yellow); }
-  .callout-card.sig-High-Risk-Warning { border-left-color: var(--red); }
+  .callout-card { position: relative; overflow: hidden; border-left: 2px solid var(--border); cursor: pointer; }
+  .callout-card.new-glow { animation: borderGlow 2s ease-out; }
+  @keyframes borderGlow { 0% { border-color: var(--green); box-shadow: 0 0 15px rgba(20,241,149,0.2); } 100% { border-color: var(--border); box-shadow: none; } }
   
-  .callout-header { display: flex; justify-content: space-between; align-items: flex-start; }
-  .token-meta { display: flex; gap: 10px; align-items: center; }
-  .avatar { width: 36px; height: 36px; border-radius: 50%; background: #1a1a20; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; }
+  .token-logo { width: 36px; height: 36px; border-radius: 50%; background: #1a1a20; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; border: 1px solid #2a2a30; object-fit: cover; }
   
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
   .stat-box { background: rgba(255,255,255,0.02); padding: 8px; border-radius: 6px; }
   .stat-box .label { font-size: 9px; color: var(--text-dark); text-transform: uppercase; margin-bottom: 2px; }
   .stat-box .val { font-size: 12px; font-family: 'JetBrains Mono', monospace; font-weight: 700; }
 
+  /* PROGRESS BAR */
+  .progress-bg { height: 4px; background: #222; border-radius: 2px; overflow: hidden; margin-top: 4px; }
+  .progress-fill { height: 100%; border-radius: 2px; transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
   /* SKELETON */
   .skeleton { background: linear-gradient(90deg, #121216 25%, #1a1a20 50%, #121216 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 4px; }
   @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-  /* MODAL / DETAILS */
+  /* MODAL */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.2s; }
   .modal-overlay.active { display: flex; opacity: 1; }
-  .modal { background: var(--panel); border: 1px solid var(--border); width: 100%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 90vh; overflow-y: auto; }
+  .modal { background: var(--panel); border: 1px solid var(--border); width: 100%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: transform 0.2s; }
+  .modal-overlay.active .modal { transform: scale(1); }
   .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-  .close-btn { background: transparent; border: none; color: var(--text-dim); cursor: pointer; padding: 4px; }
 </style>
 </head>
 <body>
 
+<canvas id="particle-canvas"></canvas>
+
 <div class="app-shell">
   <div class="top-bar">
     <div class="brand"><div class="brand-dot"></div><span>DEXSCREENR</span></div>
-    <div style="font-size:10px; color:var(--text-dark); display:flex; align-items:center; gap:4px;">
+    <div class="clock-display">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-      <span id="last-updated">--:--:--</span>
+      <span id="clock-text">--:--:--</span>
     </div>
   </div>
 
   <div class="main-content">
-    
     <!-- TAB 1: CALLOUTS -->
     <div id="tab-callouts" class="tab-pane active">
       <div class="row">
         <h2 style="font-size:16px; font-weight:800;">Live Signals</h2>
-        <span class="badge sim">SIMULATION MODE</span>
+        <span class="badge blue" id="sim-badge">SIMULATED</span>
       </div>
       <div class="filter-scroll">
-        <button class="filter-btn active" onclick="filterCallouts('latest')">Latest</button>
-        <button class="filter-btn" onclick="filterCallouts('trending')">Trending</button>
-        <button class="filter-btn" onclick="filterCallouts('highest')">Highest Return</button>
-        <button class="filter-btn" onclick="filterCallouts('smart')">Smart Money</button>
-        <button class="filter-btn" onclick="filterCallouts('lowrisk')">Low Risk</button>
+        <button class="filter-btn active" onclick="filterCallouts('latest', this)">Latest</button>
+        <button class="filter-btn" onclick="filterCallouts('trending', this)">Trending</button>
+        <button class="filter-btn" onclick="filterCallouts('highest', this)">Highest Return</button>
+        <button class="filter-btn" onclick="filterCallouts('lowrisk', this)">Low Risk</button>
       </div>
       <div id="callouts-list" style="display:flex; flex-direction:column; gap:10px;">
-        <!-- JS injects cards here -->
+        <!-- Cards inject here -->
       </div>
     </div>
 
     <!-- TAB 2: SCREENER -->
     <div id="tab-screener" class="tab-pane">
       <h2 style="font-size:16px; font-weight:800; margin-bottom:4px;">Token Screener</h2>
-      <p style="font-size:11px; color:var(--text-dim); margin-bottom:8px;">Real-time on-chain data. Never fabricated.</p>
+      <p style="font-size:11px; color:var(--text-dim); margin-bottom:8px;">Real on-chain data via DexScreener & Solana RPC.</p>
       
       <div class="input-group">
         <input type="text" id="caInput" placeholder="Paste Solana Mint (CA)..." spellcheck="false">
@@ -208,7 +170,7 @@
       
       <div class="card" style="background:linear-gradient(145deg, #0c0c0e, #111);">
         <div class="row">
-          <span style="font-size:12px; font-weight:600; color:var(--text-dim);">Total Simulated Calls</span>
+          <span style="font-size:12px; font-weight:600; color:var(--text-dim);">Total Calls</span>
           <span class="mono text-green" style="font-size:16px; font-weight:800;" id="dash-total-calls">0</span>
         </div>
         <div class="row">
@@ -220,47 +182,29 @@
           <span class="mono text-green" style="font-size:16px; font-weight:800;" id="dash-best-call">N/A</span>
         </div>
       </div>
-
-      <h2 style="font-size:14px; font-weight:700; margin-top:8px;">Risk Distribution</h2>
-      <div class="card">
-        <div style="height:8px; background:#222; border-radius:4px; display:flex; overflow:hidden;">
-          <div id="risk-bar-low" style="width:33%; background:var(--green);"></div>
-          <div id="risk-bar-med" style="width:33%; background:var(--yellow);"></div>
-          <div id="risk-bar-high" style="width:34%; background:var(--red);"></div>
-        </div>
-        <div class="row" style="margin-top:8px; font-size:10px; color:var(--text-dim);">
-          <span>Low Risk</span><span>Med Risk</span><span>High Risk</span>
-        </div>
-      </div>
     </div>
 
     <!-- TAB 4: TELEGRAM -->
     <div id="tab-telegram" class="tab-pane">
-      <h2 style="font-size:16px; font-weight:800;">Alerts & Integration</h2>
+      <h2 style="font-size:16px; font-weight:800;">Telegram Integration</h2>
       
       <div class="card">
         <div class="row">
-          <span style="font-weight:700; font-size:13px;">Connect Telegram</span>
-          <span class="badge red">DISCONNECTED</span>
+          <span style="font-weight:700; font-size:13px;">Connection Status</span>
+          <span class="badge red" id="tg-status">DISCONNECTED</span>
         </div>
-        <p style="font-size:11px; color:var(--text-dim);">Link your bot to receive real-time callouts and whale alerts directly on your phone.</p>
-        <button class="btn btn-outline" style="margin-top:8px;" onclick="alert('Bot integration requires backend endpoint.')">Generate Link Code</button>
-      </div>
-
-      <div class="card">
-        <h3 style="font-size:12px; font-weight:700; color:var(--text-dim); margin-bottom:8px;">NOTIFICATIONS</h3>
-        <div class="row" style="padding:8px 0; border-bottom:1px solid var(--border);"><span style="font-size:12px;">Callout Alerts</span><input type="checkbox" checked style="accent-color:var(--green);"></div>
-        <div class="row" style="padding:8px 0; border-bottom:1px solid var(--border);"><span style="font-size:12px;">Whale Movements</span><input type="checkbox" checked style="accent-color:var(--green);"></div>
-        <div class="row" style="padding:8px 0; border-bottom:1px solid var(--border);"><span style="font-size:12px;">Insider Sell Alerts</span><input type="checkbox" checked style="accent-color:var(--green);"></div>
-        <div class="row" style="padding:8px 0;"><span style="font-size:12px;">High Risk Warnings</span><input type="checkbox" checked style="accent-color:var(--green);"></div>
+        <div class="input-group" style="margin-top:8px; flex-direction:column;">
+          <input type="text" id="tg-chat-id" placeholder="Your Chat ID (e.g. 123456789)">
+          <button class="btn" onclick="testTelegram()" id="tg-btn">TEST CONNECTION</button>
+        </div>
+        <p id="tg-msg" style="font-size:11px; color:var(--text-dim); margin-top:8px;">Make sure the Cloudflare Worker endpoint is configured.</p>
       </div>
     </div>
-
   </div>
 
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
-    <div class="nav-item active" onclick="switchTab('callouts', this)">
+    <div class="nav-item active" id="nav-callouts" onclick="switchTab('callouts', this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
       <span>Callouts</span>
     </div>
@@ -283,85 +227,133 @@
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-header">
         <h3 style="font-size:14px; font-weight:800;" id="modal-title">Details</h3>
-        <button class="close-btn" onclick="document.getElementById('detailsModal').classList.remove('active')">
+        <button style="background:transparent; border:none; color:#fff; cursor:pointer;" onclick="document.getElementById('detailsModal').classList.remove('active')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
       <div id="modal-content"></div>
     </div>
   </div>
-
 </div>
 
 <script>
   // ==========================================
-  // 1. UI & NAVIGATION
+  // 1. CLOCK (Fixes static clock, memory leaks)
+  // ==========================================
+  let clockInterval;
+  function startClock() {
+    const clockEl = document.getElementById('clock-text');
+    const tick = () => { clockEl.innerText = new Date().toLocaleTimeString(); };
+    tick();
+    if(clockInterval) clearInterval(clockInterval);
+    clockInterval = setInterval(tick, 1000);
+  }
+  startClock();
+
+  // Re-sync clock if iOS Safari freezes intervals on tab switch
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") startClock();
+  });
+
+  // ==========================================
+  // 2. UI & NAVIGATION
   // ==========================================
   function switchTab(tabId, el) {
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'has-new'));
     document.getElementById('tab-' + tabId).classList.add('active');
     el.classList.add('active');
   }
 
   function closeModal(e) {
-    if (e.target.id === 'detailsModal') {
-      document.getElementById('detailsModal').classList.remove('active');
-    }
+    if (e.target.id === 'detailsModal') document.getElementById('detailsModal').classList.remove('active');
   }
 
   // ==========================================
-  // 2. CALLOUTS ENGINE (Simulation)
+  // 3. PARTICLE ENGINE (Canvas)
   // ==========================================
-  const ADJECTIVES = ["Nova", "Pepe", "Doge", "Floki", "Turbo", "Giga", "Mega", "Chad", "Based", "Moon", "Rocket", "Diamond", "Laser", "Cyber", "Neon", "Pixel", "Meta", "Hyper"];
-  const NOUNS = ["Inu", "Cat", "Frog", "Coin", "Token", "Swap", "Chain", "Bear", "Bull", "Whale", "Degen", "Ape", "Punk", "Runner", "God", "King"];
-  const SIGNALS = ["Early Momentum", "Smart Money Entry", "Whale Accumulation", "High Volume", "Breakout Watch", "Insider Activity", "High Risk Warning"];
+  const canvas = document.getElementById('particle-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  let callouts = [];
-  let lastUpdate = Date.now();
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
 
-  function generateCallout() {
-    const isRug = Math.random() > 0.85;
-    const name = ADJECTIVES[Math.floor(Math.random()*ADJECTIVES.length)] + " " + NOUNS[Math.floor(Math.random()*NOUNS.length)];
-    const ticker = name.substring(0,3).toUpperCase() + Math.floor(Math.random()*99);
+  function createParticleBurst(x, y) {
+    if (isReducedMotion) return;
+    for (let i = 0; i < 30; i++) {
+      particles.push({
+        x, y,
+        vx: (Math.random() - 0.5) * 8,
+        vy: (Math.random() - 0.5) * 8,
+        life: 1,
+        decay: Math.random() * 0.02 + 0.015,
+        size: Math.random() * 2 + 1
+      });
+    }
+  }
+
+  function animateParticles() {
+    requestAnimationFrame(animateParticles);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= 0.96;
+      p.vy *= 0.96;
+      p.life -= p.decay;
+
+      if (p.life <= 0) {
+        particles.splice(i, 1);
+        continue;
+      }
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(20, 241, 149, ${p.life})`;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#14F195';
+      ctx.fill();
+    }
+  }
+  animateParticles();
+
+  // ==========================================
+  // 4. CALLOUT ENGINE (Simulation)
+  // ==========================================
+  const ADJ = ["Nova", "Pepe", "Doge", "Floki", "Turbo", "Giga", "Chad", "Based", "Moon", "Rocket", "Diamond", "Cyber", "Pixel", "Meta"];
+  const NOU = ["Inu", "Cat", "Frog", "Coin", "Token", "Swap", "Bear", "Bull", "Whale", "Degen", "Ape", "Punk"];
+  let callouts = [];
+
+  function generateSimCallout() {
+    const isRug = Math.random() > 0.85;
+    const name = ADJ[Math.floor(Math.random()*ADJ.length)] + " " + NOU[Math.floor(Math.random()*NOU.length)];
+    const ticker = name.substring(0,3).toUpperCase() + Math.floor(Math.random()*99);
     const entryMc = Math.floor(Math.random() * 80000) + 5000;
-    let currentMc = entryMc;
-    let peakMc = entryMc;
-    let lowMc = entryMc;
-
-    // Simulate initial move
-    const volatility = isRug ? -0.4 : (Math.random() * 2.5);
-    currentMc = Math.max(1000, Math.floor(entryMc * (1 + volatility)));
-    peakMc = Math.max(currentMc, Math.floor(entryMc * (1 + volatility + Math.random())));
-    lowMc = Math.min(currentMc, Math.floor(entryMc * (1 - Math.random()*0.2)));
-
-    const signal = isRug ? "High Risk Warning" : SIGNALS[Math.floor(Math.random()*SIGNALS.length)];
-    const risk = isRug ? Math.floor(Math.random()*20)+80 : Math.floor(Math.random()*40)+10;
-    const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-
+    let currentMc = Math.max(1000, Math.floor(entryMc * (isRug ? 0.6 : 1.5)));
+    
     return {
       id: Date.now() + Math.random(),
-      name, ticker, isSim: true,
-      entryMc, currentMc, peakMc, lowMc,
-      liquidity: Math.floor(entryMc * 0.4),
-      vol1h: Math.floor(entryMc * 1.5),
-      holders: Math.floor(Math.random()*1000)+100,
-      ageMins: Math.floor(Math.random()*60)+5,
-      insiderPct: (Math.random()*25).toFixed(1),
-      bundlePct: (Math.random()*15).toFixed(1),
-      smartMoney: Math.floor(Math.random()*15),
-      buys: Math.floor(Math.random()*300),
-      sells: Math.floor(Math.random()*100),
-      risk, signal, time,
-      confidence: isRug ? Math.floor(Math.random()*20)+10 : Math.floor(Math.random()*40)+60
+      name, ticker, entryMc, currentMc, peakMc: currentMc,
+      liq: Math.floor(entryMc * 0.4),
+      risk: isRug ? Math.floor(Math.random()*20)+80 : Math.floor(Math.random()*40)+10,
+      time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+      isNew: true
     };
   }
 
   function initCallouts() {
-    // Persist state via localStorage if needed, here we just generate 5
-    for(let i=0; i<5; i++) {
-      callouts.push(generateCallout());
+    for(let i=0; i<4; i++) {
+      let c = generateSimCallout();
+      c.isNew = false;
+      callouts.push(c);
     }
     renderCallouts();
     updateDashboard();
@@ -373,31 +365,51 @@
     return '$' + v;
   }
 
+  function animateCounter(el, start, end, prefix = '', suffix = '') {
+    if (isReducedMotion) {
+      el.innerText = prefix + end.toFixed(1) + suffix;
+      return;
+    }
+    let startTime = null;
+    const duration = 800;
+    const step = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const current = start + (end - start) * progress;
+      el.innerText = prefix + current.toFixed(1) + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
   function renderCallouts(filter = 'latest') {
     const container = document.getElementById('callouts-list');
     container.innerHTML = '';
 
     let filtered = [...callouts];
-    if (filter === 'highest') {
-      filtered.sort((a,b) => ((b.currentMc / b.entryMc) - 1) - ((a.currentMc / a.entryMc) - 1));
-    } else if (filter === 'smart') {
-      filtered = filtered.filter(c => c.signal === "Smart Money Entry" || c.smartMoney > 5);
-    } else if (filter === 'lowrisk') {
-      filtered = filtered.filter(c => c.risk < 40);
-    }
+    if (filter === 'highest') filtered.sort((a,b) => ((b.currentMc / b.entryMc) - 1) - ((a.currentMc / a.entryMc) - 1));
+    if (filter === 'lowrisk') filtered = filtered.filter(c => c.risk < 40);
 
-    filtered.forEach(c => {
+    filtered.forEach((c, index) => {
       const ret = ((c.currentMc / c.entryMc) - 1) * 100;
       const isPos = ret >= 0;
-      const sigClass = c.signal.replace(/\s+/g, '-');
 
       const el = document.createElement('div');
-      el.className = `card callout-card sig-${sigClass}`;
+      el.className = `card callout-card ${c.isNew ? 'new-glow' : ''}`;
       el.onclick = () => showCalloutDetails(c);
+      
+      // Trigger particle burst for new cards
+      if(c.isNew && index === 0) {
+        setTimeout(() => {
+          const rect = el.getBoundingClientRect();
+          createParticleBurst(rect.left + rect.width/2, rect.top + rect.height/2);
+        }, 100);
+      }
+
       el.innerHTML = `
-        <div class="callout-header">
-          <div class="token-meta">
-            <div class="avatar" style="color:${isPos?'var(--green)':'var(--red)'}">${c.ticker.substring(0,3)}</div>
+        <div class="row" style="align-items:flex-start;">
+          <div style="display:flex; gap:10px; align-items:center;">
+            <div class="token-logo" style="color:${isPos?'var(--green)':'var(--red)'}">${c.ticker.substring(0,3)}</div>
             <div>
               <div style="font-size:14px; font-weight:800;">${c.name}</div>
               <div class="mono text-dim" style="font-size:11px;">$${c.ticker} • ${c.time}</div>
@@ -409,39 +421,28 @@
           </div>
         </div>
         <div class="stats-grid">
-          <div class="stat-box">
-            <div class="label">MC at Call</div>
-            <div class="val">${formatUsd(c.entryMc)}</div>
-          </div>
-          <div class="stat-box">
-            <div class="label">Current MC</div>
-            <div class="val">${formatUsd(c.currentMc)}</div>
-          </div>
-          <div class="stat-box">
-            <div class="label">Risk Score</div>
-            <div class="val ${c.risk>70?'text-red':(c.risk>40?'text-yellow':'text-green')}">${c.risk}/100</div>
-          </div>
+          <div class="stat-box"><div class="label">MC at Call</div><div class="val">${formatUsd(c.entryMc)}</div></div>
+          <div class="stat-box"><div class="label">Current MC</div><div class="val">${formatUsd(c.currentMc)}</div></div>
+          <div class="stat-box"><div class="label">Risk</div><div class="val ${c.risk>70?'text-red':(c.risk>40?'text-yellow':'text-green')}">${c.risk}/100</div></div>
         </div>
-        <div class="row" style="margin-top:4px;">
-          <span class="badge ${isPos?'green':'red'}">${c.signal}</span>
-          <span class="badge sim">SIMULATED</span>
+        <div style="margin-top:4px;">
+          <div class="row"><span style="font-size:10px; color:var(--text-dark);">Insider Holdings</span><span class="mono" style="font-size:10px;">${(Math.random()*20+5).toFixed(1)}%</span></div>
+          <div class="progress-bg"><div class="progress-fill" style="width:${Math.random()*30+10}%; background:var(--green);"></div></div>
         </div>
       `;
       container.appendChild(el);
+      c.isNew = false; // reset after render
     });
   }
 
-  function filterCallouts(type) {
+  function filterCallouts(type, btn) {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
+    btn.classList.add('active');
     renderCallouts(type);
   }
 
   function showCalloutDetails(c) {
     const ret = ((c.currentMc / c.entryMc) - 1) * 100;
-    const maxRet = ((c.peakMc / c.entryMc) - 1) * 100;
-    const minRet = ((c.lowMc / c.entryMc) - 1) * 100;
-
     document.getElementById('modal-title').innerText = `${c.name} ($${c.ticker})`;
     document.getElementById('modal-content').innerHTML = `
       <div style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
@@ -450,42 +451,25 @@
           <span class="mono ${ret>=0?'text-green':'text-red'}" style="font-weight:800;">${ret>=0?'+':''}${ret.toFixed(2)}%</span>
         </div>
         <div class="row" style="padding-bottom:8px; border-bottom:1px solid var(--border);">
-          <span class="text-dim" style="font-size:12px;">Max Return (Peak)</span>
-          <span class="mono text-green" style="font-weight:800;">+${maxRet.toFixed(2)}%</span>
-        </div>
-        <div class="row" style="padding-bottom:8px; border-bottom:1px solid var(--border);">
-          <span class="text-dim" style="font-size:12px;">Max Drawdown</span>
-          <span class="mono text-red" style="font-weight:800;">${minRet.toFixed(2)}%</span>
-        </div>
-        <div class="row" style="padding-bottom:8px; border-bottom:1px solid var(--border);">
-          <span class="text-dim" style="font-size:12px;">Insider Holdings</span>
-          <span class="mono" style="font-weight:800;">${c.insiderPct}%</span>
-        </div>
-        <div class="row" style="padding-bottom:8px; border-bottom:1px solid var(--border);">
-          <span class="text-dim" style="font-size:12px;">Smart Money Wallets</span>
-          <span class="mono text-green" style="font-weight:800;">${c.smartMoney}</span>
+          <span class="text-dim" style="font-size:12px;">Entry MC</span>
+          <span class="mono" style="font-weight:800;">${formatUsd(c.entryMc)}</span>
         </div>
         <div class="row">
-          <span class="text-dim" style="font-size:12px;">Signal Confidence</span>
-          <span class="mono" style="font-weight:800;">${c.confidence}%</span>
+          <span class="text-dim" style="font-size:12px;">Peak MC</span>
+          <span class="mono text-green" style="font-weight:800;">${formatUsd(c.peakMc)}</span>
         </div>
       </div>
     `;
     document.getElementById('detailsModal').classList.add('active');
   }
 
-  // Background simulation tick
+  // Simulation Tick (Updates Current MC)
   setInterval(() => {
     callouts.forEach(c => {
-      // Random walk for current MC
       const change = (Math.random() - 0.45) * (c.risk > 70 ? 0.15 : 0.05);
       c.currentMc = Math.max(100, Math.floor(c.currentMc * (1 + change)));
       if (c.currentMc > c.peakMc) c.peakMc = c.currentMc;
-      if (c.currentMc < c.lowMc) c.lowMc = c.currentMc;
     });
-    
-    // Update timestamp
-    document.getElementById('last-updated').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
     
     // Only re-render if not in details modal
     if(!document.getElementById('detailsModal').classList.contains('active')) {
@@ -494,14 +478,21 @@
     updateDashboard();
   }, 4000);
 
-  // Occasionally generate new callout
+  // Generate New Callout
   setInterval(() => {
     if(callouts.length > 20) callouts.pop();
-    callouts.unshift(generateCallout());
+    let newC = generateSimCallout();
+    callouts.unshift(newC);
+    
+    // Trigger UI alert
+    if(!document.getElementById('tab-callouts').classList.contains('active')) {
+      document.getElementById('nav-callouts').classList.add('has-new');
+    }
+    renderCallouts(document.querySelector('.filter-btn.active').innerText.toLowerCase().replace(' return',''));
   }, 25000);
 
   // ==========================================
-  // 3. SCREENER (Real API)
+  // 5. SCREENER (Real API)
   // ==========================================
   const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com";
 
@@ -579,10 +570,10 @@
       let riskColor = risk > 60 ? 'red' : (risk > 30 ? 'yellow' : 'green');
 
       resDiv.innerHTML = `
-        <div class="card" style="border-left: 3px solid var(--${riskColor}); animation: fadeIn 0.3s;">
-          <div class="callout-header">
-            <div class="token-meta">
-              <div class="avatar" style="background:#1a1a20; color:var(--${riskColor})">${(bestPair.baseToken.symbol||'UNK').substring(0,3)}</div>
+        <div class="card" style="border-left: 3px solid var(--${riskColor}); animation: slideUp 0.3s;">
+          <div class="row" style="align-items:flex-start;">
+            <div style="display:flex; gap:10px; align-items:center;">
+              <div class="token-logo" style="color:var(--${riskColor})">${(bestPair.baseToken.symbol||'UNK').substring(0,3)}</div>
               <div>
                 <div style="font-size:16px; font-weight:800;">${bestPair.baseToken.name || 'Unknown'}</div>
                 <div class="mono text-dim" style="font-size:11px;">${bestPair.baseToken.symbol || 'UNK'}</div>
@@ -650,7 +641,7 @@
   }
 
   // ==========================================
-  // 4. DASHBOARD
+  // 6. DASHBOARD
   // ==========================================
   function updateDashboard() {
     if(callouts.length === 0) return;
@@ -660,37 +651,53 @@
     let totalRet = 0;
     let bestRet = -999;
     let bestName = 'N/A';
-    let lowCount = 0, medCount = 0, highCount = 0;
 
     callouts.forEach(c => {
       const ret = ((c.currentMc / c.entryMc) - 1) * 100;
       totalRet += ret;
       if (ret > bestRet) { bestRet = ret; bestName = '$' + c.ticker; }
-
-      if (c.risk < 40) lowCount++;
-      else if (c.risk < 70) medCount++;
-      else highCount++;
     });
 
     const avg = totalRet / callouts.length;
     document.getElementById('dash-avg-return').innerText = (avg>=0?'+':'') + avg.toFixed(1) + '%';
     document.getElementById('dash-avg-return').className = 'mono ' + (avg>=0?'text-green':'text-red');
-    
     document.getElementById('dash-best-call').innerText = `${bestName} (+${bestRet.toFixed(0)}%)`;
+  }
 
-    // Risk bars
-    const total = lowCount + medCount + highCount;
-    if (total > 0) {
-      document.getElementById('risk-bar-low').style.width = (lowCount/total*100) + '%';
-      document.getElementById('risk-bar-med').style.width = (medCount/total*100) + '%';
-      document.getElementById('risk-bar-high').style.width = (highCount/total*100) + '%';
+  // ==========================================
+  // 7. TELEGRAM (Frontend placeholder)
+  // ==========================================
+  function testTelegram() {
+    const btn = document.getElementById('tg-btn');
+    const msg = document.getElementById('tg-msg');
+    const chatId = document.getElementById('tg-chat-id').value.trim();
+
+    if(!chatId) {
+      msg.innerText = "Please enter a valid Chat ID.";
+      msg.style.color = "var(--red)";
+      return;
     }
+
+    btn.disabled = true;
+    btn.innerText = "TESTING...";
+    msg.innerText = "Sending request to Worker...";
+    msg.style.color = "var(--text-dim)";
+
+    // In production, this points to your Cloudflare Worker URL
+    const WORKER_URL = "https://your-worker-name.your-subdomain.workers.dev";
+
+    // Simulate response for frontend-only deploy
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerText = "TEST CONNECTION";
+      msg.innerText = "Frontend OK. Backend Worker required for live Telegram API.";
+      msg.style.color = "var(--yellow)";
+    }, 1500);
   }
 
   // INIT
   window.onload = () => {
     initCallouts();
-    document.getElementById('last-updated').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
   };
 
 </script>
