@@ -66,12 +66,6 @@
   .text-dim { color: var(--text-dim); }
   .text-dark { color: var(--text-dark); }
 
-  /* FLASH ANIMATIONS */
-  .flash-green { animation: flashGreen 0.8s ease-out; }
-  @keyframes flashGreen { 0% { background: rgba(20,241,149,0.2); } 100% { background: transparent; } }
-  .flash-red { animation: flashRed 0.8s ease-out; }
-  @keyframes flashRed { 0% { background: rgba(239,68,68,0.2); } 100% { background: transparent; } }
-
   /* INPUTS & BUTTONS */
   .input-group { display: flex; gap: 8px; }
   input[type="text"] { flex: 1; background: #121216; border: 1px solid #2a2a30; color: #fff; padding: 12px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none; transition: border-color 0.2s; }
@@ -92,7 +86,10 @@
   .callout-card.new-glow { animation: borderGlow 2s ease-out; }
   @keyframes borderGlow { 0% { border-color: var(--green); box-shadow: 0 0 15px rgba(20,241,149,0.2); } 100% { border-color: var(--border); box-shadow: none; } }
   
-  .token-logo { width: 36px; height: 36px; border-radius: 50%; background: #1a1a20; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; border: 1px solid #2a2a30; object-fit: cover; }
+  /* Text-only Token Identifier */
+  .token-id { display: flex; align-items: center; gap: 8px; }
+  .token-name-text { font-size: 14px; font-weight: 800; color: var(--text); }
+  .token-ticker-text { font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
   
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
   .stat-box { background: rgba(255,255,255,0.02); padding: 8px; border-radius: 6px; }
@@ -102,6 +99,14 @@
   /* PROGRESS BAR */
   .progress-bg { height: 4px; background: #222; border-radius: 2px; overflow: hidden; margin-top: 4px; }
   .progress-fill { height: 100%; border-radius: 2px; transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+  /* COPY BUTTON */
+  .ca-container { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-dark); font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
+  .copy-btn { background: transparent; border: none; color: var(--text-dim); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px; border-radius: 4px; transition: color 0.2s, background 0.2s; }
+  .copy-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+  .copy-btn.copied { color: var(--green); pointer-events: none; }
+  .copy-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--green); color: #000; font-size: 11px; font-weight: 800; padding: 6px 14px; border-radius: 20px; opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; z-index: 100; box-shadow: 0 4px 12px rgba(20,241,149,0.3); }
+  .copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* SKELETON */
   .skeleton { background: linear-gradient(90deg, #121216 25%, #1a1a20 50%, #121216 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 4px; }
@@ -118,6 +123,7 @@
 <body>
 
 <canvas id="particle-canvas"></canvas>
+<div id="copy-toast" class="copy-toast">Copied!</div>
 
 <div class="app-shell">
   <div class="top-bar">
@@ -133,7 +139,6 @@
     <div id="tab-callouts" class="tab-pane active">
       <div class="row">
         <h2 style="font-size:16px; font-weight:800;">Live Signals</h2>
-        <span class="badge blue" id="sim-badge">SIMULATED</span>
       </div>
       <div class="filter-scroll">
         <button class="filter-btn active" onclick="filterCallouts('latest', this)">Latest</button>
@@ -238,7 +243,62 @@
 
 <script>
   // ==========================================
-  // 1. CLOCK (Fixes static clock, memory leaks)
+  // 1. CLIPBOARD LOGIC
+  // ==========================================
+  async function copyToClipboard(text, btnElement) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        // Fallback for older iOS Safari
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "absolute";
+        textArea.style.left = "-999999px";
+        document.body.prepend(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        textArea.remove();
+      }
+      
+      // Visual feedback
+      const toast = document.getElementById('copy-toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1500);
+
+      if (btnElement) {
+        const originalHTML = btnElement.innerHTML;
+        btnElement.classList.add('copied');
+        // Lucide Check icon
+        btnElement.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+        
+        setTimeout(() => {
+          btnElement.classList.remove('copied');
+          btnElement.innerHTML = originalHTML;
+        }, 1500);
+      }
+    } catch (err) {
+      console.error('Copy failed', err);
+    }
+  }
+
+  // Helper to build CA row
+  function buildCaRow(ca) {
+    if (!ca) return '';
+    const shortCa = ca.substring(0, 6) + '...' + ca.substring(ca.length - 4);
+    // Lucide Clipboard icon
+    const clipIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+    
+    return `
+      <div class="ca-container">
+        <span>CA: ${shortCa}</span>
+        <button class="copy-btn" onclick="event.stopPropagation(); copyToClipboard('${ca}', this)">${clipIcon}</button>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // 2. CLOCK
   // ==========================================
   let clockInterval;
   function startClock() {
@@ -250,13 +310,12 @@
   }
   startClock();
 
-  // Re-sync clock if iOS Safari freezes intervals on tab switch
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") startClock();
   });
 
   // ==========================================
-  // 2. UI & NAVIGATION
+  // 3. UI & NAVIGATION
   // ==========================================
   function switchTab(tabId, el) {
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
@@ -270,63 +329,7 @@
   }
 
   // ==========================================
-  // 3. PARTICLE ENGINE (Canvas)
-  // ==========================================
-  const canvas = document.getElementById('particle-canvas');
-  const ctx = canvas.getContext('2d');
-  let particles = [];
-  let isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-
-  function createParticleBurst(x, y) {
-    if (isReducedMotion) return;
-    for (let i = 0; i < 30; i++) {
-      particles.push({
-        x, y,
-        vx: (Math.random() - 0.5) * 8,
-        vy: (Math.random() - 0.5) * 8,
-        life: 1,
-        decay: Math.random() * 0.02 + 0.015,
-        size: Math.random() * 2 + 1
-      });
-    }
-  }
-
-  function animateParticles() {
-    requestAnimationFrame(animateParticles);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i];
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vx *= 0.96;
-      p.vy *= 0.96;
-      p.life -= p.decay;
-
-      if (p.life <= 0) {
-        particles.splice(i, 1);
-        continue;
-      }
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(20, 241, 149, ${p.life})`;
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = '#14F195';
-      ctx.fill();
-    }
-  }
-  animateParticles();
-
-  // ==========================================
-  // 4. CALLOUT ENGINE (Simulation)
+  // 4. CALLOUT ENGINE (Text Only)
   // ==========================================
   const ADJ = ["Nova", "Pepe", "Doge", "Floki", "Turbo", "Giga", "Chad", "Based", "Moon", "Rocket", "Diamond", "Cyber", "Pixel", "Meta"];
   const NOU = ["Inu", "Cat", "Frog", "Coin", "Token", "Swap", "Bear", "Bull", "Whale", "Degen", "Ape", "Punk"];
@@ -338,10 +341,12 @@
     const ticker = name.substring(0,3).toUpperCase() + Math.floor(Math.random()*99);
     const entryMc = Math.floor(Math.random() * 80000) + 5000;
     let currentMc = Math.max(1000, Math.floor(entryMc * (isRug ? 0.6 : 1.5)));
+    // Generate a valid format base58 string for demo
+    const ca = Array.from({length: 44}, () => "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"[Math.floor(Math.random()*58)]).join('');
     
     return {
       id: Date.now() + Math.random(),
-      name, ticker, entryMc, currentMc, peakMc: currentMc,
+      name, ticker, ca, entryMc, currentMc, peakMc: currentMc,
       liq: Math.floor(entryMc * 0.4),
       risk: isRug ? Math.floor(Math.random()*20)+80 : Math.floor(Math.random()*40)+10,
       time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
@@ -365,23 +370,6 @@
     return '$' + v;
   }
 
-  function animateCounter(el, start, end, prefix = '', suffix = '') {
-    if (isReducedMotion) {
-      el.innerText = prefix + end.toFixed(1) + suffix;
-      return;
-    }
-    let startTime = null;
-    const duration = 800;
-    const step = (timestamp) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const current = start + (end - start) * progress;
-      el.innerText = prefix + current.toFixed(1) + suffix;
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }
-
   function renderCallouts(filter = 'latest') {
     const container = document.getElementById('callouts-list');
     container.innerHTML = '';
@@ -390,32 +378,24 @@
     if (filter === 'highest') filtered.sort((a,b) => ((b.currentMc / b.entryMc) - 1) - ((a.currentMc / a.entryMc) - 1));
     if (filter === 'lowrisk') filtered = filtered.filter(c => c.risk < 40);
 
-    filtered.forEach((c, index) => {
+    filtered.forEach((c) => {
       const ret = ((c.currentMc / c.entryMc) - 1) * 100;
       const isPos = ret >= 0;
 
       const el = document.createElement('div');
       el.className = `card callout-card ${c.isNew ? 'new-glow' : ''}`;
       el.onclick = () => showCalloutDetails(c);
-      
-      // Trigger particle burst for new cards
-      if(c.isNew && index === 0) {
-        setTimeout(() => {
-          const rect = el.getBoundingClientRect();
-          createParticleBurst(rect.left + rect.width/2, rect.top + rect.height/2);
-        }, 100);
-      }
 
       el.innerHTML = `
         <div class="row" style="align-items:flex-start;">
-          <div style="display:flex; gap:10px; align-items:center;">
-            <div class="token-logo" style="color:${isPos?'var(--green)':'var(--red)'}">${c.ticker.substring(0,3)}</div>
-            <div>
-              <div style="font-size:14px; font-weight:800;">${c.name}</div>
-              <div class="mono text-dim" style="font-size:11px;">$${c.ticker} • ${c.time}</div>
+          <div>
+            <div class="token-id">
+              <span class="token-name-text">${c.name}</span>
+              <span class="token-ticker-text">$${c.ticker}</span>
             </div>
+            ${buildCaRow(c.ca)}
           </div>
-          <div style="text-align:right;">
+          <div style="text-align:right; flex-shrink:0;">
             <div class="mono ${isPos?'text-green':'text-red'}" style="font-size:14px; font-weight:800;">${isPos?'+':''}${ret.toFixed(1)}%</div>
             <div style="font-size:10px; color:var(--text-dark);">Since Call</div>
           </div>
@@ -425,13 +405,9 @@
           <div class="stat-box"><div class="label">Current MC</div><div class="val">${formatUsd(c.currentMc)}</div></div>
           <div class="stat-box"><div class="label">Risk</div><div class="val ${c.risk>70?'text-red':(c.risk>40?'text-yellow':'text-green')}">${c.risk}/100</div></div>
         </div>
-        <div style="margin-top:4px;">
-          <div class="row"><span style="font-size:10px; color:var(--text-dark);">Insider Holdings</span><span class="mono" style="font-size:10px;">${(Math.random()*20+5).toFixed(1)}%</span></div>
-          <div class="progress-bg"><div class="progress-fill" style="width:${Math.random()*30+10}%; background:var(--green);"></div></div>
-        </div>
       `;
       container.appendChild(el);
-      c.isNew = false; // reset after render
+      c.isNew = false;
     });
   }
 
@@ -446,6 +422,12 @@
     document.getElementById('modal-title').innerText = `${c.name} ($${c.ticker})`;
     document.getElementById('modal-content').innerHTML = `
       <div style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
+        <div style="padding-bottom:8px; border-bottom:1px solid var(--border);">
+          <span class="text-dim" style="font-size:12px;">Contract Address</span>
+          <div style="margin-top:4px;">
+            ${buildCaRow(c.ca)}
+          </div>
+        </div>
         <div class="row" style="padding-bottom:8px; border-bottom:1px solid var(--border);">
           <span class="text-dim" style="font-size:12px;">Return Since Call</span>
           <span class="mono ${ret>=0?'text-green':'text-red'}" style="font-weight:800;">${ret>=0?'+':''}${ret.toFixed(2)}%</span>
@@ -463,7 +445,7 @@
     document.getElementById('detailsModal').classList.add('active');
   }
 
-  // Simulation Tick (Updates Current MC)
+  // Simulation Tick
   setInterval(() => {
     callouts.forEach(c => {
       const change = (Math.random() - 0.45) * (c.risk > 70 ? 0.15 : 0.05);
@@ -471,20 +453,16 @@
       if (c.currentMc > c.peakMc) c.peakMc = c.currentMc;
     });
     
-    // Only re-render if not in details modal
     if(!document.getElementById('detailsModal').classList.contains('active')) {
       renderCallouts(document.querySelector('.filter-btn.active').innerText.toLowerCase().replace(' return',''));
     }
     updateDashboard();
   }, 4000);
 
-  // Generate New Callout
   setInterval(() => {
     if(callouts.length > 20) callouts.pop();
     let newC = generateSimCallout();
     callouts.unshift(newC);
-    
-    // Trigger UI alert
     if(!document.getElementById('tab-callouts').classList.contains('active')) {
       document.getElementById('nav-callouts').classList.add('has-new');
     }
@@ -492,7 +470,7 @@
   }, 25000);
 
   // ==========================================
-  // 5. SCREENER (Real API)
+  // 5. SCREENER
   // ==========================================
   const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com";
 
@@ -508,31 +486,19 @@
 
     btn.disabled = true;
     btn.innerText = "WAIT...";
-    resDiv.innerHTML = `
-      <div class="card" style="gap:16px;">
-        <div class="skeleton" style="height:20px; width:50%;"></div>
-        <div class="skeleton" style="height:40px; width:100%;"></div>
-        <div class="skeleton" style="height:60px; width:100%;"></div>
-      </div>
-    `;
+    resDiv.innerHTML = `<div class="card"><div class="skeleton" style="height:20px; width:50%;"></div><div class="skeleton" style="height:40px; width:100%; margin-top:10px;"></div></div>`;
 
     try {
-      // 1. DexScreener
       const dexReq = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${ca}`);
       const dexData = await dexReq.json();
       
-      if (!dexData.pairs || dexData.pairs.length === 0) {
-        throw new Error("No liquidity pairs found for this token.");
-      }
-      
+      if (!dexData.pairs || dexData.pairs.length === 0) throw new Error("No liquidity pairs found.");
       const bestPair = dexData.pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
 
-      // 2. RPC Mint Info
       let mintAuth = 'N/A', freezeAuth = 'N/A';
       try {
         const rpcReq = await fetch(RPC_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getAccountInfo', params: [ca, { encoding: "jsonParsed" }] })
         });
         const rpcData = await rpcReq.json();
@@ -541,9 +507,8 @@
           mintAuth = info.mintAuthority || 'Revoked';
           freezeAuth = info.freezeAuthority || 'Revoked';
         }
-      } catch (e) { console.warn("RPC failed, skipping auth check."); }
+      } catch (e) {}
 
-      // 3. Processing & Validation
       const price = parseFloat(bestPair.priceUsd);
       const mc = parseFloat(bestPair.marketCap || bestPair.fdv);
       const liq = parseFloat(bestPair.liquidity?.usd || 0);
@@ -552,17 +517,11 @@
       const ageMs = Date.now() - (bestPair.pairCreatedAt || Date.now());
       const ageHours = ageMs / (1000 * 60 * 60);
 
-      // Explicit Age formatting
       let ageStr = 'N/A';
-      if (ageHours < 1) {
-        ageStr = Math.floor(ageHours * 60) + 'm';
-      } else if (ageHours < 24) {
-        ageStr = Math.floor(ageHours) + 'h ' + Math.floor((ageHours % 1) * 60) + 'm';
-      } else {
-        ageStr = Math.floor(ageHours / 24) + 'd ' + Math.floor(ageHours % 24) + 'h';
-      }
+      if (ageHours < 1) ageStr = Math.floor(ageHours * 60) + 'm';
+      else if (ageHours < 24) ageStr = Math.floor(ageHours) + 'h ' + Math.floor((ageHours % 1) * 60) + 'm';
+      else ageStr = Math.floor(ageHours / 24) + 'd ' + Math.floor(ageHours % 24) + 'h';
 
-      // Risk calculation
       let risk = 0;
       if (liq < 5000) risk += 40;
       if (mintAuth !== 'Revoked') risk += 30;
@@ -572,68 +531,33 @@
       resDiv.innerHTML = `
         <div class="card" style="border-left: 3px solid var(--${riskColor}); animation: slideUp 0.3s;">
           <div class="row" style="align-items:flex-start;">
-            <div style="display:flex; gap:10px; align-items:center;">
-              <div class="token-logo" style="color:var(--${riskColor})">${(bestPair.baseToken.symbol||'UNK').substring(0,3)}</div>
-              <div>
-                <div style="font-size:16px; font-weight:800;">${bestPair.baseToken.name || 'Unknown'}</div>
-                <div class="mono text-dim" style="font-size:11px;">${bestPair.baseToken.symbol || 'UNK'}</div>
+            <div>
+              <div class="token-id">
+                <span class="token-name-text">${bestPair.baseToken.name || 'Unknown'}</span>
+                <span class="token-ticker-text">${bestPair.baseToken.symbol || 'UNK'}</span>
               </div>
+              ${buildCaRow(ca)}
             </div>
             <div class="badge ${riskColor}">RISK: ${risk}</div>
           </div>
 
-          <div class="row mono" style="font-size:11px; color:var(--text-dark); margin:8px 0;">
-            <span>CA: ${ca.substring(0,6)}...${ca.substring(ca.length-4)}</span>
-            <span style="cursor:pointer;" onclick="navigator.clipboard.writeText('${ca}')">COPY</span>
-          </div>
-
           <div class="stats-grid">
-            <div class="stat-box">
-              <div class="label">Price</div>
-              <div class="val">${price < 0.01 ? price.toFixed(6) : price.toFixed(4)}</div>
-            </div>
-            <div class="stat-box">
-              <div class="label">Market Cap</div>
-              <div class="val text-yellow">${mc ? formatUsd(mc) : 'N/A'}</div>
-            </div>
-            <div class="stat-box">
-              <div class="label">Liquidity</div>
-              <div class="val ${liq < 5000 ? 'text-red' : ''}">${formatUsd(liq)}</div>
-            </div>
-            <div class="stat-box">
-              <div class="label">Age</div>
-              <div class="val">${ageStr}</div>
-            </div>
-            <div class="stat-box">
-              <div class="label">24h Vol</div>
-              <div class="val">${formatUsd(vol24)}</div>
-            </div>
-            <div class="stat-box">
-              <div class="label">1h Vol</div>
-              <div class="val">${formatUsd(vol1h)}</div>
-            </div>
+            <div class="stat-box"><div class="label">Price</div><div class="val">${price < 0.01 ? price.toFixed(6) : price.toFixed(4)}</div></div>
+            <div class="stat-box"><div class="label">Market Cap</div><div class="val text-yellow">${mc ? formatUsd(mc) : 'N/A'}</div></div>
+            <div class="stat-box"><div class="label">Liquidity</div><div class="val ${liq < 5000 ? 'text-red' : ''}">${formatUsd(liq)}</div></div>
+            <div class="stat-box"><div class="label">Age</div><div class="val">${ageStr}</div></div>
+            <div class="stat-box"><div class="label">24h Vol</div><div class="val">${formatUsd(vol24)}</div></div>
+            <div class="stat-box"><div class="label">1h Vol</div><div class="val">${formatUsd(vol1h)}</div></div>
           </div>
 
           <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
-            <div class="row">
-              <span style="font-size:11px; color:var(--text-dim);">Mint Authority</span>
-              <span class="mono" style="font-size:11px; color:${mintAuth==='Revoked'?'var(--green)':'var(--red)'}">${mintAuth}</span>
-            </div>
-            <div class="row">
-              <span style="font-size:11px; color:var(--text-dim);">Freeze Authority</span>
-              <span class="mono" style="font-size:11px; color:${freezeAuth==='Revoked'?'var(--green)':'var(--red)'}">${freezeAuth}</span>
-            </div>
+            <div class="row"><span style="font-size:11px; color:var(--text-dim);">Mint Authority</span><span class="mono" style="font-size:11px; color:${mintAuth==='Revoked'?'var(--green)':'var(--red)'}">${mintAuth}</span></div>
+            <div class="row"><span style="font-size:11px; color:var(--text-dim);">Freeze Authority</span><span class="mono" style="font-size:11px; color:${freezeAuth==='Revoked'?'var(--green)':'var(--red)'}">${freezeAuth}</span></div>
           </div>
         </div>
       `;
-
     } catch (err) {
-      resDiv.innerHTML = `
-        <div class="card" style="border-left: 3px solid var(--red); background:var(--red-dim); padding:16px; text-align:center;">
-          <div style="color:var(--red); font-size:13px; font-weight:700;">SCAN FAILED</div>
-          <div style="color:var(--text-dim); font-size:11px; margin-top:4px;">${err.message}</div>
-        </div>
-      `;
+      resDiv.innerHTML = `<div class="card" style="border-left: 3px solid var(--red); background:var(--red-dim); padding:16px; text-align:center;"><div style="color:var(--red); font-size:13px; font-weight:700;">SCAN FAILED</div><div style="color:var(--text-dim); font-size:11px; margin-top:4px;">${err.message}</div></div>`;
     } finally {
       btn.disabled = false;
       btn.innerText = "SCAN";
@@ -645,12 +569,8 @@
   // ==========================================
   function updateDashboard() {
     if(callouts.length === 0) return;
-    
     document.getElementById('dash-total-calls').innerText = callouts.length;
-    
-    let totalRet = 0;
-    let bestRet = -999;
-    let bestName = 'N/A';
+    let totalRet = 0, bestRet = -999, bestName = 'N/A';
 
     callouts.forEach(c => {
       const ret = ((c.currentMc / c.entryMc) - 1) * 100;
@@ -664,42 +584,8 @@
     document.getElementById('dash-best-call').innerText = `${bestName} (+${bestRet.toFixed(0)}%)`;
   }
 
-  // ==========================================
-  // 7. TELEGRAM (Frontend placeholder)
-  // ==========================================
-  function testTelegram() {
-    const btn = document.getElementById('tg-btn');
-    const msg = document.getElementById('tg-msg');
-    const chatId = document.getElementById('tg-chat-id').value.trim();
-
-    if(!chatId) {
-      msg.innerText = "Please enter a valid Chat ID.";
-      msg.style.color = "var(--red)";
-      return;
-    }
-
-    btn.disabled = true;
-    btn.innerText = "TESTING...";
-    msg.innerText = "Sending request to Worker...";
-    msg.style.color = "var(--text-dim)";
-
-    // In production, this points to your Cloudflare Worker URL
-    const WORKER_URL = "https://your-worker-name.your-subdomain.workers.dev";
-
-    // Simulate response for frontend-only deploy
-    setTimeout(() => {
-      btn.disabled = false;
-      btn.innerText = "TEST CONNECTION";
-      msg.innerText = "Frontend OK. Backend Worker required for live Telegram API.";
-      msg.style.color = "var(--yellow)";
-    }, 1500);
-  }
-
   // INIT
-  window.onload = () => {
-    initCallouts();
-  };
-
+  window.onload = () => { initCallouts(); };
 </script>
 </body>
 </html>
