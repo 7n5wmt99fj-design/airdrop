@@ -3,40 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DEXSCREENR | Terminal</title>
+<title>DEXSCREENR | Truth Engine</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
 
   body {
-    background-color: #030304;
-    color: #ffffff;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow: hidden;
+    background-color: #030304; color: #ffffff; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; overflow: hidden;
   }
 
   .app-container {
     width: 100%; max-width: 480px; height: 100vh; display: flex; flex-direction: column;
-    background: #07070a;
-    position: relative;
-    overflow: hidden;
+    background: #07070a; position: relative; overflow: hidden;
   }
 
-  /* Animated background */
   .app-container::before {
     content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
-    background-image:
-      linear-gradient(rgba(20,241,149,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(20,241,149,0.03) 1px, transparent 1px);
-    background-size: 32px 32px;
-    mask-image: radial-gradient(ellipse at top, rgba(0,0,0,0.9), transparent 70%);
-    animation: gridDrift 20s linear infinite;
+    background-image: linear-gradient(rgba(20,241,149,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(20,241,149,0.03) 1px, transparent 1px);
+    background-size: 32px 32px; mask-image: radial-gradient(ellipse at top, rgba(0,0,0,0.9), transparent 70%);
   }
-  @keyframes gridDrift { 0% { background-position: 0 0; } 100% { background-position: 32px 32px; } }
 
   /* Top Header */
   .top-bar {
@@ -46,77 +33,79 @@
     z-index: 10; position: relative; backdrop-filter: blur(10px);
   }
   .brand { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 800; color: #ffffff; font-size: 15px; letter-spacing: 1px; }
-  .brand em { color: #14F195; font-style: normal; text-shadow: 0 0 10px rgba(20,241,149,0.6); animation: brandGlow 2s ease-in-out infinite alternate; }
-  @keyframes brandGlow { from { text-shadow: 0 0 6px rgba(20,241,149,0.4); } to { text-shadow: 0 0 16px rgba(20,241,149,0.9); } }
+  .brand em { color: #14F195; font-style: normal; text-shadow: 0 0 10px rgba(20,241,149,0.6); }
   .pulse-dot { width: 7px; height: 7px; background: #14F195; border-radius: 50%; animation: pulse 1s infinite alternate; margin-right: 2px; box-shadow: 0 0 10px #14F195; }
   @keyframes pulse { 0% { opacity: 0.4; transform: scale(0.85); } 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 16px #14F195; } }
-  .header-actions { display: flex; align-items: center; gap: 14px; color: #71717a; }
-  .header-actions svg { width: 20px; height: 20px; cursor: pointer; transition: color .2s, transform .2s; }
-  .header-actions svg:hover { color: #14F195; transform: rotate(45deg); }
-  .profile-pic { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid #14F195; cursor: pointer; box-shadow: 0 0 10px rgba(20,241,149,0.3); transition: box-shadow .3s; background: #111; display: block; }
-
-  /* Ticker Strip */
-  .ticker-strip { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); background: #050507; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #71717a; white-space: nowrap; z-index: 9; overflow: hidden; position: relative; }
-  .ticker-track { display: flex; gap: 28px; padding-left: 16px; animation: scrollTicker 30s linear infinite; }
-  @keyframes scrollTicker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-  .ticker-item { display: flex; gap: 6px; align-items: center; }
-  .ticker-item strong { color: #fff; }
-  .ticker-item .up { color: #14F195; }
-  .ticker-item .down { color: #ef4444; }
+  
+  .search-bar {
+    padding: 12px 16px; background: #0c0c10; border-bottom: 1px solid rgba(255,255,255,0.05);
+    z-index: 9; display: flex; gap: 8px;
+  }
+  .search-input {
+    flex: 1; background: #15151a; border: 1px solid #222; color: #fff;
+    padding: 10px 14px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    outline: none; transition: border .2s;
+  }
+  .search-input:focus { border-color: #14F195; }
+  .search-btn {
+    background: rgba(20,241,149,0.1); border: 1px solid rgba(20,241,149,0.3); color: #14F195;
+    padding: 0 16px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background .2s;
+  }
+  .search-btn:hover { background: rgba(20,241,149,0.2); }
+  .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* Feed */
-  .feed-container { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: none; position: relative; z-index: 2; }
+  .feed-container { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 14px; scrollbar-width: none; position: relative; z-index: 2; }
   .feed-container::-webkit-scrollbar { display: none; }
 
   /* Card */
-  .token-card { background: linear-gradient(145deg, #101014 0%, #0c0c10 100%); border: 1px solid rgba(255,255,255,0.06); border-left: 2px solid #14F195; border-radius: 10px; padding: 13px; display: flex; flex-direction: column; gap: 10px; animation: slideIn 0.4s cubic-bezier(.2,.8,.2,1); position: relative; overflow: hidden; transition: border-color .3s, box-shadow .3s, transform .3s; }
-  .token-card:hover { border-color: rgba(20,241,149,0.4); box-shadow: 0 4px 30px rgba(20,241,149,0.12); transform: translateY(-2px); }
+  .token-card { background: linear-gradient(145deg, #101014 0%, #0c0c10 100%); border: 1px solid rgba(255,255,255,0.06); border-left: 3px solid #14F195; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 14px; animation: slideIn 0.4s cubic-bezier(.2,.8,.2,1); position: relative; overflow: hidden; }
+  .token-card:hover { border-color: rgba(20,241,149,0.3); box-shadow: 0 4px 30px rgba(20,241,149,0.08); }
   .token-card.rug { border-left-color: #ef4444; }
-  .token-card::before { content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(20,241,149,0.06), transparent); animation: shimmer 2s ease-out 1; pointer-events: none; }
-  @keyframes shimmer { 0% { left: -100%; } 100% { left: 100%; } }
+  .token-card.rug:hover { border-color: rgba(239,68,68,0.3); box-shadow: 0 4px 30px rgba(239,68,68,0.08); }
   @keyframes slideIn { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-  .card-top { display: flex; align-items: flex-start; gap: 12px; position: relative; z-index: 2; }
-  .token-logo { width: 48px; height: 48px; border-radius: 50%; border: 2px solid #14F195; object-fit: cover; box-shadow: 0 0 12px rgba(20,241,149,0.25); transition: transform .3s, box-shadow .3s; background-color: #1a1a20; }
-  .token-card:hover .token-logo { transform: scale(1.08) rotate(-4deg); box-shadow: 0 0 20px rgba(20,241,149,0.5); }
+  /* Card Header */
+  .card-header { display: flex; align-items: flex-start; gap: 12px; }
+  .token-logo { width: 52px; height: 52px; border-radius: 50%; border: 2px solid #14F195; object-fit: cover; background-color: #1a1a20; flex-shrink: 0; }
+  .token-card.rug .token-logo { border-color: #ef4444; }
+  .token-title { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+  .token-name { font-size: 16px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px; }
+  .token-ticker { font-size: 12px; color: #71717a; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .token-ca { font-size: 10px; color: #52525b; font-family: 'JetBrains Mono', monospace; margin-top: 2px; display: flex; gap: 6px; align-items: center; cursor: pointer; transition: color .2s; }
+  .token-ca:hover { color: #14F195; }
+  
+  /* Risk Badge */
+  .risk-badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; text-transform: uppercase; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .risk-badge span { font-size: 8px; opacity: 0.7; font-family: 'Inter', sans-serif; font-weight: 500; }
+  .risk-low { background: rgba(20,241,149,0.15); color: #14F195; border: 1px solid rgba(20,241,149,0.3); }
+  .risk-med { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+  .risk-high { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+  .risk-na { background: rgba(255,255,255,0.05); color: #a1a1aa; border: 1px solid rgba(255,255,255,0.1); }
 
-  .token-info { flex: 1; min-width: 0; }
-  .token-name-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
-  .token-name { font-size: 15px; font-weight: 800; color: #ffffff; letter-spacing: -0.2px; }
-  .token-ticker { font-size: 11px; color: #71717a; font-family: 'JetBrains Mono', monospace; }
-  .token-stats-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #a1a1aa; }
-  .token-stats-row .age { color: #14F195; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-  .token-stats-row .dev { color: #f59e0b; font-weight: 600; }
+  /* Analytics Grid */
+  .analytics-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: rgba(255,255,255,0.06); border-radius: 8px; overflow: hidden; }
+  .stat-cell { background: #0c0c10; padding: 10px; display: flex; flex-direction: column; gap: 4px; }
+  .stat-label { font-size: 9px; color: #71717a; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-val { font-size: 13px; color: #fff; font-family: 'JetBrains Mono', monospace; font-weight: 700; word-break: break-all; }
+  .stat-val.green { color: #14F195; }
+  .stat-val.red { color: #ef4444; }
+  .stat-val.gold { color: #fbbf24; }
+  .stat-val.na { color: #52525b; font-style: italic; }
+  .stat-sub { font-size: 9px; color: #52525b; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
 
-  .mc-fees { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
-  .mc-label { font-size: 9px; color: #52525b; text-transform: uppercase; letter-spacing: 1px; }
-  .mc-value { font-size: 15px; font-weight: 800; color: #fbbf24; font-family: 'JetBrains Mono', monospace; text-shadow: 0 0 8px rgba(251,191,36,0.25); transition: color .2s; display: inline-block; }
-  .mc-value.up { color: #14F195; text-shadow: 0 0 12px rgba(20,241,149,0.6); }
-  .mc-value.down { color: #ef4444; text-shadow: 0 0 12px rgba(239,68,68,0.6); }
-  .fees-value { font-size: 11px; font-weight: 600; color: #14F195; display: flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; }
-  .fees-value svg { width: 11px; height: 11px; }
+  /* Alerts */
+  .alerts-section { display: flex; flex-wrap: wrap; gap: 6px; }
+  .flag { display: flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.05); color: #a1a1aa; }
+  .flag svg { width: 12px; height: 12px; }
+  .flag.danger { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+  .flag.warning { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+  .flag.safe { background: rgba(20,241,149,0.1); color: #14F195; border: 1px solid rgba(20,241,149,0.2); }
+  .flag.na { background: rgba(255,255,255,0.05); color: #a1a1aa; border: 1px solid rgba(255,255,255,0.1); }
 
-  .card-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; position: relative; z-index: 2; }
-  .tag-item { font-size: 10.5px; font-weight: 600; color: #a1a1aa; display: flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.04); padding: 4px 8px; border-radius: 6px; }
-  .tag-item.green { color: #14F195; background: rgba(20,241,149,0.1); }
-  .tag-item.blue { color: #60a5fa; background: rgba(96,165,250,0.1); }
-  .tag-item.red { color: #ef4444; background: rgba(239,68,68,0.12); }
-  .tag-item svg { width: 12px; height: 12px; }
-
-  .card-bottom { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 2px; position: relative; z-index: 2; }
-  .bottom-left { display: flex; flex-direction: column; gap: 6px; }
-  .holders-row { display: flex; align-items: center; gap: 12px; font-size: 12px; color: #a1a1aa; }
-  .holders-row span { display: flex; align-items: center; gap: 4px; }
-  .holders-row svg { width: 14px; height: 14px; }
-  .call-info { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #71717a; }
-  .call-info span { color: #14F195; font-weight: 700; }
-  .call-info .ath { color: #52525b; }
-
-  .bottom-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
-  .pnl-percent { font-size: 18px; font-weight: 900; color: #14F195; text-shadow: 0 0 15px rgba(20,241,149,0.3); font-family: 'JetBrains Mono', monospace; }
-  .pnl-percent.down { color: #ef4444; text-shadow: 0 0 15px rgba(239,68,68,0.3); }
-  .mini-chart { width: 80px; height: 30px; margin-top: 2px; overflow: visible; }
-  .mini-chart path { fill: none; stroke: #14F195; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  /* Loading/Error state */
+  .status-msg { text-align: center; color: #71717a; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 20px; }
+  .status-msg.error { color: #ef4444; }
 
   /* Bottom Nav */
   .bottom-nav { display: flex; justify-content: space-around; padding: 12px 0 calc(16px + env(safe-area-inset-bottom, 0px)) 0; background: rgba(10,10,12,0.98); border-top: 1px solid rgba(255,255,255,0.05); z-index: 10; backdrop-filter: blur(10px); position: relative; }
@@ -130,149 +119,207 @@
 <body>
 
   <div class="app-container">
-
     <div class="top-bar">
-      <div class="brand">
-        <div class="pulse-dot"></div>
-        <em>DEXSCREENR</em>
-      </div>
+      <div class="brand"><div class="pulse-dot"></div><em>DEXSCREENR</em></div>
       <div class="header-actions">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         <svg class="profile-pic" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="24" height="24" rx="12" fill="#1a1a20"/>
-          <circle cx="12" cy="9" r="4" fill="#52525b"/>
-          <path d="M6 21C6 17.6863 8.68629 15 12 15C15.3137 15 18 17.6863 18 21" fill="#52525b"/>
+          <rect width="24" height="24" rx="12" fill="#1a1a20"/><circle cx="12" cy="9" r="4" fill="#52525b"/><path d="M6 21C6 17.6863 8.68629 15 12 15C15.3137 15 18 17.6863 18 21" fill="#52525b"/>
         </svg>
       </div>
     </div>
 
-    <div class="ticker-strip">
-      <div class="ticker-track" id="tickerTrack">
-        <div class="ticker-item"><strong>$WIF</strong> <span class="up">▲ 12.4%</span></div>
-        <div class="ticker-item"><strong>$BONK</strong> <span class="down">▼ 3.2%</span></div>
-        <div class="ticker-item"><strong>$POPCAT</strong> <span class="up">▲ 45.1%</span></div>
-        <div class="ticker-item"><strong>$MEW</strong> <span class="up">▲ 8.7%</span></div>
-        <div class="ticker-item"><strong>$WIF</strong> <span class="up">▲ 12.4%</span></div>
-        <div class="ticker-item"><strong>$BONK</strong> <span class="down">▼ 3.2%</span></div>
-      </div>
+    <!-- Real Search Bar -->
+    <div class="search-bar">
+      <input type="text" id="caInput" class="search-input" placeholder="Enter Solana Mint Address (CA)..." spellcheck="false">
+      <button class="search-btn" id="searchBtn" onclick="analyzeToken()">SCAN</button>
     </div>
 
     <div class="feed-container" id="feed">
-      <!-- Initial hardcoded callout so screen is never empty -->
-      <div class="token-card">
-        <div class="card-top">
-          <img class="token-logo" src="https://assets.coingecko.com/coins/images/33566/standard/dogwifhat.jpg">
-          <div class="token-info">
-            <div class="token-name-row"><span class="token-name">dogwifhat</span><span class="token-ticker">$WIF</span></div>
-            <div class="token-stats-row"><span class="age">3h</span><span class="dev">Dev 15%</span></div>
-          </div>
-          <div class="mc-fees">
-            <div class="mc-label">MC</div>
-            <div class="mc-value">$42.1K</div>
-            <div class="fees-value"><svg viewBox="0 0 397 311" fill="#14F195" xmlns="http://www.w3.org/2000/svg"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z"/></svg> 4.2</div>
-          </div>
-        </div>
-        <div class="card-tags">
-          <span class="tag-item green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg> @dogwifcoin</span>
-          <span class="tag-item blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> 494K</span>
-        </div>
-        <div class="card-bottom">
-          <div class="bottom-left">
-            <div class="holders-row">
-              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> 311</span>
-              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg> 38</span>
-            </div>
-            <div class="call-info">Called @ <span>$12k</span> <span class="ath">| ATH $2.6M</span></div>
-          </div>
-          <div class="bottom-right">
-            <div class="pnl-percent">+2,450%</div>
-            <svg class="mini-chart" viewBox="0 0 80 30"><path d="M0,30 L15,25 L25,28 L35,15 L45,18 L55,5 L80,0" /></svg>
-          </div>
-        </div>
-      </div>
+      <div class="status-msg" id="statusMsg">Awaiting contract address...</div>
     </div>
 
     <div class="bottom-nav">
-      <div class="nav-item active" onclick="switchTab(this)">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        <span>Calls</span>
-      </div>
-      <div class="nav-item" onclick="switchTab(this)">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-        <span>Dashboard</span>
-      </div>
-      <div class="nav-item" onclick="switchTab(this)">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-        <span>Telegram</span>
-      </div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg><span>Calls</span></div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg><span>Dashboard</span></div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg><span>Telegram</span></div>
     </div>
-
   </div>
 
   <script>
-    function switchTab(element) {
-      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-      element.classList.add('active');
-    }
-
-    const coins = [
-      { name: "dogwifhat", ticker: "WIF", img: "https://assets.coingecko.com/coins/images/33566/standard/dogwifhat.jpg", twitter: "dogwifcoin", followers: "494K" },
-      { name: "Bonk", ticker: "BONK", img: "https://assets.coingecko.com/coins/images/28600/standard/bonk.jpg", twitter: "bonk_inu", followers: "1.2M" },
-      { name: "Popcat", ticker: "POPCAT", img: "https://assets.coingecko.com/coins/images/33722/standard/popcat.jpg", twitter: "PopcatSolana", followers: "85K" },
-      { name: "Mew", ticker: "MEW", img: "https://assets.coingecko.com/coins/images/36612/standard/mew.jpg", twitter: "mewsworld", followers: "210K" },
-      { name: "Book of Meme", ticker: "BOME", img: "https://assets.coingecko.com/coins/images/29714/standard/bome.jpg", twitter: "Darkfarms1", followers: "340K" },
-      { name: "Slerf", ticker: "SLERF", img: "https://assets.coingecko.com/coins/images/36057/standard/slerf.jpg", twitter: "SlerfToken", followers: "120K" },
-      { name: "Myro", ticker: "MYRO", img: "https://assets.coingecko.com/coins/images/33438/standard/myro.jpg", twitter: "MyroCoin", followers: "98K" }
-    ];
-
+    // Globals
+    const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com"; // Public RPC
     const feed = document.getElementById('feed');
+    const statusMsg = document.getElementById('statusMsg');
+    const searchBtn = document.getElementById('searchBtn');
+    const caInput = document.getElementById('caInput');
 
-    // Core formatting
-    const fmtMc = (v) => {
-      if (v >= 1e6) return '$' + (v/1e6).toFixed(2) + 'M';
-      if (v >= 1e3) return '$' + (v/1e3).toFixed(1) + 'K';
-      return '$' + Math.round(v);
+    // Strict Validators
+    const isValidNum = (v) => typeof v === 'number' && isFinite(v) && !isNaN(v) && v >= 0;
+    const safeFormat = (v, type) => {
+      if (!isValidNum(v)) return 'N/A';
+      if (type === 'usd') {
+        if (v >= 1e6) return '$' + (v/1e6).toFixed(2) + 'M';
+        if (v >= 1e3) return '$' + (v/1e3).toFixed(2) + 'K';
+        return '$' + v.toFixed(2);
+      }
+      if (type === 'price') return v < 0.01 ? '$' + v.toFixed(6) : '$' + v.toFixed(4);
+      if (type === 'pct') return v.toFixed(1) + '%';
+      return v.toString();
     };
 
-    function generateCall() {
-      const coin = coins[Math.floor(Math.random() * coins.length)];
-      const isRug = Math.random() < 0.15;
+    async function fetchRPC(method, params) {
+      const res = await fetch(RPC_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
+      });
+      const json = await res.json();
+      if (json.error) throw new Error(json.error.message);
+      return json.result;
+    }
 
-      const mcStart = Math.floor(Math.random() * (150000 - 15000 + 1)) + 15000;
-      const fees = (Math.random() * 25 + 0.5).toFixed(2);
-      const age = Math.floor(Math.random() * 12) + 1;
-      const dev = Math.floor(Math.random() * 25);
-      const holders = Math.floor(Math.random() * 1400) + 100;
-      const views = Math.floor(Math.random() * 490) + 10;
-      const entryStr = fmtMc(Math.floor(Math.random() * (120000 - 6000 + 1)) + 6000);
-      const athStr = fmtMc(Math.floor(Math.random() * (3000000 - 200000 + 1)) + 200000);
-
-      let percentValue = isRug ? -(Math.floor(Math.random() * 90) + 10) : Math.floor(Math.random() * (3000 - 200 + 1)) + 200;
-      const percentStr = (percentValue >= 0 ? '+' : '') + percentValue.toLocaleString() + '%';
-
-      let pathStr = "M0,30 ";
-      for (let i = 1; i <= 8; i++) {
-        const x = i * 10;
-        let y = isRug ? Math.min(30, 5 + (i * 3) + (Math.random() * 4 - 2)) : Math.max(0, 30 - (i * 3.5) - (Math.random() * 6 - 3));
-        pathStr += `L${x},${y} `;
+    async function analyzeToken() {
+      const ca = caInput.value.trim();
+      if (!ca || ca.length < 32) {
+        showError("Invalid Solana Mint Address.");
+        return;
       }
 
-      const el = document.createElement('div');
-      el.className = 'token-card' + (isRug ? ' rug' : '');
-      el.innerHTML = `
-        <div class="card-top">
-          <img class="token-logo" src="${coin.img}" onerror="this.style.display='none'">
-          <div class="token-info">
-            <div class="token-name-row"><span class="token-name">${coin.name}</span><span class="token-ticker">$${coin.ticker}</span></div>
-            <div class="token-stats-row"><span class="age">${age}h</span><span class="dev">Dev ${dev}%</span></div>
+      searchBtn.disabled = true;
+      searchBtn.innerText = "...";
+      feed.innerHTML = '<div class="status-msg">Validating token on-chain...</div>';
+
+      try {
+        // 1. Fetch DexScreener Data for verified pricing/liquidity
+        const dexRes = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${ca}`);
+        const dexData = await dexRes.json();
+        
+        if (!dexData.pairs || dexData.pairs.length === 0) {
+          throw new Error("Token not found on DexScreener or has no liquidity pairs.");
+        }
+        
+        // Sort by highest liquidity
+        const bestPair = dexData.pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+
+        // 2. Fetch On-Chain Data via Solana RPC (Mint & Freeze authority)
+        let mintAuth = 'N/A', freezeAuth = 'N/A', supply = 'N/A';
+        try {
+          const accountInfo = await fetchRPC("getAccountInfo", [ca, { encoding: "jsonParsed" }]);
+          if (accountInfo && accountInfo.value && accountInfo.value.data.parsed) {
+            const info = accountInfo.value.data.parsed.info;
+            mintAuth = info.mintAuthority || 'Revoked';
+            freezeAuth = info.freezeAuthority || 'Revoked';
+            // Supply is raw, needs decimals processing (DexScreener handles this better for display)
+            supply = info.supply;
+          }
+        } catch (rpcErr) {
+          console.warn("RPC fetch failed, relying on DexScreener data only.");
+        }
+
+        // 3. Strict Data Parsing
+        const name = bestPair.baseToken.name || 'Unknown';
+        const ticker = bestPair.baseToken.symbol || 'UNK';
+        const price = parseFloat(bestPair.priceUsd);
+        
+        // Supply / Mkt Cap calculations (DexScreener fallback)
+        const mcap = parseFloat(bestPair.marketCap || bestPair.fdv);
+        const fdv = parseFloat(bestPair.fdv);
+        const liquidity = parseFloat(bestPair.liquidity?.usd || 0);
+        const vol24h = parseFloat(bestPair.volume?.h24 || 0);
+        const vol1h = parseFloat(bestPair.volume?.h1 || 0);
+        const priceChange = parseFloat(bestPair.priceChange?.h24 || 0);
+        const ageMs = Date.now() - (bestPair.pairCreatedAt || Date.now());
+        const ageHours = Math.floor(ageMs / (1000 * 60 * 60));
+
+        // Math validations based on prompt rules
+        const validPrice = isValidNum(price) ? price : null;
+        const validMc = isValidNum(mcap) ? mcap : null;
+        const validFdv = isValidNum(fdv) ? fdv : null;
+        const validLiq = isValidNum(liquidity) ? liquidity : 0;
+        const validVol = isValidNum(vol24h) ? vol24h : 0;
+        
+        // Risk scoring based on real available data
+        let risk = 0;
+        if (validLiq < 5000) risk += 40;
+        if (mintAuth !== 'Revoked' && mintAuth !== 'N/A') risk += 30;
+        if (freezeAuth !== 'Revoked' && freezeAuth !== 'N/A') risk += 30;
+        
+        let riskClass = 'risk-low', riskTxt = 'LOW';
+        if (risk >= 60) { riskClass = 'risk-high'; riskTxt = 'HIGH'; }
+        else if (risk >= 30) { riskClass = 'risk-med'; riskTxt = 'MED'; }
+        else if (risk === 0 && mintAuth === 'N/A') { riskClass = 'risk-na'; riskTxt = 'N/A'; }
+
+        const isRug = risk >= 60 || validLiq < 1000;
+
+        const el = document.createElement('div');
+        el.className = 'token-card' + (isRug ? ' rug' : '');
+        el.innerHTML = `
+          <div class="card-header">
+            <div class="token-logo" style="display:flex;align-items:center;justify-content:center;font-weight:900;color:${isRug?'#ef4444':'#14F195'};background:#15151a;">${ticker.substring(0,3)}</div>
+            <div class="token-title">
+              <div class="token-name">${name} <span class="token-ticker">$${ticker}</span></div>
+              <div class="token-ca" onclick="navigator.clipboard.writeText('${ca}')">CA: ${ca.substring(0,4)}...${ca.substring(ca.length-4)} <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+            </div>
+            <div class="risk-badge ${riskClass}">${riskTxt} <span>RISK SCORE</span></div>
           </div>
-          <div class="mc-fees">
-            <div class="mc-label">MC</div>
-            <div class="mc-value">${fmtMc(mcStart)}</div>
-            <div class="fees-value"><svg viewBox="0 0 397 311" fill="#14F195" xmlns="http://www.w3.org/2000/svg"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z"/></svg> ${fees}</div>
+
+          <div class="analytics-grid">
+            <div class="stat-cell">
+              <span class="stat-label">Price</span>
+              <span class="stat-val">${validPrice !== null ? safeFormat(validPrice, 'price') : '<span class="na">N/A</span>'}</span>
+              <span class="stat-sub" style="color:${priceChange >= 0 ? '#14F195' : '#ef4444'};">${isValidNum(priceChange) ? (priceChange>0?'+':'') + safeFormat(priceChange, 'pct') : 'N/A'}</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">Market Cap</span>
+              <span class="stat-val gold">${validMc !== null ? safeFormat(validMc, 'usd') : '<span class="na">N/A</span>'}</span>
+              <span class="stat-sub">Vol: ${safeFormat(validVol, 'usd')}</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">Liquidity</span>
+              <span class="stat-val ${validLiq < 5000 ? 'red' : ''}">${safeFormat(validLiq, 'usd')}</span>
+              <span class="stat-sub">FDV: ${validFdv !== null ? safeFormat(validFdv, 'usd') : 'N/A'}</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">Age</span>
+              <span class="stat-val">${ageHours}h</span>
+              <span class="stat-sub">Created At</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">24h Volume</span>
+              <span class="stat-val">${safeFormat(validVol, 'usd')}</span>
+              <span class="stat-sub">1h: ${safeFormat(parseFloat(bestPair.volume?.h1||0), 'usd')}</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">Txn (24h)</span>
+              <span class="stat-val">${bestPair.txns?.h24?.buys || 0} / ${bestPair.txns?.h24?.sells || 0}</span>
+              <span class="stat-sub">Buys / Sells</span>
+            </div>
           </div>
-        </div>
-        <div class="card-tags">
-          <span class="tag-item green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg> @${coin.twitter}</span>
-          <span class="tag-item blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> ${coin.followers}</span>
-          ${isRug ? '<span class="tag-item red
+
+          <div class="alerts-section">
+            ${mintAuth === 'Revoked' ? '<span class="flag safe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Mint Revoked</span>' : `<span class="flag ${mintAuth==='N/A'?'na':'danger'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Mint: ${mintAuth}</span>`}
+            
+            ${freezeAuth === 'Revoked' ? '<span class="flag safe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Freeze Revoked</span>' : `<span class="flag ${freezeAuth==='N/A'?'na':'danger'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Freeze: ${freezeAuth}</span>`}
+            
+            <span class="flag warning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> LP: ${bestPair.dexId.toUpperCase()}</span>
+          </div>
+        `;
+
+        feed.innerHTML = '';
+        feed.appendChild(el);
+        statusMsg.style.display = 'none';
+
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        searchBtn.disabled = false;
+        searchBtn.innerText = "SCAN";
+      }
+    }
+
+    function showError(msg) {
+      feed.innerHTML = `<div class="status-msg error">[!] ${msg}</div>`;
+    }
+  </script>
+</body>
+</html>
