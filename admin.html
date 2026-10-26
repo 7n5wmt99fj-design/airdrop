@@ -22,12 +22,23 @@
 
   .app-shell { width: 100%; max-width: 480px; height: 100%; display: flex; flex-direction: column; background: var(--bg); position: relative; }
 
-  /* HEADER */
+  /* HEADER & ANIMATED LOGO */
   .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); background: rgba(3,3,4,0.9); backdrop-filter: blur(12px); z-index: 20; position: relative; }
-  .brand { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 15px; letter-spacing: 0.5px; }
-  .brand-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite alternate; }
-  @keyframes pulse { 0% { opacity: 0.5; } 100% { opacity: 1; box-shadow: 0 0 12px var(--green); } }
-  .brand span { color: var(--green); }
+  
+  .brand { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 15px; letter-spacing: 0.5px; cursor: default; }
+  
+  /* Advanced Logo Animation */
+  .logo-graphic { position: relative; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
+  .logo-core { width: 6px; height: 6px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); animation: corePulse 2s infinite alternate; }
+  .logo-ring { position: absolute; inset: 0; border: 1.5px solid var(--green); border-radius: 50%; opacity: 0; animation: ringExpand 2s infinite cubic-bezier(0.1, 0.8, 0.3, 1); }
+  .logo-ring:nth-child(2) { animation-delay: 0.6s; }
+  @keyframes corePulse { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 16px var(--green); } }
+  @keyframes ringExpand { 0% { transform: scale(0.5); opacity: 0.8; } 100% { transform: scale(2.5); opacity: 0; border-width: 0.5px; } }
+  
+  .brand-text { background: linear-gradient(90deg, #fff, #a1a1aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transition: 0.3s; }
+  .brand-text span { color: var(--green); -webkit-text-fill-color: var(--green); text-shadow: 0 0 12px rgba(20,241,149,0.4); }
+  .brand:hover .brand-text { filter: brightness(1.2); }
+
   .clock-display { font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 4px; }
 
   /* MAIN CONTENT */
@@ -78,6 +89,9 @@
 
   /* CALLOUT CARD */
   .callout-card { cursor: pointer; }
+  .callout-card.new-call { animation: cardPulse 1s ease-out; }
+  @keyframes cardPulse { 0% { border-color: var(--green); box-shadow: 0 0 20px rgba(20,241,149,0.3); } 100% { border-color: var(--border); box-shadow: none; } }
+
   .token-header { display: flex; align-items: center; gap: 10px; }
   .token-logo { width: 32px; height: 32px; border-radius: 50%; background: #1a1a20; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px; border: 1px solid #2a2a30; object-fit: cover; flex-shrink: 0; }
   .token-title { flex: 1; min-width: 0; }
@@ -124,7 +138,14 @@
 
 <div class="app-shell">
   <div class="top-bar">
-    <div class="brand"><div class="brand-dot"></div><span>DEXSCREENR</span></div>
+    <div class="brand">
+      <div class="logo-graphic">
+        <div class="logo-core"></div>
+        <div class="logo-ring"></div>
+        <div class="logo-ring"></div>
+      </div>
+      <div class="brand-text">DEXSCREEN<span>R</span></div>
+    </div>
     <div class="clock-display">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
       <span id="clock-text">--:--:--</span>
@@ -246,7 +267,6 @@
   // ==========================================
   // CONFIG & STATE
   // ==========================================
-  const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com";
   const WORKER_URL = "https://your-worker-name.your-subdomain.workers.dev"; // REPLACE THIS
   const STORAGE_KEY = 'dexscreenr_tracked_calls_v1';
   
@@ -273,6 +293,7 @@
   function timeAgo(timestamp) {
     const diff = Date.now() - timestamp;
     const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
     if (mins < 60) return mins + 'm ago';
     const hrs = Math.floor(mins / 60);
     if (hrs < 24) return hrs + 'h ago';
@@ -362,7 +383,6 @@
   // DATA FETCHING & TRACKING
   // ==========================================
   
-  // Load persistent state
   function loadState() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -370,14 +390,12 @@
     } catch(e) { console.error("State load failed", e); }
   }
 
-  // Save persistent state
   function saveState() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(trackedCalls));
     } catch(e) { console.error("State save failed", e); }
   }
 
-  // Calculate Risk Score (0-100, higher = riskier)
   function calculateRisk(pair) {
     let score = 0;
     let factors = [];
@@ -394,13 +412,10 @@
     const vol24 = parseFloat(pair.volume?.h24 || 0);
     if (vol24 === 0) { score += 20; factors.push("No 24h volume"); }
     
-    // Default to high risk if missing RPC data for now, but keep UI functional
     if (factors.length === 0) factors.push("Standard market conditions");
-    
     return { score: Math.min(100, score), factors };
   }
 
-  // Fetch pair data from DexScreener
   async function fetchTokenData(address) {
     try {
       const res = await fetch(`https://api.dexscreener.com/token-pairs/v1/solana/${address}`);
@@ -408,7 +423,6 @@
       const data = await res.json();
       if (!data.pairs || data.pairs.length === 0) throw new Error("No pairs");
       
-      // Sort by highest liquidity to get the "main" pair
       data.pairs.sort((a, b) => (parseFloat(b.liquidity?.usd || 0)) - (parseFloat(a.liquidity?.usd || 0)));
       return data.pairs[0];
     } catch(e) {
@@ -416,7 +430,6 @@
     }
   }
 
-  // Fetch discovery feeds
   async function discoverNewTokens() {
     if (isPolling) return;
     isPolling = true;
@@ -424,28 +437,31 @@
     document.getElementById('api-status').style.color = "var(--yellow)";
 
     try {
-      // 1. Fetch latest token profiles (often includes newly created pairs)
-      const profileRes = await fetch('https://api.dexscreener.com/token-profiles/latest/v1');
-      const profileData = await profileRes.json();
-      
-      let newAddresses = [];
-      
-      if (profileData && Array.isArray(profileData)) {
-        profileData.forEach(item => {
-          if (item.chainId === 'solana' && item.tokenAddress) {
-            newAddresses.push(item.tokenAddress);
-          }
-        });
-      }
+      let newAddresses = new Set();
 
-      // Deduplicate and filter out already tracked
-      newAddresses = [...new Set(newAddresses)];
+      // 1. Fetch latest token boosts (usually highly active new tokens)
+      try {
+        const boostRes = await fetch('https://api.dexscreener.com/token-boosts/latest/v1');
+        const boostData = await boostRes.json();
+        if (Array.isArray(boostData)) {
+          boostData.forEach(item => { if (item.chainId === 'solana' && item.tokenAddress) newAddresses.add(item.tokenAddress); });
+        }
+      } catch(e) { console.warn("Boost fetch failed", e); }
+
+      // 2. Fetch search for SOL pairs (returns newest and trending)
+      try {
+        const searchRes = await fetch('https://api.dexscreener.com/latest/dex/search?q=SOL');
+        const searchData = await searchRes.json();
+        if (searchData.pairs && Array.isArray(searchData.pairs)) {
+          searchData.pairs.forEach(pair => { if (pair.chainId === 'solana' && pair.baseToken?.address) newAddresses.add(pair.baseToken.address); });
+        }
+      } catch(e) { console.warn("Search fetch failed", e); }
+
       const trackedAddrs = trackedCalls.map(c => c.address);
-      const toAdd = newAddresses.filter(addr => !trackedAddrs.includes(addr));
+      const toAdd = Array.from(newAddresses).filter(addr => !trackedAddrs.includes(addr));
 
-      // Fetch details for new tokens (limit to 3 per poll to avoid rate limits)
       let addedCount = 0;
-      for (let i = 0; i < Math.min(toAdd.length, 3); i++) {
+      for (let i = 0; i < Math.min(toAdd.length, 5); i++) {
         const pair = await fetchTokenData(toAdd[i]);
         if (pair) {
           const entryMc = parseFloat(pair.marketCap || pair.fdv || 0);
@@ -464,13 +480,13 @@
               peakMc: entryMc,
               risk: riskData.score,
               riskFactors: riskData.factors,
-              currentData: pair
+              currentData: pair,
+              isNew: true
             });
             addedCount++;
           }
         }
-        // Small delay to respect rate limits
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise(r => setTimeout(r, 300)); // Rate limit respect
       }
 
       if (addedCount > 0) {
@@ -478,6 +494,7 @@
         renderCallouts();
         updateDashboard();
         document.getElementById('nav-callouts').classList.add('has-new');
+        setTimeout(() => { trackedCalls.forEach(c => c.isNew = false); }, 2000);
       }
 
       document.getElementById('api-status').innerText = "LIVE";
@@ -492,11 +509,8 @@
     }
   }
 
-  // Refresh existing calls with new data
   async function refreshTrackedCalls() {
     if (trackedCalls.length === 0) return;
-    
-    // Refresh top 5 most recent to save API calls
     const toRefresh = trackedCalls.slice(0, 5);
     
     for (let call of toRefresh) {
@@ -506,7 +520,7 @@
         const currentMc = parseFloat(pair.marketCap || pair.fdv || 0);
         if (currentMc > call.peakMc) call.peakMc = currentMc;
       }
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, 300));
     }
     saveState();
     renderCallouts();
@@ -531,7 +545,6 @@
 
     let filtered = [...trackedCalls];
     
-    // Apply sorting
     if (calloutFilter === 'highest') {
       filtered.sort((a, b) => {
         const retA = ((parseFloat(a.currentData?.marketCap || a.currentData?.fdv || a.entryMc) / a.entryMc) - 1) * 100;
@@ -547,35 +560,24 @@
         return volB - volA;
       });
     } else {
-      // Latest (default sort by time)
       filtered.sort((a, b) => b.entryTime - a.entryTime);
     }
 
     container.innerHTML = '';
     filtered.forEach(c => {
       const currentMc = parseFloat(c.currentData?.marketCap || c.currentData?.fdv || 0);
-      const currentPrice = parseFloat(c.currentData?.priceUsd || 0);
-      
       let mcRet = null;
-      if (c.entryMc > 0 && currentMc > 0) {
-        mcRet = ((currentMc - c.entryMc) / c.entryMc) * 100;
-      }
-      
-      let priceRet = null;
-      if (c.entryPrice > 0 && currentPrice > 0) {
-        priceRet = ((currentPrice - c.entryPrice) / c.entryPrice) * 100;
-      }
+      if (c.entryMc > 0 && currentMc > 0) mcRet = ((currentMc - c.entryMc) / c.entryMc) * 100;
 
       const isPos = mcRet >= 0;
       const retColor = mcRet === null ? 'text-dark' : (isPos ? 'text-green' : 'text-red');
 
-      // Logo or placeholder
       const logoHtml = c.logo 
         ? `<img class="token-logo" src="${c.logo}" onerror="this.outerHTML='<div class=\\'token-logo\\'>${c.ticker.substring(0,3)}</div>'">`
         : `<div class="token-logo">${c.ticker.substring(0,3)}</div>`;
 
       const el = document.createElement('div');
-      el.className = `card callout-card`;
+      el.className = `card callout-card ${c.isNew ? 'new-call' : ''}`;
       el.onclick = () => showCalloutDetails(c);
       el.innerHTML = `
         <div class="row" style="align-items:flex-start;">
@@ -817,14 +819,10 @@
     renderCallouts();
     updateDashboard();
     
-    // Initial fetch
     discoverNewTokens();
     refreshTrackedCalls();
 
-    // Poll discovery every 60s
     setInterval(discoverNewTokens, 60000);
-    
-    // Refresh tracked data every 30s
     setInterval(refreshTrackedCalls, 30000);
   };
 
