@@ -1,591 +1,804 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#030304">
 <title>DEXSCREENR | Terminal</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap');
-
-  :root {
-    --bg: #030304; --panel: #0c0c0e; --panel-hover: #121216;
-    --border: #1f1f24; --text: #ffffff; --text-dim: #8a8a93; --text-dark: #52525b;
-    --green: #14F195; --green-dim: rgba(20,241,149,0.1);
-    --red: #ef4444; --red-dim: rgba(239,68,68,0.1);
-    --yellow: #fbbf24; --yellow-dim: rgba(251,191,36,0.1);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
-  
-  body { background-color: var(--bg); color: var(--text); height: 100vh; height: 100dvh; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
-
-  /* Particle Canvas */
-  #particle-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 99; }
-
-  .app-shell { width: 100%; max-width: 480px; height: 100%; display: flex; flex-direction: column; background: var(--bg); position: relative; }
-
-  /* HEADER */
-  .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); background: rgba(3,3,4,0.9); backdrop-filter: blur(12px); z-index: 20; position: relative; }
-  .brand { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 15px; letter-spacing: 0.5px; }
-  .brand-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite alternate; }
-  @keyframes pulse { 0% { opacity: 0.5; } 100% { opacity: 1; box-shadow: 0 0 12px var(--green); } }
-  .brand span { color: var(--green); }
-  .clock-display { font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 4px; }
-
-  /* MAIN CONTENT */
-  .main-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)); scrollbar-width: none; position: relative; }
-  .main-content::-webkit-scrollbar { display: none; }
-  
-  .tab-pane { display: none; padding: 16px; gap: 12px; flex-direction: column; }
-  .tab-pane.active { display: flex; animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-  @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* BOTTOM NAV */
-  .bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px)) 0; background: rgba(8,8,10,0.95); backdrop-filter: blur(16px); border-top: 1px solid var(--border); z-index: 20; }
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-dark); cursor: pointer; transition: color 0.2s; width: 60px; position: relative; }
-  .nav-item svg { width: 22px; height: 22px; transition: transform 0.2s; }
-  .nav-item span { font-size: 10px; font-weight: 600; }
-  .nav-item.active { color: var(--green); }
-  .nav-item.active svg { transform: translateY(-2px); filter: drop-shadow(0 2px 4px rgba(20,241,149,0.4)); }
-  .nav-item.has-new svg { animation: navGlow 1s ease-out 1; }
-  @keyframes navGlow { 0% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(0 0 8px var(--green)); color: var(--green); } 100% { filter: drop-shadow(0 0 0 transparent); } }
-
-  /* GENERAL UI */
-  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; transition: border-color 0.2s, box-shadow 0.3s; }
-  
-  .badge { font-size: 9px; font-weight: 800; padding: 3px 6px; border-radius: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
-  .badge.green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(20,241,149,0.3); }
-  .badge.red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
-  .badge.yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
-  .badge.blue { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.3); }
-
-  .row { display: flex; justify-content: space-between; align-items: center; }
-  .mono { font-family: 'JetBrains Mono', monospace; }
-  .text-green { color: var(--green); }
-  .text-red { color: var(--red); }
-  .text-dim { color: var(--text-dim); }
-  .text-dark { color: var(--text-dark); }
-
-  /* INPUTS & BUTTONS */
-  .input-group { display: flex; gap: 8px; }
-  input[type="text"] { flex: 1; background: #121216; border: 1px solid #2a2a30; color: #fff; padding: 12px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none; transition: border-color 0.2s; }
-  input[type="text"]:focus { border-color: var(--green); }
-  .btn { background: var(--green); color: #000; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; transition: opacity 0.2s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-  .btn:active { transform: scale(0.96); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-outline { background: transparent; border: 1px solid var(--border); color: #fff; }
-  
-  /* FILTERS */
-  .filter-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
-  .filter-scroll::-webkit-scrollbar { display: none; }
-  .filter-btn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: 0.2s; }
-  .filter-btn.active { background: var(--green-dim); border-color: var(--green); color: var(--green); }
-
-  /* CALLOUTS */
-  .callout-card { position: relative; overflow: hidden; border-left: 2px solid var(--border); cursor: pointer; }
-  .callout-card.new-glow { animation: borderGlow 2s ease-out; }
-  @keyframes borderGlow { 0% { border-color: var(--green); box-shadow: 0 0 15px rgba(20,241,149,0.2); } 100% { border-color: var(--border); box-shadow: none; } }
-  
-  /* Text-only Token Identifier */
-  .token-id { display: flex; align-items: center; gap: 8px; }
-  .token-name-text { font-size: 14px; font-weight: 800; color: var(--text); }
-  .token-ticker-text { font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
-  
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
-  .stat-box { background: rgba(255,255,255,0.02); padding: 8px; border-radius: 6px; }
-  .stat-box .label { font-size: 9px; color: var(--text-dark); text-transform: uppercase; margin-bottom: 2px; }
-  .stat-box .val { font-size: 12px; font-family: 'JetBrains Mono', monospace; font-weight: 700; }
-
-  /* PROGRESS BAR */
-  .progress-bg { height: 4px; background: #222; border-radius: 2px; overflow: hidden; margin-top: 4px; }
-  .progress-fill { height: 100%; border-radius: 2px; transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
-
-  /* COPY BUTTON */
-  .ca-container { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-dark); font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
-  .copy-btn { background: transparent; border: none; color: var(--text-dim); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px; border-radius: 4px; transition: color 0.2s, background 0.2s; }
-  .copy-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
-  .copy-btn.copied { color: var(--green); pointer-events: none; }
-  .copy-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--green); color: #000; font-size: 11px; font-weight: 800; padding: 6px 14px; border-radius: 20px; opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; z-index: 100; box-shadow: 0 4px 12px rgba(20,241,149,0.3); }
-  .copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-  /* SKELETON */
-  .skeleton { background: linear-gradient(90deg, #121216 25%, #1a1a20 50%, #121216 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 4px; }
-  @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-  /* MODAL */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.2s; }
-  .modal-overlay.active { display: flex; opacity: 1; }
-  .modal { background: var(--panel); border: 1px solid var(--border); width: 100%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: transform 0.2s; }
-  .modal-overlay.active .modal { transform: scale(1); }
-  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+:root{--bg:#030304;--panel:#0d0d10;--border:#25252b;--green:#14f195;--red:#ef4444;--yellow:#fbbf24;--muted:#90909b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:white;font:13px Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.app{max-width:500px;margin:auto;height:100dvh;display:flex;flex-direction:column}
+header{padding:18px 17px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.brand{font-size:15px;font-weight:900;letter-spacing:.5px;color:var(--green)}
+.brand:before{content:'●';font-size:10px;margin-right:9px}
+.clock{color:var(--muted);font:12px ui-monospace,monospace}
+main{flex:1;overflow-y:auto;padding:16px 15px 90px}
+section{display:none}
+section.active{display:block;animation:appear .25s ease}
+@keyframes appear{from{opacity:.4;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+h2{font-size:17px;margin:3px 0 14px}
+p.small,.muted{color:var(--muted);font-size:11px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:9px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;margin:10px 0}
+.token{font-size:14px;font-weight:800;overflow-wrap:anywhere}
+.ticker{color:var(--muted);font-size:11px;margin-left:6px}
+.ca{display:flex;align-items:center;gap:7px;margin-top:8px;color:var(--muted);font:11px ui-monospace,monospace}
+.copy{border:1px solid var(--border);background:#19191e;color:var(--muted);border-radius:6px;padding:5px 8px;cursor:pointer}
+.copy:active{color:var(--green)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:12px}
+.stat{padding:9px 7px;border-radius:7px;background:#17171b;min-width:0}
+.label{font-size:9px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.value{font:700 12px ui-monospace,monospace;overflow-wrap:anywhere}
+.green{color:var(--green)}
+.red{color:var(--red)}
+.yellow{color:var(--yellow)}
+.filters{display:flex;gap:7px;overflow-x:auto;margin-bottom:12px}
+.filters button,.outline{background:transparent;color:var(--muted);border:1px solid var(--border);padding:8px 11px;border-radius:20px;white-space:nowrap;cursor:pointer}
+.filters button.active{border-color:var(--green);color:var(--green);background:#0b251b}
+button{font:inherit}
+button.primary{background:var(--green);color:#000;font-weight:800;border:0;border-radius:8px;padding:12px 14px;cursor:pointer}
+button:disabled{opacity:.5}
+.inputs{display:flex;gap:8px;margin:14px 0}
+input{min-width:0;flex:1;padding:12px;border:1px solid #303037;border-radius:8px;background:#15151a;color:white;outline:0}
+input:focus{border-color:var(--green)}
+nav{position:absolute;bottom:0;width:100%;max-width:500px;display:flex;background:#09090bed;border-top:1px solid var(--border);padding:10px 0 calc(10px + env(safe-area-inset-bottom))}
+nav button{width:25%;border:0;background:none;color:#74747e;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:10px;cursor:pointer}
+nav button.active{color:var(--green)}
+nav svg{width:21px;height:21px}
+.risk{width:74px;height:74px;flex-shrink:0;position:relative;display:grid;place-items:center}
+.risk svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.risk circle{fill:none;stroke-width:7}
+.risk .track{stroke:#27272c}
+.risk .progress{stroke:var(--risk-color);stroke-linecap:round;stroke-dasharray:201;stroke-dashoffset:201;transition:stroke-dashoffset 1s ease}
+.risk .number{font:800 18px ui-monospace,monospace;text-align:center}
+.risk .caption{font-size:8px;color:var(--muted);text-align:center}
+.risk-wrap{display:flex;align-items:center;gap:14px}
+.risk-info{flex:1}
+.risk-gradient{height:5px;border-radius:5px;background:linear-gradient(90deg,#14f195,#fbbf24,#f97316,#ef4444);margin-top:9px}
+.risk-name{font-size:12px;font-weight:800}
+.tag{font-size:9px;padding:4px 7px;border-radius:5px;background:#202026;color:var(--muted)}
+.card.new{animation:arrival 1.5s ease}
+@keyframes arrival{0%{border-color:var(--green);box-shadow:0 0 25px #14f19544}100%{border-color:var(--border);box-shadow:none}}
+.empty{padding:26px 15px;text-align:center;color:var(--muted);font-size:12px}
+.details{display:grid;gap:10px}
+.detail{display:flex;justify-content:space-between;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border);font-size:12px}
+.detail span:first-child{color:var(--muted)}
+.detail span:last-child{text-align:right;overflow-wrap:anywhere}
+#particles{position:fixed;inset:0;pointer-events:none;z-index:50}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);padding:8px 15px;background:var(--green);color:#000;border-radius:20px;font-weight:800;display:none;z-index:70}
+dialog{border:1px solid var(--border);border-radius:12px;background:#0d0d10;color:white;padding:18px;width:min(92vw,440px);max-height:80vh;overflow:auto}
+dialog::backdrop{background:#000b}
+.link{color:var(--green);text-decoration:none}
+.error{color:#ff7b7b;font-size:11px;line-height:1.6}
+.help{font-size:11px;color:var(--muted);line-height:1.6}
+footer{margin-top:10px;font-size:10px;color:var(--muted)}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<canvas id="particles"></canvas>
+<div id="toast" role="status"></div>
+<div class="app">
+<header>
+<div class="brand">DEXSCREENR</div>
+<div class="clock" id="clock">--:--:--</div>
+</header>
+<main>
 
-<canvas id="particle-canvas"></canvas>
-<div id="copy-toast" class="copy-toast">Copied!</div>
+<section id="callouts" class="active">
+<div class="row">
+<h2>Live Signals</h2>
+<button class="outline" id="refresh">↻ Refresh</button>
+</div>
+<div class="filters" id="filters">
+<button class="active" data-filter="latest">Latest</button>
+<button data-filter="trending">Trending</button>
+<button data-filter="highest">Highest Return</button>
+<button data-filter="lowrisk">Low Risk</button>
+</div>
+<p class="small" id="feed-status">Connecting to market feed…</p>
+<div id="callouts-list"></div>
+<footer>Discovery feed uses public Solana token profiles. A listing is not an investment recommendation or evidence of insider activity.</footer>
+</section>
 
-<div class="app-shell">
-  <div class="top-bar">
-    <div class="brand"><div class="brand-dot"></div><span>DEXSCREENR</span></div>
-    <div class="clock-display">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-      <span id="clock-text">--:--:--</span>
-    </div>
-  </div>
+<section id="screener">
+<h2>Token Screener</h2>
+<p class="small">Paste a Solana token mint address to scan real market data.</p>
+<div class="inputs">
+<input id="ca-input" placeholder="Solana mint address" autocomplete="off" spellcheck="false">
+<button class="primary" id="scan">SCAN</button>
+</div>
+<div id="scan-result" class="empty">Awaiting token address</div>
+</section>
 
-  <div class="main-content">
-    <!-- TAB 1: CALLOUTS -->
-    <div id="tab-callouts" class="tab-pane active">
-      <div class="row">
-        <h2 style="font-size:16px; font-weight:800;">Live Signals</h2>
-      </div>
-      <div class="filter-scroll">
-        <button class="filter-btn active" onclick="filterCallouts('latest', this)">Latest</button>
-        <button class="filter-btn" onclick="filterCallouts('trending', this)">Trending</button>
-        <button class="filter-btn" onclick="filterCallouts('highest', this)">Highest Return</button>
-        <button class="filter-btn" onclick="filterCallouts('lowrisk', this)">Low Risk</button>
-      </div>
-      <div id="callouts-list" style="display:flex; flex-direction:column; gap:10px;">
-        <!-- Cards inject here -->
-      </div>
-    </div>
+<section id="dashboard">
+<h2>Performance</h2>
+<div class="card details">
+<div class="detail"><span>Tracked Tokens</span><strong id="total">0</strong></div>
+<div class="detail"><span>Average Market Cap Change</span><strong id="average">N/A</strong></div>
+<div class="detail"><span>Top Tracked Token</span><strong id="best">N/A</strong></div>
+<div class="detail"><span>Last Feed Refresh</span><strong id="updated">N/A</strong></div>
+</div>
+<p class="help">Changes are calculated from the first price observation recorded by this browser, not from a trade entry or an investment return.</p>
+</section>
 
-    <!-- TAB 2: SCREENER -->
-    <div id="tab-screener" class="tab-pane">
-      <h2 style="font-size:16px; font-weight:800; margin-bottom:4px;">Token Screener</h2>
-      <p style="font-size:11px; color:var(--text-dim); margin-bottom:8px;">Real on-chain data via DexScreener & Solana RPC.</p>
-      
-      <div class="input-group">
-        <input type="text" id="caInput" placeholder="Paste Solana Mint (CA)..." spellcheck="false">
-        <button class="btn" id="scanBtn" onclick="scanToken()">SCAN</button>
-      </div>
+<section id="telegram">
+<h2>Telegram Integration</h2>
+<div class="card">
+<div class="row">
+<strong>Connection Status</strong>
+<span class="tag" id="tg-status">NOT CONFIGURED</span>
+</div>
+<p class="help">Deploy the Cloudflare Worker and enter its HTTPS endpoint. Store your bot token and target chat ID as Worker secrets.</p>
+<div class="inputs" style="flex-direction:column">
+<input id="worker-url" placeholder="https://your-worker.workers.dev" autocomplete="url">
+<button class="primary" id="tg-test">TEST CONNECTION</button>
+</div>
+<p class="help" id="tg-message">The test sends one message to your configured Telegram chat.</p>
+</div>
+</section>
 
-      <div id="scan-result" style="margin-top:8px;">
-        <div style="text-align:center; padding:40px 20px; color:var(--text-dark);">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:8px; opacity:0.5;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <div style="font-size:12px; font-family:'JetBrains Mono',monospace;">Awaiting token address</div>
-        </div>
-      </div>
-    </div>
+</main>
 
-    <!-- TAB 3: DASHBOARD -->
-    <div id="tab-dashboard" class="tab-pane">
-      <h2 style="font-size:16px; font-weight:800; margin-bottom:8px;">Performance</h2>
-      
-      <div class="card" style="background:linear-gradient(145deg, #0c0c0e, #111);">
-        <div class="row">
-          <span style="font-size:12px; font-weight:600; color:var(--text-dim);">Total Calls</span>
-          <span class="mono text-green" style="font-size:16px; font-weight:800;" id="dash-total-calls">0</span>
-        </div>
-        <div class="row">
-          <span style="font-size:12px; font-weight:600; color:var(--text-dim);">Average Return</span>
-          <span class="mono text-green" style="font-size:16px; font-weight:800;" id="dash-avg-return">0%</span>
-        </div>
-        <div class="row">
-          <span style="font-size:12px; font-weight:600; color:var(--text-dim);">Best Call</span>
-          <span class="mono text-green" style="font-size:16px; font-weight:800;" id="dash-best-call">N/A</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 4: TELEGRAM -->
-    <div id="tab-telegram" class="tab-pane">
-      <h2 style="font-size:16px; font-weight:800;">Telegram Integration</h2>
-      
-      <div class="card">
-        <div class="row">
-          <span style="font-weight:700; font-size:13px;">Connection Status</span>
-          <span class="badge red" id="tg-status">DISCONNECTED</span>
-        </div>
-        <div class="input-group" style="margin-top:8px; flex-direction:column;">
-          <input type="text" id="tg-chat-id" placeholder="Your Chat ID (e.g. 123456789)">
-          <button class="btn" onclick="testTelegram()" id="tg-btn">TEST CONNECTION</button>
-        </div>
-        <p id="tg-msg" style="font-size:11px; color:var(--text-dim); margin-top:8px;">Make sure the Cloudflare Worker endpoint is configured.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- BOTTOM NAV -->
-  <div class="bottom-nav">
-    <div class="nav-item active" id="nav-callouts" onclick="switchTab('callouts', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-      <span>Callouts</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('screener', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <span>Screener</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('dashboard', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-      <span>Dashboard</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('telegram', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-      <span>Telegram</span>
-    </div>
-  </div>
-
-  <!-- MODAL -->
-  <div class="modal-overlay" id="detailsModal" onclick="closeModal(event)">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h3 style="font-size:14px; font-weight:800;" id="modal-title">Details</h3>
-        <button style="background:transparent; border:none; color:#fff; cursor:pointer;" onclick="document.getElementById('detailsModal').classList.remove('active')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
-      <div id="modal-content"></div>
-    </div>
-  </div>
+<nav id="nav">
+<button data-tab="callouts" class="active">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Callouts
+</button>
+<button data-tab="screener">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m16 16 5 5"/></svg>Screener
+</button>
+<button data-tab="dashboard">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
+</button>
+<button data-tab="telegram">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4zM22 2 11 13"/></svg>Telegram
+</button>
+</nav>
 </div>
 
+<dialog id="modal">
+<div class="row">
+<h2 id="modal-title">Token Details</h2>
+<button class="outline" id="close-modal">✕</button>
+</div>
+<div id="modal-body"></div>
+</dialog>
+
 <script>
-  // ==========================================
-  // 1. CLIPBOARD LOGIC
-  // ==========================================
-  async function copyToClipboard(text, btnElement) {
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        // Fallback for older iOS Safari
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        textArea.style.position = "absolute";
-        textArea.style.left = "-999999px";
-        document.body.prepend(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        textArea.remove();
-      }
-      
-      // Visual feedback
-      const toast = document.getElementById('copy-toast');
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 1500);
+'use strict';
 
-      if (btnElement) {
-        const originalHTML = btnElement.innerHTML;
-        btnElement.classList.add('copied');
-        // Lucide Check icon
-        btnElement.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-        
-        setTimeout(() => {
-          btnElement.classList.remove('copied');
-          btnElement.innerHTML = originalHTML;
-        }, 1500);
-      }
-    } catch (err) {
-      console.error('Copy failed', err);
+const $ = id => document.getElementById(id);
+const api = 'https://api.dexscreener.com';
+
+const state = {
+  tokens: new Map(),
+  filter: 'latest',
+  refreshing: false,
+  firstLoad: true
+};
+
+const esc = s => String(s ?? '').replace(
+  /[&<>"']/g,
+  c => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[c])
+);
+
+const money = n => Number.isFinite(n) && n >= 0
+  ? '$' + (
+    n >= 1e9 ? (n/1e9).toFixed(2)+'B' :
+    n >= 1e6 ? (n/1e6).toFixed(2)+'M' :
+    n >= 1e3 ? (n/1e3).toFixed(1)+'K' :
+    n.toLocaleString('en-US',{maximumFractionDigits:2})
+  )
+  : 'N/A';
+
+const num = x =>
+  x === null || x === undefined || x === ''
+    ? null
+    : Number.isFinite(Number(x)) && Number(x) >= 0
+      ? Number(x)
+      : null;
+
+const signed = x => Number.isFinite(x)
+  ? (x >= 0 ? '+' : '') + x.toFixed(1) + '%'
+  : 'N/A';
+
+const short = s => s ? s.slice(0,6)+'…'+s.slice(-5) : 'N/A';
+
+const mintValid = s => /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(s);
+
+function toast(msg) {
+  $('toast').textContent = msg;
+  $('toast').style.display = 'block';
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => $('toast').style.display='none',1600);
+}
+
+async function copyCA(ca) {
+  try {
+    if(navigator.clipboard && isSecureContext) {
+      await navigator.clipboard.writeText(ca);
+    } else {
+      const t = document.createElement('textarea');
+      t.value = ca;
+      t.style.position = 'fixed';
+      t.style.opacity = '0';
+      document.body.appendChild(t);
+      t.select();
+      if(!document.execCommand('copy')) throw Error('Copy unavailable');
+      t.remove();
+    }
+    toast('Copied!');
+  } catch(e) {
+    toast('Copy failed');
+  }
+}
+
+function caRow(ca) {
+  return `<div class="ca">
+    <span>CA: ${esc(short(ca))}</span>
+    <button class="copy" data-copy="${esc(ca)}" title="Copy full contract address">⧉</button>
+  </div>`;
+}
+
+// LIVE CLOCK
+function tickClock() {
+  $('clock').textContent = new Date().toLocaleTimeString(
+    undefined,
+    {hour:'2-digit',minute:'2-digit',second:'2-digit'}
+  );
+}
+
+tickClock();
+setInterval(tickClock,1000);
+document.addEventListener('visibilitychange',tickClock);
+window.addEventListener('focus',tickClock);
+
+// NAVIGATION
+$('nav').addEventListener('click',e => {
+  const b = e.target.closest('[data-tab]');
+  if(!b) return;
+
+  document.querySelectorAll('section').forEach(s =>
+    s.classList.toggle('active',s.id===b.dataset.tab)
+  );
+
+  document.querySelectorAll('#nav button').forEach(n =>
+    n.classList.toggle('active',n===b)
+  );
+});
+
+document.addEventListener('click',e => {
+  const b = e.target.closest('[data-copy]');
+  if(b) {
+    e.stopPropagation();
+    copyCA(b.dataset.copy);
+  }
+});
+
+$('close-modal').onclick = () => $('modal').close();
+
+$('modal').addEventListener('click',e => {
+  if(e.target===$('modal')) $('modal').close();
+});
+
+// RISK CIRCLE
+const riskName = n =>
+  n===null ? 'UNAVAILABLE' :
+  n<=25 ? 'LOW RISK' :
+  n<=50 ? 'MODERATE' :
+  n<=75 ? 'HIGH RISK' : 'EXTREME';
+
+const riskColor = n =>
+  n===null ? '#777' :
+  n<=25 ? '#14f195' :
+  n<=50 ? '#fbbf24' :
+  n<=75 ? '#f97316' : '#ef4444';
+
+function riskGauge(n) {
+  const p = n===null ? 0 : Math.min(100,Math.max(0,n));
+  return `
+  <div class="risk" style="--risk-color:${riskColor(n)}">
+    <svg width="74" height="74" viewBox="0 0 74 74">
+      <circle class="track" cx="37" cy="37" r="32"/>
+      <circle class="progress" cx="37" cy="37" r="32"
+        data-offset="${201*(1-p/100)}"/>
+    </svg>
+    <div>
+      <div class="number">${n===null?'—':n}</div>
+      <div class="caption">/100</div>
+    </div>
+  </div>`;
+}
+
+function animateGauges(root=document) {
+  requestAnimationFrame(() =>
+    root.querySelectorAll('.progress').forEach(el =>
+      el.style.strokeDashoffset=el.dataset.offset
+    )
+  );
+}
+
+// PRELIMINARY RISK MODEL
+function assess(pair) {
+  const liq = num(pair.liquidity?.usd);
+  const fdv = num(pair.fdv);
+  const mc = num(pair.marketCap);
+
+  const notes = [];
+  let score=0, checks=0;
+
+  if(liq!==null) {
+    checks++;
+    if(liq<5000) {
+      score+=50;
+      notes.push('Very low pool liquidity');
+    } else if(liq<20000) {
+      score+=25;
+      notes.push('Limited pool liquidity');
     }
   }
 
-  // Helper to build CA row
-  function buildCaRow(ca) {
-    if (!ca) return '';
-    const shortCa = ca.substring(0, 6) + '...' + ca.substring(ca.length - 4);
-    // Lucide Clipboard icon
-    const clipIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-    
-    return `
-      <div class="ca-container">
-        <span>CA: ${shortCa}</span>
-        <button class="copy-btn" onclick="event.stopPropagation(); copyToClipboard('${ca}', this)">${clipIcon}</button>
+  if(liq!==null && (mc??fdv)!==null && (mc??fdv)>0) {
+    checks++;
+    const ratio=liq/(mc??fdv);
+    if(ratio<.05) {
+      score+=30;
+      notes.push('Low liquidity relative to valuation');
+    } else if(ratio<.12) {
+      score+=15;
+      notes.push('Moderate liquidity relative to valuation');
+    }
+  }
+
+  const age=num(pair.pairCreatedAt);
+  if(age!==null && age>0 && age<=Date.now()) {
+    checks++;
+    if(Date.now()-age<3600000) {
+      score+=20;
+      notes.push('Very new trading pair');
+    } else if(Date.now()-age<86400000) {
+      score+=10;
+      notes.push('Recently created trading pair');
+    }
+  }
+
+  return {
+    score:checks===3 ? Math.min(100,score) : null,
+    notes,
+    limited:true
+  };
+}
+
+function tokenAge(t) {
+  if(!t || t>Date.now()) return 'N/A';
+  const m=Math.floor((Date.now()-t)/60000);
+  return m<1 ? '<1m' :
+    m<60 ? m+'m' :
+    m<1440 ? Math.floor(m/60)+'h '+m%60+'m' :
+    Math.floor(m/1440)+'d';
+}
+
+function pickPair(pairs,ca) {
+  return (pairs||[])
+    .filter(p=>p.chainId==='solana' && p.baseToken?.address===ca)
+    .sort((a,b)=>
+      (num(b.liquidity?.usd)??-1)-(num(a.liquidity?.usd)??-1)
+    )[0]||null;
+}
+
+async function fetchJSON(url,options) {
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),12000);
+  try {
+    const r=await fetch(url,{...options,signal:controller.signal});
+    if(!r.ok) throw Error('HTTP '+r.status);
+    return await r.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchPair(ca) {
+  const data=await fetchJSON(
+    `${api}/latest/dex/tokens/${encodeURIComponent(ca)}`
+  );
+  return pickPair(data.pairs,ca);
+}
+
+function cardHTML(t) {
+  const p=t.pair;
+  const r=assess(p);
+  const cap=num(p.marketCap);
+  const liq=num(p.liquidity?.usd);
+  const change=t.entryCap && cap!==null
+    ? (cap/t.entryCap-1)*100 : null;
+
+  return `
+  <div class="card token-card ${t.new?'new':''}"
+    data-open="${esc(t.ca)}">
+    <div class="row">
+      <div style="min-width:0">
+        <div class="token">
+          ${esc(p.baseToken?.name||'Unknown')}
+          <span class="ticker">$${esc(p.baseToken?.symbol||'?')}</span>
+        </div>
+        ${caRow(t.ca)}
       </div>
-    `;
-  }
+      <div class="risk-wrap">${riskGauge(r.score)}</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="label">Market Cap</div><div class="value">${money(cap)}</div></div>
+      <div class="stat"><div class="label">Liquidity</div><div class="value">${money(liq)}</div></div>
+      <div class="stat"><div class="label">Risk</div><div class="value" style="color:${riskColor(r.score)}">${r.score===null?'N/A':r.score+'/100'}</div></div>
+      <div class="stat"><div class="label">1h Volume</div><div class="value">${money(num(p.volume?.h1))}</div></div>
+      <div class="stat"><div class="label">Pair Age</div><div class="value">${tokenAge(num(p.pairCreatedAt))}</div></div>
+      <div class="stat"><div class="label">Since Tracked</div><div class="value ${change===null?'':change>=0?'green':'red'}">${signed(change)}</div></div>
+    </div>
+  </div>`;
+}
 
-  // ==========================================
-  // 2. CLOCK
-  // ==========================================
-  let clockInterval;
-  function startClock() {
-    const clockEl = document.getElementById('clock-text');
-    const tick = () => { clockEl.innerText = new Date().toLocaleTimeString(); };
-    tick();
-    if(clockInterval) clearInterval(clockInterval);
-    clockInterval = setInterval(tick, 1000);
-  }
-  startClock();
+function render() {
+  let list=[...state.tokens.values()].filter(t=>t.pair);
 
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") startClock();
-  });
-
-  // ==========================================
-  // 3. UI & NAVIGATION
-  // ==========================================
-  function switchTab(tabId, el) {
-    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'has-new'));
-    document.getElementById('tab-' + tabId).classList.add('active');
-    el.classList.add('active');
-  }
-
-  function closeModal(e) {
-    if (e.target.id === 'detailsModal') document.getElementById('detailsModal').classList.remove('active');
-  }
-
-  // ==========================================
-  // 4. CALLOUT ENGINE (Text Only)
-  // ==========================================
-  const ADJ = ["Nova", "Pepe", "Doge", "Floki", "Turbo", "Giga", "Chad", "Based", "Moon", "Rocket", "Diamond", "Cyber", "Pixel", "Meta"];
-  const NOU = ["Inu", "Cat", "Frog", "Coin", "Token", "Swap", "Bear", "Bull", "Whale", "Degen", "Ape", "Punk"];
-  let callouts = [];
-
-  function generateSimCallout() {
-    const isRug = Math.random() > 0.85;
-    const name = ADJ[Math.floor(Math.random()*ADJ.length)] + " " + NOU[Math.floor(Math.random()*NOU.length)];
-    const ticker = name.substring(0,3).toUpperCase() + Math.floor(Math.random()*99);
-    const entryMc = Math.floor(Math.random() * 80000) + 5000;
-    let currentMc = Math.max(1000, Math.floor(entryMc * (isRug ? 0.6 : 1.5)));
-    // Generate a valid format base58 string for demo
-    const ca = Array.from({length: 44}, () => "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"[Math.floor(Math.random()*58)]).join('');
-    
-    return {
-      id: Date.now() + Math.random(),
-      name, ticker, ca, entryMc, currentMc, peakMc: currentMc,
-      liq: Math.floor(entryMc * 0.4),
-      risk: isRug ? Math.floor(Math.random()*20)+80 : Math.floor(Math.random()*40)+10,
-      time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-      isNew: true
-    };
-  }
-
-  function initCallouts() {
-    for(let i=0; i<4; i++) {
-      let c = generateSimCallout();
-      c.isNew = false;
-      callouts.push(c);
-    }
-    renderCallouts();
-    updateDashboard();
-  }
-
-  function formatUsd(v) {
-    if (v >= 1e6) return '$' + (v/1e6).toFixed(2) + 'M';
-    if (v >= 1e3) return '$' + (v/1e3).toFixed(1) + 'K';
-    return '$' + v;
-  }
-
-  function renderCallouts(filter = 'latest') {
-    const container = document.getElementById('callouts-list');
-    container.innerHTML = '';
-
-    let filtered = [...callouts];
-    if (filter === 'highest') filtered.sort((a,b) => ((b.currentMc / b.entryMc) - 1) - ((a.currentMc / a.entryMc) - 1));
-    if (filter === 'lowrisk') filtered = filtered.filter(c => c.risk < 40);
-
-    filtered.forEach((c) => {
-      const ret = ((c.currentMc / c.entryMc) - 1) * 100;
-      const isPos = ret >= 0;
-
-      const el = document.createElement('div');
-      el.className = `card callout-card ${c.isNew ? 'new-glow' : ''}`;
-      el.onclick = () => showCalloutDetails(c);
-
-      el.innerHTML = `
-        <div class="row" style="align-items:flex-start;">
-          <div>
-            <div class="token-id">
-              <span class="token-name-text">${c.name}</span>
-              <span class="token-ticker-text">$${c.ticker}</span>
-            </div>
-            ${buildCaRow(c.ca)}
-          </div>
-          <div style="text-align:right; flex-shrink:0;">
-            <div class="mono ${isPos?'text-green':'text-red'}" style="font-size:14px; font-weight:800;">${isPos?'+':''}${ret.toFixed(1)}%</div>
-            <div style="font-size:10px; color:var(--text-dark);">Since Call</div>
-          </div>
-        </div>
-        <div class="stats-grid">
-          <div class="stat-box"><div class="label">MC at Call</div><div class="val">${formatUsd(c.entryMc)}</div></div>
-          <div class="stat-box"><div class="label">Current MC</div><div class="val">${formatUsd(c.currentMc)}</div></div>
-          <div class="stat-box"><div class="label">Risk</div><div class="val ${c.risk>70?'text-red':(c.risk>40?'text-yellow':'text-green')}">${c.risk}/100</div></div>
-        </div>
-      `;
-      container.appendChild(el);
-      c.isNew = false;
+  if(state.filter==='trending') {
+    list.sort((a,b)=>
+      (num(b.pair.volume?.h1)??-1)-(num(a.pair.volume?.h1)??-1)
+    );
+  } else if(state.filter==='highest') {
+    list.sort((a,b)=>
+      ((num(b.pair.marketCap)??0)/(b.entryCap||Infinity))-
+      ((num(a.pair.marketCap)??0)/(a.entryCap||Infinity))
+    );
+  } else if(state.filter==='lowrisk') {
+    list=list.filter(t=>{
+      const n=assess(t.pair).score;
+      return n!==null && n<=25;
     });
+  } else {
+    list.sort((a,b)=>b.seen-a.seen);
   }
 
-  function filterCallouts(type, btn) {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderCallouts(type);
+  $('callouts-list').innerHTML=list.length
+    ? list.slice(0,35).map(cardHTML).join('')
+    : '<div class="empty">No matching tokens available.</div>';
+
+  animateGauges($('callouts-list'));
+
+  for(const t of list) t.new=false;
+  updateDashboard();
+}
+
+$('filters').onclick=e=>{
+  const b=e.target.closest('[data-filter]');
+  if(!b)return;
+  state.filter=b.dataset.filter;
+  document.querySelectorAll('#filters button').forEach(x=>
+    x.classList.toggle('active',x===b)
+  );
+  render();
+};
+
+$('callouts-list').onclick=e=>{
+  if(e.target.closest('[data-copy]'))return;
+  const card=e.target.closest('[data-open]');
+  if(card){
+    const t=state.tokens.get(card.dataset.open);
+    if(t)showDetails(t.pair,t.ca,t);
   }
+};
 
-  function showCalloutDetails(c) {
-    const ret = ((c.currentMc / c.entryMc) - 1) * 100;
-    document.getElementById('modal-title').innerText = `${c.name} ($${c.ticker})`;
-    document.getElementById('modal-content').innerHTML = `
-      <div style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
-        <div style="padding-bottom:8px; border-bottom:1px solid var(--border);">
-          <span class="text-dim" style="font-size:12px;">Contract Address</span>
-          <div style="margin-top:4px;">
-            ${buildCaRow(c.ca)}
-          </div>
-        </div>
-        <div class="row" style="padding-bottom:8px; border-bottom:1px solid var(--border);">
-          <span class="text-dim" style="font-size:12px;">Return Since Call</span>
-          <span class="mono ${ret>=0?'text-green':'text-red'}" style="font-weight:800;">${ret>=0?'+':''}${ret.toFixed(2)}%</span>
-        </div>
-        <div class="row" style="padding-bottom:8px; border-bottom:1px solid var(--border);">
-          <span class="text-dim" style="font-size:12px;">Entry MC</span>
-          <span class="mono" style="font-weight:800;">${formatUsd(c.entryMc)}</span>
-        </div>
-        <div class="row">
-          <span class="text-dim" style="font-size:12px;">Peak MC</span>
-          <span class="mono text-green" style="font-weight:800;">${formatUsd(c.peakMc)}</span>
-        </div>
-      </div>
-    `;
-    document.getElementById('detailsModal').classList.add('active');
-  }
+let lastRefresh=0;
 
-  // Simulation Tick
-  setInterval(() => {
-    callouts.forEach(c => {
-      const change = (Math.random() - 0.45) * (c.risk > 70 ? 0.15 : 0.05);
-      c.currentMc = Math.max(100, Math.floor(c.currentMc * (1 + change)));
-      if (c.currentMc > c.peakMc) c.peakMc = c.currentMc;
-    });
-    
-    if(!document.getElementById('detailsModal').classList.contains('active')) {
-      renderCallouts(document.querySelector('.filter-btn.active').innerText.toLowerCase().replace(' return',''));
-    }
-    updateDashboard();
-  }, 4000);
+async function refreshFeed() {
+  if(state.refreshing)return;
 
-  setInterval(() => {
-    if(callouts.length > 20) callouts.pop();
-    let newC = generateSimCallout();
-    callouts.unshift(newC);
-    if(!document.getElementById('tab-callouts').classList.contains('active')) {
-      document.getElementById('nav-callouts').classList.add('has-new');
-    }
-    renderCallouts(document.querySelector('.filter-btn.active').innerText.toLowerCase().replace(' return',''));
-  }, 25000);
+  state.refreshing=true;
+  $('refresh').disabled=true;
+  $('feed-status').textContent='Refreshing token discovery…';
 
-  // ==========================================
-  // 5. SCREENER
-  // ==========================================
-  const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com";
+  try {
+    const profiles=await fetchJSON(`${api}/token-profiles/latest/v1`);
+    if(!Array.isArray(profiles))throw Error('Invalid discovery response');
 
-  async function scanToken() {
-    const ca = document.getElementById('caInput').value.trim();
-    const btn = document.getElementById('scanBtn');
-    const resDiv = document.getElementById('scan-result');
-    
-    if (!ca || ca.length < 32) {
-      resDiv.innerHTML = `<div style="color:var(--red); font-size:12px; padding:10px;">Invalid Solana mint address.</div>`;
+    const addresses=[...new Set(
+      profiles.filter(x=>
+        x.chainId==='solana' && mintValid(x.tokenAddress)
+      ).map(x=>x.tokenAddress)
+    )].slice(0,16);
+
+    if(!addresses.length){
+      $('feed-status').textContent='No Solana profiles returned right now.';
       return;
     }
 
-    btn.disabled = true;
-    btn.innerText = "WAIT...";
-    resDiv.innerHTML = `<div class="card"><div class="skeleton" style="height:20px; width:50%;"></div><div class="skeleton" style="height:40px; width:100%; margin-top:10px;"></div></div>`;
+    const responses=await Promise.allSettled(addresses.map(fetchPair));
+    let added=0;
 
-    try {
-      const dexReq = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${ca}`);
-      const dexData = await dexReq.json();
-      
-      if (!dexData.pairs || dexData.pairs.length === 0) throw new Error("No liquidity pairs found.");
-      const bestPair = dexData.pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+    responses.forEach((r,i)=>{
+      if(r.status!=='fulfilled'||!r.value)return;
 
-      let mintAuth = 'N/A', freezeAuth = 'N/A';
-      try {
-        const rpcReq = await fetch(RPC_ENDPOINT, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getAccountInfo', params: [ca, { encoding: "jsonParsed" }] })
-        });
-        const rpcData = await rpcReq.json();
-        if (rpcData.result?.value?.data?.parsed?.info) {
-          const info = rpcData.result.value.data.parsed.info;
-          mintAuth = info.mintAuthority || 'Revoked';
-          freezeAuth = info.freezeAuthority || 'Revoked';
-        }
-      } catch (e) {}
+      const ca=addresses[i];
+      const pair=r.value;
+      const cap=num(pair.marketCap);
+      const old=state.tokens.get(ca);
 
-      const price = parseFloat(bestPair.priceUsd);
-      const mc = parseFloat(bestPair.marketCap || bestPair.fdv);
-      const liq = parseFloat(bestPair.liquidity?.usd || 0);
-      const vol24 = parseFloat(bestPair.volume?.h24 || 0);
-      const vol1h = parseFloat(bestPair.volume?.h1 || 0);
-      const ageMs = Date.now() - (bestPair.pairCreatedAt || Date.now());
-      const ageHours = ageMs / (1000 * 60 * 60);
+      if(old){
+        old.pair=pair;
+        return;
+      }
 
-      let ageStr = 'N/A';
-      if (ageHours < 1) ageStr = Math.floor(ageHours * 60) + 'm';
-      else if (ageHours < 24) ageStr = Math.floor(ageHours) + 'h ' + Math.floor((ageHours % 1) * 60) + 'm';
-      else ageStr = Math.floor(ageHours / 24) + 'd ' + Math.floor(ageHours % 24) + 'h';
-
-      let risk = 0;
-      if (liq < 5000) risk += 40;
-      if (mintAuth !== 'Revoked') risk += 30;
-      if (freezeAuth !== 'Revoked') risk += 30;
-      let riskColor = risk > 60 ? 'red' : (risk > 30 ? 'yellow' : 'green');
-
-      resDiv.innerHTML = `
-        <div class="card" style="border-left: 3px solid var(--${riskColor}); animation: slideUp 0.3s;">
-          <div class="row" style="align-items:flex-start;">
-            <div>
-              <div class="token-id">
-                <span class="token-name-text">${bestPair.baseToken.name || 'Unknown'}</span>
-                <span class="token-ticker-text">${bestPair.baseToken.symbol || 'UNK'}</span>
-              </div>
-              ${buildCaRow(ca)}
-            </div>
-            <div class="badge ${riskColor}">RISK: ${risk}</div>
-          </div>
-
-          <div class="stats-grid">
-            <div class="stat-box"><div class="label">Price</div><div class="val">${price < 0.01 ? price.toFixed(6) : price.toFixed(4)}</div></div>
-            <div class="stat-box"><div class="label">Market Cap</div><div class="val text-yellow">${mc ? formatUsd(mc) : 'N/A'}</div></div>
-            <div class="stat-box"><div class="label">Liquidity</div><div class="val ${liq < 5000 ? 'text-red' : ''}">${formatUsd(liq)}</div></div>
-            <div class="stat-box"><div class="label">Age</div><div class="val">${ageStr}</div></div>
-            <div class="stat-box"><div class="label">24h Vol</div><div class="val">${formatUsd(vol24)}</div></div>
-            <div class="stat-box"><div class="label">1h Vol</div><div class="val">${formatUsd(vol1h)}</div></div>
-          </div>
-
-          <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
-            <div class="row"><span style="font-size:11px; color:var(--text-dim);">Mint Authority</span><span class="mono" style="font-size:11px; color:${mintAuth==='Revoked'?'var(--green)':'var(--red)'}">${mintAuth}</span></div>
-            <div class="row"><span style="font-size:11px; color:var(--text-dim);">Freeze Authority</span><span class="mono" style="font-size:11px; color:${freezeAuth==='Revoked'?'var(--green)':'var(--red)'}">${freezeAuth}</span></div>
-          </div>
-        </div>
-      `;
-    } catch (err) {
-      resDiv.innerHTML = `<div class="card" style="border-left: 3px solid var(--red); background:var(--red-dim); padding:16px; text-align:center;"><div style="color:var(--red); font-size:13px; font-weight:700;">SCAN FAILED</div><div style="color:var(--text-dim); font-size:11px; margin-top:4px;">${err.message}</div></div>`;
-    } finally {
-      btn.disabled = false;
-      btn.innerText = "SCAN";
-    }
-  }
-
-  // ==========================================
-  // 6. DASHBOARD
-  // ==========================================
-  function updateDashboard() {
-    if(callouts.length === 0) return;
-    document.getElementById('dash-total-calls').innerText = callouts.length;
-    let totalRet = 0, bestRet = -999, bestName = 'N/A';
-
-    callouts.forEach(c => {
-      const ret = ((c.currentMc / c.entryMc) - 1) * 100;
-      totalRet += ret;
-      if (ret > bestRet) { bestRet = ret; bestName = '$' + c.ticker; }
+      state.tokens.set(ca,{
+        ca,pair,
+        entryCap:cap&&cap>0?cap:null,
+        seen:Date.now(),
+        new:!state.firstLoad
+      });
+      added++;
     });
 
-    const avg = totalRet / callouts.length;
-    document.getElementById('dash-avg-return').innerText = (avg>=0?'+':'') + avg.toFixed(1) + '%';
-    document.getElementById('dash-avg-return').className = 'mono ' + (avg>=0?'text-green':'text-red');
-    document.getElementById('dash-best-call').innerText = `${bestName} (+${bestRet.toFixed(0)}%)`;
+    if(state.tokens.size>80){
+      const sorted=[...state.tokens.values()]
+        .sort((a,b)=>b.seen-a.seen).slice(0,80);
+      state.tokens=new Map(sorted.map(t=>[t.ca,t]));
+    }
+
+    render();
+
+    if(added&&!state.firstLoad)burst();
+
+    state.firstLoad=false;
+    lastRefresh=Date.now();
+
+    $('feed-status').textContent=
+      `${state.tokens.size} tracked tokens · updated ${new Date().toLocaleTimeString()} · refresh every 60s`;
+
+  }catch(e){
+    $('feed-status').textContent='Feed unavailable: '+e.message;
+  }finally{
+    state.refreshing=false;
+    $('refresh').disabled=false;
+  }
+}
+
+$('refresh').onclick=refreshFeed;
+
+setInterval(()=>{
+  if(!document.hidden)refreshFeed();
+},60000);
+
+// TOKEN DETAILS
+function showDetails(p,ca,t) {
+  const r=assess(p);
+  $('modal-title').textContent=p.baseToken?.name||'Token Details';
+
+  const entries=[
+    ['Token',p.baseToken?.symbol||'N/A'],
+    ['Price USD',p.priceUsd??'N/A'],
+    ['Market Cap',money(num(p.marketCap))],
+    ['FDV',money(num(p.fdv))],
+    ['Liquidity',money(num(p.liquidity?.usd))],
+    ['Volume 5m',money(num(p.volume?.m5))],
+    ['Volume 1h',money(num(p.volume?.h1))],
+    ['Volume 24h',money(num(p.volume?.h24))],
+    ['Pair Age',tokenAge(num(p.pairCreatedAt))],
+    ['5m Price Change',p.priceChange?.m5===undefined?'N/A':signed(Number(p.priceChange.m5))],
+    ['24h Price Change',p.priceChange?.h24===undefined?'N/A':signed(Number(p.priceChange.h24))],
+    ['Risk',r.score===null?'N/A':r.score+'/100'],
+    ['Risk Notes',r.notes.join('; ')||'No threshold triggered']
+  ];
+
+  if(t){
+    entries.push(
+      ['First Tracked',new Date(t.seen).toLocaleString()],
+      ['First Tracked MC',money(t.entryCap)]
+    );
   }
 
-  // INIT
-  window.onload = () => { initCallouts(); };
+  $('modal-body').innerHTML=`
+    ${caRow(ca)}
+    <div style="margin:14px 0" class="risk-wrap">
+      ${riskGauge(r.score)}
+      <div class="risk-info">
+        <div class="risk-name" style="color:${riskColor(r.score)}">${riskName(r.score)}</div>
+        <div class="risk-gradient"></div>
+        <p class="small">Preliminary liquidity/age score only.</p>
+      </div>
+    </div>
+    <div class="details">
+      ${entries.map(([k,v])=>`
+        <div class="detail"><span>${esc(k)}</span><span>${esc(v)}</span></div>
+      `).join('')}
+    </div>
+    <p class="help">Holder concentration and insider ownership are not verified by this market-data feed.</p>
+    ${p.url&&/^https:\/\/dexscreener\.com\//.test(p.url)
+      ? `<a class="link" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">Open on DexScreener ↗</a>`
+      : ''}
+  `;
+
+  $('modal').showModal();
+  animateGauges($('modal'));
+}
+
+// SCREENER
+async function scan() {
+  const ca=$('ca-input').value.trim();
+
+  if(!mintValid(ca)){
+    $('scan-result').innerHTML='<p class="error">Enter a valid-looking Solana mint address.</p>';
+    return;
+  }
+
+  $('scan').disabled=true;
+  $('scan-result').innerHTML='<div class="card">Scanning token…</div>';
+
+  try {
+    const pair=await fetchPair(ca);
+    if(!pair)throw Error('No matching Solana base-token liquidity pair found.');
+
+    $('scan-result').innerHTML=cardHTML({
+      ca,pair,entryCap:null,new:false
+    });
+
+    animateGauges($('scan-result'));
+
+    $('scan-result').querySelector('.token-card')
+      .addEventListener('click',e=>{
+        if(!e.target.closest('[data-copy]'))
+          showDetails(pair,ca,null);
+      });
+
+  }catch(e){
+    $('scan-result').innerHTML=
+      `<p class="error">Scan failed: ${esc(e.message)}</p>`;
+  }finally{
+    $('scan').disabled=false;
+  }
+}
+
+$('scan').onclick=scan;
+$('ca-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter')scan();
+});
+
+// DASHBOARD
+function updateDashboard() {
+  const list=[...state.tokens.values()].filter(t=>t.pair);
+  $('total').textContent=list.length;
+
+  const returns=list.map(t=>{
+    const cap=num(t.pair.marketCap);
+    return t.entryCap&&cap!==null
+      ? (cap/t.entryCap-1)*100
+      : null;
+  }).filter(Number.isFinite);
+
+  $('average').textContent=returns.length
+    ? signed(returns.reduce((a,b)=>a+b,0)/returns.length)
+    : 'N/A';
+
+  const sorted=list.filter(t=>
+    t.entryCap && num(t.pair.marketCap)!==null
+  ).sort((a,b)=>
+    (num(b.pair.marketCap)/b.entryCap)-
+    (num(a.pair.marketCap)/a.entryCap)
+  );
+
+  $('best').textContent=sorted.length
+    ? '$'+(sorted[0].pair.baseToken?.symbol||'?')+' '+
+      signed((num(sorted[0].pair.marketCap)/sorted[0].entryCap-1)*100)
+    : 'N/A';
+
+  $('updated').textContent=lastRefresh
+    ? new Date(lastRefresh).toLocaleTimeString()
+    : 'N/A';
+}
+
+// TELEGRAM
+$('worker-url').value=localStorage.getItem('dexscreenr-worker-url')||'';
+
+$('tg-test').onclick=async()=>{
+  const url=$('worker-url').value.trim().replace(/\/$/,'');
+
+  if(!/^https:\/\/[\w.-]+(?::\d+)?(?:\/.*)?$/.test(url)){
+    $('tg-message').textContent='Enter a valid HTTPS Worker URL.';
+    return;
+  }
+
+  localStorage.setItem('dexscreenr-worker-url',url);
+  $('tg-test').disabled=true;
+  $('tg-status').textContent='CONNECTING';
+
+  try {
+    const response=await fetch(url+'/test',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:'DEXSCREENR connection test'})
+    });
+
+    const data=await response.json();
+    if(!response.ok||!data.ok)
+      throw Error(data.error||'Telegram request failed');
+
+    $('tg-status').textContent='CONNECTED';
+    $('tg-status').style.color='var(--green)';
+    $('tg-message').textContent='Test message sent successfully.';
+
+  }catch(e){
+    $('tg-status').textContent='FAILED';
+    $('tg-message').textContent='Connection failed: '+e.message;
+  }finally{
+    $('tg-test').disabled=false;
+  }
+};
+
+// PARTICLES
+const canvas=$('particles');
+const ctx=canvas.getContext('2d');
+
+let particles=[],frame=null;
+
+function sizeCanvas(){
+  canvas.width=innerWidth*devicePixelRatio;
+  canvas.height=innerHeight*devicePixelRatio;
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+}
+
+addEventListener('resize',sizeCanvas);
+sizeCanvas();
+
+function burst(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+
+  const x=Math.min(innerWidth/2,250),y=150;
+
+  for(let i=0;i<32;i++){
+    const a=Math.random()*Math.PI*2;
+    const s=1+Math.random()*3;
+
+    particles.push({
+      x,y,
+      vx:Math.cos(a)*s,
+      vy:Math.sin(a)*s-1,
+      life:1,
+      size:1+Math.random()*2
+    });
+  }
+
+  if(frame===null)draw();
+}
+
+function draw(){
+  ctx.clearRect(0,0,innerWidth,innerHeight);
+  particles=particles.filter(p=>p.life>0);
+
+  for(const p of particles){
+    p.x+=p.vx;
+    p.y+=p.vy;
+    p.vy+=.035;
+    p.life-=.018;
+
+    ctx.globalAlpha=Math.max(0,p.life);
+    ctx.fillStyle='#14f195';
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+    ctx.fill();
+  }
+
+  ctx.globalAlpha=1;
+  frame=particles.length?requestAnimationFrame(draw):null;
+}
+
+// START
+refreshFeed();
 </script>
 </body>
 </html>
