@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>INSIDER | live feed</title>
+<title>DEXSCREENR | Terminal</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
@@ -125,7 +125,6 @@
   .token-card.rug { border-left-color: #ef4444; }
   .token-card.rug::after { background: radial-gradient(circle at top right, rgba(239,68,68,0.10), transparent 70%); }
 
-  /* shimmer sweep across new cards */
   .token-card::before {
     content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
     background: linear-gradient(90deg, transparent, rgba(20,241,149,0.06), transparent);
@@ -148,6 +147,7 @@
     width: 48px; height: 48px; border-radius: 50%; border: 2px solid #14F195;
     object-fit: cover; box-shadow: 0 0 12px rgba(20,241,149,0.25);
     transition: transform .3s, box-shadow .3s;
+    background-color: #1a1a20;
   }
   .token-card:hover .token-logo { transform: scale(1.08) rotate(-4deg); box-shadow: 0 0 20px rgba(20,241,149,0.5); }
 
@@ -178,7 +178,6 @@
   .fees-value { font-size: 11px; font-weight: 600; color: #14F195; display: flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; }
   .fees-value svg { width: 11px; height: 11px; }
 
-  /* Tags */
   .card-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; position: relative; z-index: 2; }
   .tag-item {
     font-size: 10.5px; font-weight: 600; color: #a1a1aa;
@@ -193,7 +192,6 @@
   @keyframes rugPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
   .tag-item svg { width: 12px; height: 12px; }
 
-  /* Bottom row */
   .card-bottom { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 2px; position: relative; z-index: 2; }
 
   .bottom-left { display: flex; flex-direction: column; gap: 6px; }
@@ -240,7 +238,6 @@
   .nav-item.active svg { filter: drop-shadow(0 0 8px rgba(20,241,149,0.6)); animation: navGlow 2s ease-in-out infinite alternate; }
   @keyframes navGlow { from { filter: drop-shadow(0 0 4px rgba(20,241,149,0.4)); } to { filter: drop-shadow(0 0 12px rgba(20,241,149,0.9)); } }
   .nav-item span { font-size: 10px; font-weight: 600; letter-spacing: 0.3px; }
-
 </style>
 </head>
 <body>
@@ -251,7 +248,7 @@
     <div class="top-bar">
       <div class="brand">
         <div class="pulse-dot"></div>
-        <em>INSIDER</em>
+        <em>DEXSCREENR</em>
       </div>
       <div class="header-actions">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -298,7 +295,7 @@
 
   const feed = document.getElementById('feed');
   const tickerTrack = document.getElementById('tickerTrack');
-  const liveCards = []; // { el, mcEl, baseMc, trend, pnlEl, pnlBase }
+  const liveCards = [];
 
   const fmtMc = (v) => {
     if (v >= 1e6) return '$' + (v/1e6).toFixed(2) + 'M';
@@ -318,19 +315,16 @@
       const pct = (Math.random() * 40 - 10);
       html += makeTickerItem(c, pct);
     }
-    // duplicate for seamless loop
     tickerTrack.innerHTML = html + html;
   }
   buildTicker();
-
-  // re-randomize ticker pct every 4s
   setInterval(buildTicker, 4000);
 
   function generateCall() {
     const coin = coins[Math.floor(Math.random() * coins.length)];
     const isRug = Math.random() < 0.15;
 
-    const mcValue = Math.floor(Math.random() * (150000 - 15000 + 1)) + 15000;
+    const mcStart = Math.floor(Math.random() * (150000 - 15000 + 1)) + 15000;
     const fees = (Math.random() * 25 + 0.5).toFixed(2);
     const age = Math.floor(Math.random() * 12) + 1;
     const dev = Math.floor(Math.random() * 25);
@@ -345,4 +339,116 @@
 
     let percentValue, pnlClass = '';
     if (isRug) {
-      percentValue = -(Math.floor(Math.random() * 90
+      percentValue = -(Math.floor(Math.random() * 90) + 10);
+      pnlClass = 'down';
+    } else {
+      percentValue = Math.floor(Math.random() * (3000 - 200 + 1)) + 200;
+    }
+    const percentStr = (percentValue >= 0 ? '+' : '') + percentValue.toLocaleString() + '%';
+
+    let pathStr = "M0,30 ";
+    for (let i = 1; i <= 8; i++) {
+      const x = i * 10;
+      let y;
+      if (isRug) y = Math.min(30, 5 + (i * 3) + (Math.random() * 4 - 2));
+      else y = Math.max(0, 30 - (i * 3.5) - (Math.random() * 6 - 3));
+      pathStr += `L${x},${y} `;
+    }
+
+    const el = document.createElement('div');
+    el.className = 'token-card' + (isRug ? ' rug' : '');
+    el.innerHTML = `
+      <div class="card-top">
+        <img class="token-logo" src="${coin.img}" onerror="this.style.display='none'">
+        <div class="token-info">
+          <div class="token-name-row">
+            <span class="token-name">${coin.name}</span>
+            <span class="token-ticker">$${coin.ticker}</span>
+          </div>
+          <div class="token-stats-row">
+            <span class="age">${age}h</span>
+            <span class="dev ${dev < 5 ? 'safe' : ''}">Dev ${dev}%</span>
+          </div>
+        </div>
+        <div class="mc-fees">
+          <div class="mc-label">MC</div>
+          <div class="mc-value">${fmtMc(mcStart)}</div>
+          <div class="fees-value">
+            <svg viewBox="0 0 397 311" fill="#14F195" xmlns="http://www.w3.org/2000/svg"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z"/></svg>
+            ${fees}
+          </div>
+        </div>
+      </div>
+
+      <div class="card-tags">
+        <span class="tag-item green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+          @${coin.twitter}
+        </span>
+        <span class="tag-item blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          ${coin.followers}
+        </span>
+        ${isRug ? '<span class="tag-item red">RUGGED</span>' : ''}
+      </div>
+
+      <div class="card-bottom">
+        <div class="bottom-left">
+          <div class="holders-row">
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              ${holders}
+            </span>
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              ${views}
+            </span>
+          </div>
+          <div class="call-info">
+            Called @ <span>${entryStr}</span> <span class="ath">| ATH ${athStr}</span>
+          </div>
+        </div>
+        <div class="bottom-right">
+          <div class="pnl-percent ${pnlClass}">${percentStr}</div>
+          <svg class="mini-chart" viewBox="0 0 80 30">
+            <path d="${pathStr}" stroke="${isRug ? '#ef4444' : '#14F195'}" />
+          </svg>
+        </div>
+      </div>
+    `;
+
+    feed.prepend(el);
+
+    const mcEl = el.querySelector('.mc-value');
+    const pnlEl = el.querySelector('.pnl-percent');
+    const card = {
+      mcEl, mc: mcStart, mcBase: mcStart,
+      trend: isRug ? -1 : 1,
+      pnlEl, pnlBase: percentValue,
+      isRug
+    };
+    liveCards.push(card);
+
+    if (feed.children.length > 15) {
+      feed.lastChild.remove();
+      liveCards.shift();
+    }
+  }
+
+  setInterval(() => {
+    liveCards.forEach(c => {
+      const drift = c.isRug
+        ? -(Math.random() * 0.012 + 0.002) * c.mc
+        : (Math.random() * 0.010 - 0.003) * c.mc;
+      c.mc = Math.max(2000, c.mc + drift);
+
+      if (Math.random() < 0.03 && !c.isRug) c.mc *= 1.06;
+      if (Math.random() < 0.02 && c.isRug) c.mc *= 0.92;
+
+      const dir = c.mc > c.mcBase ? 'up' : (c.mc < c.mcBase ? 'down' : '');
+      c.mcEl.textContent = fmtMc(c.mc);
+      c.mcEl.classList.remove('up', 'down');
+      if (dir) { void c.mcEl.offsetWidth; c.mcEl.classList.add(dir); }
+
+      const pnlNow = c.isRug
+        ? c.pnlBase - ((c.mcBase - c.mc) /
