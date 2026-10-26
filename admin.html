@@ -26,22 +26,21 @@
     overflow: hidden;
   }
 
-  /* Animated grid background */
+  /* Animated background elements */
   .app-container::before {
     content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
     background-image:
-      linear-gradient(rgba(20,241,149,0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(20,241,149,0.035) 1px, transparent 1px);
+      linear-gradient(rgba(20,241,149,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(20,241,149,0.03) 1px, transparent 1px);
     background-size: 32px 32px;
     mask-image: radial-gradient(ellipse at top, rgba(0,0,0,0.9), transparent 70%);
     animation: gridDrift 20s linear infinite;
   }
   @keyframes gridDrift { 0% { background-position: 0 0; } 100% { background-position: 32px 32px; } }
 
-  /* Moving glow orb */
   .app-container::after {
     content: ""; position: absolute; width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(20,241,149,0.10), transparent 70%);
+    background: radial-gradient(circle, rgba(20,241,149,0.08), transparent 70%);
     border-radius: 50%; top: -150px; left: 50%; transform: translateX(-50%);
     animation: orbFloat 8s ease-in-out infinite;
     pointer-events: none; z-index: 1;
@@ -67,14 +66,14 @@
   .pulse-dot { width: 7px; height: 7px; background: #14F195; border-radius: 50%; animation: pulse 1s infinite alternate; margin-right: 2px; box-shadow: 0 0 10px #14F195; }
   @keyframes pulse { 0% { opacity: 0.4; transform: scale(0.85); } 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 16px #14F195; } }
 
-  .header-actions { display: flex; align-items: center; gap: 12px; color: #71717a; }
+  .header-actions { display: flex; align-items: center; gap: 14px; color: #71717a; }
   .header-actions svg { width: 20px; height: 20px; cursor: pointer; transition: color .2s, transform .2s; }
   .header-actions svg:hover { color: #14F195; transform: rotate(45deg); }
 
   .profile-pic {
-    width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid #14F195;
-    object-fit: cover; cursor: pointer; box-shadow: 0 0 10px rgba(20,241,149,0.3);
-    transition: box-shadow .3s;
+    width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid #14F195;
+    cursor: pointer; box-shadow: 0 0 10px rgba(20,241,149,0.3);
+    transition: box-shadow .3s; background: #111; display: block;
   }
   .profile-pic:hover { box-shadow: 0 0 20px rgba(20,241,149,0.6); }
 
@@ -221,17 +220,19 @@
   }
   @keyframes drawLine { from { stroke-dasharray: 200; stroke-dashoffset: 200; } to { stroke-dasharray: 200; stroke-dashoffset: 0; } }
 
-  /* BOTTOM NAV */
+  /* BOTTOM NAV - Fixed clipping */
   .bottom-nav {
     display: flex; justify-content: space-around;
-    padding: 14px 0 22px 0; background: rgba(10,10,12,0.95);
+    padding: 12px 0 calc(16px + env(safe-area-inset-bottom, 0px)) 0;
+    background: rgba(10,10,12,0.98);
     border-top: 1px solid rgba(255,255,255,0.05); z-index: 10;
     backdrop-filter: blur(10px); position: relative;
   }
   .nav-item {
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
     color: #52525b; cursor: pointer; transition: color .2s, transform .2s;
-    padding: 4px 12px; border-radius: 8px;
+    padding: 6px 16px; border-radius: 8px;
+    user-select: none; /* Prevents text selection on double tap */
   }
   .nav-item:hover { color: #a1a1aa; transform: translateY(-2px); }
   .nav-item.active { color: #14F195; }
@@ -252,7 +253,12 @@
       </div>
       <div class="header-actions">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        <img class="profile-pic" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Profile">
+        <!-- Default SVG Avatar instead of external image -->
+        <svg class="profile-pic" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="24" height="24" rx="12" fill="#1a1a20"/>
+          <circle cx="12" cy="9" r="4" fill="#52525b"/>
+          <path d="M6 21C6 17.6863 8.68629 15 12 15C15.3137 15 18 17.6863 18 21" fill="#52525b"/>
+        </svg>
       </div>
     </div>
 
@@ -266,16 +272,16 @@
 
     <!-- BOTTOM NAV -->
     <div class="bottom-nav">
-      <div class="nav-item active">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <div class="nav-item active" onclick="switchTab(this)">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
         <span>Calls</span>
       </div>
-      <div class="nav-item">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+      <div class="nav-item" onclick="switchTab(this)">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         <span>Dashboard</span>
       </div>
-      <div class="nav-item">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      <div class="nav-item" onclick="switchTab(this)">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
         <span>Telegram</span>
       </div>
     </div>
@@ -283,6 +289,12 @@
   </div>
 
 <script>
+  // Make nav buttons clickable
+  function switchTab(element) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+  }
+
   const coins = [
     { name: "dogwifhat", ticker: "WIF", img: "https://assets.coingecko.com/coins/images/33566/standard/dogwifhat.jpg", twitter: "dogwifcoin", followers: "494K" },
     { name: "Bonk", ticker: "BONK", img: "https://assets.coingecko.com/coins/images/28600/standard/bonk.jpg", twitter: "bonk_inu", followers: "1.2M" },
@@ -429,26 +441,4 @@
     };
     liveCards.push(card);
 
-    if (feed.children.length > 15) {
-      feed.lastChild.remove();
-      liveCards.shift();
-    }
-  }
-
-  setInterval(() => {
-    liveCards.forEach(c => {
-      const drift = c.isRug
-        ? -(Math.random() * 0.012 + 0.002) * c.mc
-        : (Math.random() * 0.010 - 0.003) * c.mc;
-      c.mc = Math.max(2000, c.mc + drift);
-
-      if (Math.random() < 0.03 && !c.isRug) c.mc *= 1.06;
-      if (Math.random() < 0.02 && c.isRug) c.mc *= 0.92;
-
-      const dir = c.mc > c.mcBase ? 'up' : (c.mc < c.mcBase ? 'down' : '');
-      c.mcEl.textContent = fmtMc(c.mc);
-      c.mcEl.classList.remove('up', 'down');
-      if (dir) { void c.mcEl.offsetWidth; c.mcEl.classList.add(dir); }
-
-      const pnlNow = c.isRug
-        ? c.pnlBase - ((c.mcBase - c.mc) /
+    if (
